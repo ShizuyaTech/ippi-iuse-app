@@ -1,0 +1,93 @@
+<x-app-layout>
+    <x-slot name="title">Routing</x-slot>
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <h2 class="text-lg font-semibold text-gray-700">Daftar Routing Produksi</h2>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('pp.routings.export') }}" class="inline-flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Export Excel
+                </a>
+                <a href="{{ route('pp.routings.import-template') }}" class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-4 py-2 rounded text-sm border border-blue-300 hover:bg-blue-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Download Template
+                </a>
+                <button onclick="document.getElementById('import-panel').classList.toggle('hidden')" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4 4l4-4m0 0l4-4m-4 4V4"/></svg>
+                    Import Excel
+                </button>
+                <a href="{{ route('pp.routings.create') }}" class="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800">+ Buat Manual</a>
+            </div>
+        </div>
+
+        {{-- Import Panel --}}
+        <div id="import-panel" class="hidden mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+            <p class="text-sm text-blue-800 font-medium mb-3">Import Routing dari Excel</p>
+            <p class="text-xs text-gray-500 mb-3">Setiap routing terdiri dari satu baris header material (isi kolom A–B) diikuti baris operasi (kolom C–F). Operasi tambahan cukup isi kolom C–F, kolom A biarkan kosong.</p>
+            <form method="POST" action="{{ route('pp.routings.import') }}" enctype="multipart/form-data" class="flex flex-wrap gap-2 items-end">
+                @csrf
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Pilih File Excel (.xlsx/.xls)</label>
+                    <input type="file" name="file" accept=".xlsx,.xls" required class="border rounded px-3 py-1.5 text-sm bg-white">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">Upload &amp; Import</button>
+            </form>
+        </div>
+
+        {{-- Import Errors --}}
+        @if(session('import_errors') && count(session('import_errors')) > 0)
+        <div class="mb-4 p-3 bg-orange-50 border border-orange-200 rounded text-sm">
+            <p class="font-medium text-orange-800 mb-1">Detail masalah saat import:</p>
+            <ul class="list-disc list-inside text-orange-700 space-y-0.5">
+                @foreach(session('import_errors') as $e)<li>{{ $e }}</li>@endforeach
+            </ul>
+        </div>
+        @endif
+        <form method="GET" class="flex flex-wrap gap-2 mb-4">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. Routing / nama material..." class="border rounded px-3 py-2 text-sm flex-1 min-w-40">
+            {{-- <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal dibuat" class="border rounded px-3 py-2 text-sm">
+            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal dibuat" class="border rounded px-3 py-2 text-sm"> --}}
+            <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
+            <a href="{{ route('pp.routings.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
+        </form>
+        <table class="w-full text-sm border-collapse">
+            <thead class="bg-blue-900 text-white">
+                <tr>
+                    <th class="px-4 py-2 text-left">No. Routing</th>
+                    <th class="px-4 py-2 text-left">Material</th>
+                    <th class="px-4 py-2 text-right">Jml Operasi</th>
+                    <th class="px-4 py-2 text-center">Status</th>
+                    <th class="px-4 py-2 text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($routings as $rtg)
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-2 font-mono text-blue-700 font-medium">{{ $rtg->routing_number }}</td>
+                    <td class="px-4 py-2">
+                        <div class="font-mono text-xs text-gray-500">{{ $rtg->material->code }}</div>
+                        <div>{{ $rtg->material->name }}</div>
+                    </td>
+                    <td class="px-4 py-2 text-right">{{ $rtg->operations->count() }}</td>
+                    <td class="px-4 py-2 text-center">
+                        <span class="px-2 py-0.5 rounded text-xs {{ $rtg->status==='active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                            {{ $rtg->status === 'active' ? 'Aktif' : 'Nonaktif' }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 text-center flex gap-2 justify-center">
+                        <a href="{{ route('pp.routings.show', $rtg) }}" class="text-blue-600 hover:underline">Detail</a>
+                        <a href="{{ route('pp.routings.edit', $rtg) }}" class="text-yellow-600 hover:underline">Edit</a>
+                        <form method="POST" action="{{ route('pp.routings.destroy', $rtg) }}" onsubmit="return confirm('Hapus Routing ini?')">
+                            @csrf @method('DELETE')
+                            <button class="text-red-500 hover:underline">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="5" class="px-4 py-4 text-center text-gray-400">Belum ada Routing.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+        <div class="mt-4">{{ $routings->links() }}</div>
+    </div>
+</x-app-layout>

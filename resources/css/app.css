@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html,
+	body {
+		overflow-x: hidden;
+	}
+
+	img,
+	svg,
+	video,
+	canvas,
+	iframe {
+		max-width: 100%;
+	}
+}
+
+@layer components {
+	/* On mobile/scanner widths, prevent page-level horizontal scroll. */
+	@media (max-width: 1024px) {
+		main {
+			overflow-x: hidden;
+		}
+
+		main table {
+			display: block;
+			width: 100%;
+			max-width: 100%;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		main thead,
+		main tbody {
+			width: max-content;
+			min-width: 100%;
+		}
+
+		main input,
+		main select,
+		main textarea,
+		main button {
+			max-width: 100%;
+		}
+	}
+
+	/* Extra tuning for handheld scanner screens (~5.5 inch, 360-414px wide). */
+	@media (max-width: 420px) {
+		main {
+			padding: 0.75rem !important;
+		}
+
+		main .grid.grid-cols-2,
+		main .grid.grid-cols-3,
+		main .grid.grid-cols-4 {
+			grid-template-columns: minmax(0, 1fr) !important;
+		}
+
+		main .min-w-48,
+		main .min-w-56,
+		main .min-w-64 {
+			min-width: 0 !important;
+		}
+
+		main .max-w-xl,
+		main .max-w-2xl,
+		main .max-w-3xl,
+		main .max-w-4xl {
+			max-width: 100% !important;
+		}
+
+		/* Avoid browser zoom and improve readability on scanner keyboards. */
+		main input,
+		main select,
+		main textarea,
+		main button {
+			font-size: 16px;
+		}
+	}
+}
