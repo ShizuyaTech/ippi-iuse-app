@@ -79,18 +79,20 @@ Route::middleware(['auth', 'verified', 'role:vendor_admin,vendor_user', 'vendor.
         Route::get('stocks', [VendorStockController::class, 'index'])->name('stocks.index');
     });
 
+// Profile routes – accessible to all authenticated users (incl. vendors)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
 Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
     // ===================== SAP MM =====================
-    Route::prefix('mm')->name('mm.')->group(function () {
+    Route::prefix('mm')->name('mm.')->middleware('route.permission')->group(function () {
 
         // Storage Locations
         Route::get('storage-locations/export', [StorageLocationController::class, 'exportExcel'])->name('storage-locations.export');
@@ -183,7 +185,7 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
     });
 
     // ===================== SAP PP =====================
-    Route::prefix('pp')->name('pp.')->group(function () {
+    Route::prefix('pp')->name('pp.')->middleware('route.permission')->group(function () {
 
         // Work Centers
         Route::get('work-centers/export', [WorkCenterController::class, 'exportExcel'])->name('work-centers.export');

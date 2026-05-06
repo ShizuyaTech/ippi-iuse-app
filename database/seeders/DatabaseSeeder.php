@@ -20,10 +20,10 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesAndPermissionsSeeder::class);
 
         // Users
-        User::firstOrCreate(['email' => 'admin@ippi.com'], ['name' => 'Administrator', 'password' => Hash::make('password'), 'role' => 'admin']);
-        User::firstOrCreate(['email' => 'planner@ippi.com'], ['name' => 'Planner PP', 'password' => Hash::make('password'), 'role' => 'planner']);
-        User::firstOrCreate(['email' => 'purchasing@ippi.com'], ['name' => 'Purchasing MM', 'password' => Hash::make('password'), 'role' => 'purchasing']);
-        User::firstOrCreate(['email' => 'warehouse@ippi.com'], ['name' => 'Warehouse Staff', 'password' => Hash::make('password'), 'role' => 'warehouse']);
+        User::firstOrCreate(['email' => 'admin@ippi.com'], ['name' => 'Administrator', 'password' => Hash::make('ippi54321'), 'role' => 'admin']);
+        User::firstOrCreate(['email' => 'planner@ippi.com'], ['name' => 'Planner PP', 'password' => Hash::make('ippi54321'), 'role' => 'planner']);
+        User::firstOrCreate(['email' => 'purchasing@ippi.com'], ['name' => 'Purchasing MM', 'password' => Hash::make('ippi54321'), 'role' => 'purchasing']);
+        User::firstOrCreate(['email' => 'warehouse@ippi.com'], ['name' => 'Warehouse Staff', 'password' => Hash::make('ippi54321'), 'role' => 'warehouse']);
 
         // Storage Locations
         StorageLocation::firstOrCreate(['code' => 'WH-01'], ['name' => 'Gudang Bahan Baku', 'description' => 'Penyimpanan material RM']);

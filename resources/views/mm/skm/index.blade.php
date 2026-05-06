@@ -146,8 +146,8 @@
 
         {{-- Demand FP Bulanan ────────────────────────────────────────────── --}}
         <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-start mb-3">
-                <div>
+            <div class="flex flex-wrap gap-3 justify-between items-start mb-3">
+                <div class="min-w-0">
                     <h3 class="font-semibold text-gray-700">Data Demand FP Bulan Berjalan</h3>
                     <p class="text-xs text-gray-400 mt-0.5">
                         Demand digunakan untuk menghitung total kanban beredar. Import sekali per bulan — data akan tetap aktif sampai diganti import baru.
@@ -156,7 +156,7 @@
                         @endif
                     </p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2 flex-shrink-0">
                     <a href="{{ route('mm.skm.demands.template') }}"
                        class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-green-700">
                         Download Template
@@ -175,14 +175,14 @@
 
             {{-- Import form --}}
             <form method="POST" action="{{ route('mm.skm.demands.import') }}" enctype="multipart/form-data"
-                  class="flex gap-3 items-end mb-4">
+                  class="flex flex-col sm:flex-row gap-3 sm:items-end mb-4">
                 @csrf
-                <div>
+                <div class="flex-1 min-w-0">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Upload File Excel (Demand Bulan Ini)</label>
                     <input type="file" name="file" accept=".xlsx,.xls" required
-                           class="border rounded px-3 py-1.5 text-sm">
+                           class="w-full border rounded px-3 py-1.5 text-sm">
                 </div>
-                <button class="bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-blue-800">
+                <button class="bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-800 whitespace-nowrap flex-shrink-0">
                     Import &amp; Ganti Demand
                 </button>
             </form>

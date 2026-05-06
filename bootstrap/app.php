@@ -12,10 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role'           => \App\Http\Middleware\CheckRole::class,
-            'permission'     => \App\Http\Middleware\CheckPermission::class,
-            'vendor.scope'   => \App\Http\Middleware\EnsureVendorScope::class,
-            'no.vendor'      => \App\Http\Middleware\RedirectIfVendor::class,
+            'role'            => \App\Http\Middleware\CheckRole::class,
+            'permission'      => \App\Http\Middleware\CheckPermission::class,
+            'vendor.scope'    => \App\Http\Middleware\EnsureVendorScope::class,
+            'no.vendor'       => \App\Http\Middleware\RedirectIfVendor::class,
+            'route.permission' => \App\Http\Middleware\RoutePermissionGuard::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
