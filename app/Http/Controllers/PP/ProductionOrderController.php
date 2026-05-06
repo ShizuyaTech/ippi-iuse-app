@@ -95,26 +95,21 @@ class ProductionOrderController extends Controller
         $productionOrder->load('material', 'bom', 'routing.operations.workCenter', 'components.material', 'components.storageLocation', 'createdBy');
         $locations = StorageLocation::orderBy('code')->get();
 
-        // Confirm destination: berdasarkan tipe material yang diproduksi
-        $fgCode = match($productionOrder->material->type) {
-            'WIP' => 'WH-02',
-            'FP'  => 'WH-03',
-            default => 'WH-03',
-        };
-        $defaultFgLocation = $locations->firstWhere('code', $fgCode) ?? $locations->last();
+        // Confirm destination: cari gudang berdasarkan material_type dari material yang diproduksi
+        // (tidak hardcode kode gudang – ambil dari kolom material_type di storage_locations)
+        $warehouseByType  = $locations->whereNotNull('material_type')->groupBy('material_type')->map->first();
+        $defaultFgLocation = $warehouseByType->get($productionOrder->material->type)
+                             ?? $locations->last();
 
-        // Stock available per component (from WH-01 for RM, WH-02 for WIP)
-        $typeToWarehouse = ['RM' => 'WH-01', 'WIP' => 'WH-02'];
-        $warehouses      = StorageLocation::whereIn('code', ['WH-01', 'WH-02'])->get()->keyBy('code');
+        // Stock available per component – lookup by material_type
         $componentStocks = [];
         foreach ($productionOrder->components as $comp) {
-            $whCode   = $typeToWarehouse[$comp->material->type] ?? 'WH-01';
-            $location = $warehouses->get($whCode);
+            $location = $warehouseByType->get($comp->material->type);
             $stock    = $location
                 ? Stock::where('material_id', $comp->material_id)->where('storage_location_id', $location->id)->first()
                 : null;
             $componentStocks[$comp->id] = [
-                'location_code' => $whCode,
+                'location_code' => $location?->code ?? '-',
                 'available'     => $stock ? (float) $stock->quantity : 0,
             ];
         }
@@ -200,8 +195,9 @@ class ProductionOrderController extends Controller
 
         $productionOrder->load('components.material');
 
-        $typeToWarehouse = ['RM' => 'WH-01', 'WIP' => 'WH-02'];
-        $locations       = StorageLocation::whereIn('code', ['WH-01', 'WH-02'])->get()->keyBy('code');
+        // Lookup gudang berdasarkan material_type (dinamis, tidak hardcode kode gudang)
+        $warehouseByType = StorageLocation::whereNotNull('material_type')
+            ->get()->groupBy('material_type')->map->first();
 
         // Pre-validate each submitted qty
         $validationErrors = [];
@@ -215,14 +211,13 @@ class ProductionOrderController extends Controller
                 continue;
             }
 
-            $whCode   = $typeToWarehouse[$component->material->type] ?? 'WH-01';
-            $location = $locations->get($whCode);
+            $location = $warehouseByType->get($component->material->type);
             if (!$location) continue;
 
             $stock     = Stock::where('material_id', $component->material_id)->where('storage_location_id', $location->id)->first();
             $available = $stock ? (float) $stock->quantity : 0;
             if ($inputQty > $available + 0.001) {
-                $validationErrors[] = "{$component->material->code}: stok {$whCode} tidak cukup (tersedia: " . number_format($available, 3) . ", diminta: " . number_format($inputQty, 3) . ")";
+                $validationErrors[] = "{$component->material->code}: stok {$location->code} tidak cukup (tersedia: " . number_format($available, 3) . ", diminta: " . number_format($inputQty, 3) . ")";
             }
         }
 
@@ -235,13 +230,15 @@ class ProductionOrderController extends Controller
             return back()->with('error', 'Tidak ada qty yang diinput. Isi minimal satu komponen untuk di-GI.');
         }
 
-        DB::transaction(function () use ($request, $productionOrder, $typeToWarehouse, $locations) {
+        DB::transaction(function () use ($request, $productionOrder, $warehouseByType) {
+            $rmLocation = $warehouseByType->get('RM') ?? $warehouseByType->first();
+
             $gi = GoodsIssue::create([
                 'gi_number'           => GoodsIssue::generateNumber(),
                 'reference_type'      => 'production_order',
                 'reference_id'        => $productionOrder->id,
                 'issue_date'          => now()->toDateString(),
-                'storage_location_id' => $locations->get('WH-01')?->id ?? $locations->first()->id,
+                'storage_location_id' => $rmLocation?->id,
                 'status'              => 'posted',
                 'notes'               => 'GI for Production Order ' . $productionOrder->order_number,
                 'created_by'          => auth()->id(),
@@ -251,8 +248,7 @@ class ProductionOrderController extends Controller
                 $inputQty = (float) ($request->quantities[$component->id] ?? 0);
                 if ($inputQty <= 0) continue;
 
-                $whCode   = $typeToWarehouse[$component->material->type] ?? 'WH-01';
-                $location = $locations->get($whCode);
+                $location = $warehouseByType->get($component->material->type);
                 if (!$location) continue;
 
                 $gi->items()->create(['material_id' => $component->material_id, 'quantity_issued' => $inputQty]);

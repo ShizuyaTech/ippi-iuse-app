@@ -25,10 +25,19 @@ class DatabaseSeeder extends Seeder
         User::firstOrCreate(['email' => 'purchasing@ippi.com'], ['name' => 'Purchasing MM', 'password' => Hash::make('ippi54321'), 'role' => 'purchasing']);
         User::firstOrCreate(['email' => 'warehouse@ippi.com'], ['name' => 'Warehouse Staff', 'password' => Hash::make('ippi54321'), 'role' => 'warehouse']);
 
-        // Storage Locations
-        StorageLocation::firstOrCreate(['code' => 'I101'], ['name' => 'Gudang IRM', 'description' => 'Penyimpanan material RM']);
-        StorageLocation::firstOrCreate(['code' => 'I100'], ['name' => 'Gudang WIP', 'description' => 'Work-in-Process']);
-        StorageLocation::firstOrCreate(['code' => 'I107'], ['name' => 'Gudang Logistik', 'description' => 'Penyimpanan FP']);
+        // Storage Locations – updateOrCreate agar material_type ikut diset meski record sudah ada
+        StorageLocation::updateOrCreate(
+            ['code' => 'I101'],
+            ['name' => 'Gudang IRM', 'description' => 'Penyimpanan material RM', 'material_type' => 'RM']
+        );
+        StorageLocation::updateOrCreate(
+            ['code' => 'I100'],
+            ['name' => 'Gudang WIP', 'description' => 'Work-in-Process', 'material_type' => 'WIP']
+        );
+        StorageLocation::updateOrCreate(
+            ['code' => 'I107'],
+            ['name' => 'Gudang Logistik', 'description' => 'Penyimpanan FP', 'material_type' => 'FP']
+        );
 
         // Materials
         // Material::firstOrCreate(['code' => 'RM-001'], ['name' => 'Baja Plat 3mm', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 15000]);
