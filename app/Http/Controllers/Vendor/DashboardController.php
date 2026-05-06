@@ -19,21 +19,24 @@ class DashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
         $vendorId = $user->vendor_id;
+        $vendor   = $user->vendor;
+        $vType    = $vendor?->vendor_type ?? 'general';
+        $isCoilCenter = ($vType === 'coil_center');
 
         $stats = [
-            'po_open'       => PurchaseOrder::where('vendor_id', $vendorId)
-                                ->whereIn('status', ['draft', 'approved', 'partially_received'])
-                                ->count(),
-            'sj_this_month' => DeliveryNote::where('vendor_id', $vendorId)
-                                ->whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)
-                                ->count(),
-            'vpo_active'    => VendorProductionOrder::where('vendor_id', $vendorId)
-                                ->whereIn('status', ['draft', 'released', 'in_progress'])
-                                ->count(),
-            'kiriman_pending' => VendorMaterialDelivery::where('vendor_id', $vendorId)
-                                ->where('status', 'sent')
-                                ->count(),
+            'po_open'         => PurchaseOrder::where('vendor_id', $vendorId)
+                                    ->whereIn('status', ['draft', 'approved', 'partially_received'])
+                                    ->count(),
+            'sj_this_month'   => DeliveryNote::where('vendor_id', $vendorId)
+                                    ->whereMonth('created_at', now()->month)
+                                    ->whereYear('created_at', now()->year)
+                                    ->count(),
+            'vpo_active'      => $isCoilCenter ? null : VendorProductionOrder::where('vendor_id', $vendorId)
+                                    ->whereIn('status', ['draft', 'released', 'in_progress'])
+                                    ->count(),
+            'kiriman_pending'  => $isCoilCenter ? null : VendorMaterialDelivery::where('vendor_id', $vendorId)
+                                    ->where('status', 'sent')
+                                    ->count(),
         ];
 
         $recentPos = PurchaseOrder::where('vendor_id', $vendorId)
@@ -42,9 +45,12 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // Stock overview: materials processed by this vendor
-        $stockSummary = Material::with(['stocks' => fn($q) => $q->with('storageLocation')])
-            ->where('process_vendor_id', $vendorId)
+        // Stock overview: untuk coil center gunakan vendor_id, untuk process gunakan process_vendor_id
+        $stockQuery = $isCoilCenter
+            ? Material::with(['stocks' => fn($q) => $q->with('storageLocation')])->where('vendor_id', $vendorId)
+            : Material::with(['stocks' => fn($q) => $q->with('storageLocation')])->where('process_vendor_id', $vendorId);
+
+        $stockSummary = $stockQuery
             ->where('is_active', true)
             ->orderBy('type')
             ->orderBy('code')
@@ -59,6 +65,6 @@ class DashboardController extends Controller
             ->filter(fn($m) => $m['total'] > 0)
             ->values();
 
-        return view('vendor-portal.dashboard', compact('stats', 'recentPos', 'stockSummary'));
+        return view('vendor-portal.dashboard', compact('stats', 'recentPos', 'stockSummary', 'isCoilCenter'));
     }
 }

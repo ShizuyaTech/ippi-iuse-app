@@ -36,6 +36,7 @@
                 <tr>
                     <th class="px-4 py-2 text-left">Kode</th>
                     <th class="px-4 py-2 text-left">Nama</th>
+                    <th class="px-4 py-2 text-left">Tipe</th>
                     <th class="px-4 py-2 text-left">Kontak</th>
                     <th class="px-4 py-2 text-left">Email</th>
                     <th class="px-4 py-2 text-left">Telepon</th>
@@ -46,12 +47,19 @@
             <tbody>
                 @forelse($vendors as $v)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700">{{ $v->code }}</td>
-                    <td class="px-4 py-2 font-medium">{{ $v->name }}</td>
-                    <td class="px-4 py-2">{{ $v->contact_person ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $v->email ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $v->phone ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center"><span class="px-2 py-0.5 rounded text-xs {{ $v->is_active?'bg-green-100 text-green-700':'bg-red-100 text-red-700' }}">{{ $v->is_active?'Aktif':'Nonaktif' }}</span></td>
+                    <td class="px-4 py-2 font-mono text-blue-700" data-label="Kode">{{ $v->code }}</td>
+                    <td class="px-4 py-2 font-medium" data-label="Nama">{{ $v->name }}</td>
+                    <td class="px-4 py-2" data-label="Tipe">
+                        @php
+                            $typeColors = ['coil_center'=>'bg-blue-100 text-blue-700','process'=>'bg-purple-100 text-purple-700','general'=>'bg-gray-100 text-gray-600'];
+                            $typeColor  = $typeColors[$v->vendor_type ?? 'general'] ?? 'bg-gray-100 text-gray-600';
+                        @endphp
+                        <span class="px-2 py-0.5 rounded text-xs {{ $typeColor }}">{{ $v->getTypeLabel() }}</span>
+                    </td>
+                    <td class="px-4 py-2" data-label="Kontak">{{ $v->contact_person ?? '-' }}</td>
+                    <td class="px-4 py-2" data-label="Email">{{ $v->email ?? '-' }}</td>
+                    <td class="px-4 py-2" data-label="Telepon">{{ $v->phone ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center" data-label="Status"><span class="px-2 py-0.5 rounded text-xs {{ $v->is_active?'bg-green-100 text-green-700':'bg-red-100 text-red-700' }}">{{ $v->is_active?'Aktif':'Nonaktif' }}</span></td>
                     <td class="px-4 py-2 text-center flex justify-center gap-2 print:hidden">
                         <a href="{{ route('mm.vendors.show', $v) }}" class="text-blue-600 hover:underline">Detail</a>
                         <a href="{{ route('mm.vendors.edit', $v) }}" class="text-yellow-600 hover:underline">Edit</a>
@@ -62,7 +70,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="px-4 py-4 text-center text-gray-400">Belum ada data vendor.</td></tr>
+                <tr><td colspan="8" class="px-4 py-4 text-center text-gray-400">Belum ada data vendor.</td></tr>
                 @endforelse
             </tbody>
         </table>

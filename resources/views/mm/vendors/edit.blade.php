@@ -14,6 +14,15 @@
                     <input type="text" name="name" value="{{ old('name', $vendor->name) }}" class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
             </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Vendor *</label>
+                <select name="vendor_type" class="w-full border rounded px-3 py-2 text-sm" required>
+                    @foreach(\App\Models\Vendor::TYPES as $value => $label)
+                        <option value="{{ $value }}" {{ old('vendor_type', $vendor->vendor_type) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-400 mt-1">Coil Center = supplier bahan baku &bull; Process = vendor makloon/subkon &bull; Umum = lainnya</p>
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kontak</label>

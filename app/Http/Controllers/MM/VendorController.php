@@ -36,12 +36,13 @@ class VendorController extends Controller
         $request->validate([
             'code'           => 'required|string|max:20|unique:vendors,code',
             'name'           => 'required|string|max:255',
+            'vendor_type'    => 'required|in:coil_center,process,general',
             'contact_person' => 'nullable|string|max:255',
             'email'          => 'nullable|email|max:255',
             'phone'          => 'nullable|string|max:20',
             'address'        => 'nullable|string',
         ]);
-        Vendor::create($request->only('code', 'name', 'contact_person', 'email', 'phone', 'address') + ['is_active' => true]);
+        Vendor::create($request->only('code', 'name', 'vendor_type', 'contact_person', 'email', 'phone', 'address') + ['is_active' => true]);
         return redirect()->route('mm.vendors.index')->with('success', 'Vendor berhasil dibuat.');
     }
 
@@ -61,12 +62,13 @@ class VendorController extends Controller
         $request->validate([
             'code'           => 'required|string|max:20|unique:vendors,code,' . $vendor->id,
             'name'           => 'required|string|max:255',
+            'vendor_type'    => 'required|in:coil_center,process,general',
             'contact_person' => 'nullable|string|max:255',
             'email'          => 'nullable|email|max:255',
             'phone'          => 'nullable|string|max:20',
             'address'        => 'nullable|string',
         ]);
-        $vendor->update($request->only('code', 'name', 'contact_person', 'email', 'phone', 'address'));
+        $vendor->update($request->only('code', 'name', 'vendor_type', 'contact_person', 'email', 'phone', 'address'));
         return redirect()->route('mm.vendors.index')->with('success', 'Vendor berhasil diperbarui.');
     }
 

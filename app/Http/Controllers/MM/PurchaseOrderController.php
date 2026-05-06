@@ -59,12 +59,12 @@ class PurchaseOrderController extends Controller
             'items.*.material_id'            => 'required|exists:materials,id',
             'items.*.quantity'               => 'required|numeric|min:0.001',
             'items.*.unit_price'             => 'required|numeric|min:0',
-            'items.*.expected_delivery_date' => 'nullable|date',
         ]);
 
         DB::transaction(function () use ($request) {
             $materialIds = collect($request->items)->pluck('material_id')->filter()->unique()->values();
             $materialsById = Material::whereIn('id', $materialIds)->get()->keyBy('id');
+            $vendorId = (int) $request->vendor_id;
 
             foreach ($request->items as $row) {
                 $material = $materialsById[$row['material_id']] ?? null;
@@ -72,9 +72,13 @@ class PurchaseOrderController extends Controller
                     throw ValidationException::withMessages(['items' => 'Material tidak ditemukan.']);
                 }
 
-                if ($material->process_vendor_id && (int) $material->process_vendor_id !== (int) $request->vendor_id) {
+                $allowedVendors = array_filter([
+                    $material->vendor_id         ? (int) $material->vendor_id         : null,
+                    $material->process_vendor_id ? (int) $material->process_vendor_id : null,
+                ]);
+                if (!empty($allowedVendors) && !in_array($vendorId, $allowedVendors)) {
                     throw ValidationException::withMessages([
-                        'items' => "Material {$material->code} hanya bisa diproses oleh vendor yang ditetapkan pada Process Vendor.",
+                        'items' => "Material {$material->code} tidak terhubung dengan vendor yang dipilih. Pastikan vendor sesuai dengan supply vendor atau process vendor material tersebut.",
                     ]);
                 }
             }
@@ -100,7 +104,7 @@ class PurchaseOrderController extends Controller
                     'quantity'               => $item['quantity'],
                     'unit_price'             => $item['unit_price'],
                     'total_price'            => $lineTotal,
-                    'expected_delivery_date' => $item['expected_delivery_date'] ?? null,
+                    'expected_delivery_date' => $request->expected_delivery_date ?? null,
                 ]);
             }
             $po->update(['total_amount' => $total]);
@@ -141,12 +145,12 @@ class PurchaseOrderController extends Controller
             'items.*.material_id'            => 'required|exists:materials,id',
             'items.*.quantity'               => 'required|numeric|min:0.001',
             'items.*.unit_price'             => 'required|numeric|min:0',
-            'items.*.expected_delivery_date' => 'nullable|date',
         ]);
 
         DB::transaction(function () use ($request, $purchaseOrder) {
             $materialIds = collect($request->items)->pluck('material_id')->filter()->unique()->values();
             $materialsById = Material::whereIn('id', $materialIds)->get()->keyBy('id');
+            $vendorId = (int) $request->vendor_id;
 
             foreach ($request->items as $row) {
                 $material = $materialsById[$row['material_id']] ?? null;
@@ -154,9 +158,13 @@ class PurchaseOrderController extends Controller
                     throw ValidationException::withMessages(['items' => 'Material tidak ditemukan.']);
                 }
 
-                if ($material->process_vendor_id && (int) $material->process_vendor_id !== (int) $request->vendor_id) {
+                $allowedVendors = array_filter([
+                    $material->vendor_id         ? (int) $material->vendor_id         : null,
+                    $material->process_vendor_id ? (int) $material->process_vendor_id : null,
+                ]);
+                if (!empty($allowedVendors) && !in_array($vendorId, $allowedVendors)) {
                     throw ValidationException::withMessages([
-                        'items' => "Material {$material->code} hanya bisa diproses oleh vendor yang ditetapkan pada Process Vendor.",
+                        'items' => "Material {$material->code} tidak terhubung dengan vendor yang dipilih. Pastikan vendor sesuai dengan supply vendor atau process vendor material tersebut.",
                     ]);
                 }
             }
@@ -171,7 +179,7 @@ class PurchaseOrderController extends Controller
                     'quantity'               => $item['quantity'],
                     'unit_price'             => $item['unit_price'],
                     'total_price'            => $lineTotal,
-                    'expected_delivery_date' => $item['expected_delivery_date'] ?? null,
+                    'expected_delivery_date' => $request->expected_delivery_date ?? null,
                 ]);
             }
             $purchaseOrder->update([

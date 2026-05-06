@@ -98,7 +98,6 @@
                             <th class="px-3 py-2 text-left">Material</th>
                             <th class="px-3 py-2 text-right w-28">Qty</th>
                             <th class="px-3 py-2 text-right w-36">Harga Satuan</th>
-                            <th class="px-3 py-2 text-center w-36">Est. Kirim</th>
                             <th class="px-3 py-2 text-right w-36">Total</th>
                             <th class="px-3 py-2 w-12"></th>
                         </tr>
@@ -108,7 +107,7 @@
                     </tbody>
                     <tfoot>
                         <tr class="bg-gray-50 font-semibold">
-                            <td colspan="4" class="px-3 py-2 text-right">Total PO:</td>
+                            <td colspan="3" class="px-3 py-2 text-right">Total PO:</td>
                             <td class="px-3 py-2 text-right" id="grand-total">0</td>
                             <td></td>
                         </tr>
@@ -319,7 +318,6 @@
                 </td>
                 <td class="px-2 py-1"><input type="number" name="items[${rowIndex}][quantity]" class="w-full border rounded px-2 py-1 text-sm qty" min="0.001" step="0.001" value="1" onchange="calcRow(this)" required></td>
                 <td class="px-2 py-1"><input type="number" name="items[${rowIndex}][unit_price]" class="w-full border rounded px-2 py-1 text-sm price" min="0" step="0.01" value="0" onchange="calcRow(this)" required></td>
-                <td class="px-2 py-1"><input type="date" name="items[${rowIndex}][expected_delivery_date]" class="w-full border rounded px-2 py-1 text-sm"></td>
                 <td class="px-2 py-1 text-right font-medium row-total">0</td>
                 <td class="px-2 py-1 text-center"><button type="button" onclick="this.closest('tr').remove();calcGrand()" class="text-red-500 hover:text-red-700">&#10005;</button></td>
             `;

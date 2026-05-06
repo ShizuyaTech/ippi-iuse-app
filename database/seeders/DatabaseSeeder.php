@@ -26,23 +26,23 @@ class DatabaseSeeder extends Seeder
         User::firstOrCreate(['email' => 'warehouse@ippi.com'], ['name' => 'Warehouse Staff', 'password' => Hash::make('ippi54321'), 'role' => 'warehouse']);
 
         // Storage Locations
-        StorageLocation::firstOrCreate(['code' => 'WH-01'], ['name' => 'Gudang Bahan Baku', 'description' => 'Penyimpanan material RM']);
-        StorageLocation::firstOrCreate(['code' => 'WH-02'], ['name' => 'Gudang WIP', 'description' => 'Work-in-Process']);
-        StorageLocation::firstOrCreate(['code' => 'WH-03'], ['name' => 'Gudang Barang Jadi', 'description' => 'Penyimpanan FP']);
+        StorageLocation::firstOrCreate(['code' => 'I101'], ['name' => 'Gudang IRM', 'description' => 'Penyimpanan material RM']);
+        StorageLocation::firstOrCreate(['code' => 'I100'], ['name' => 'Gudang WIP', 'description' => 'Work-in-Process']);
+        StorageLocation::firstOrCreate(['code' => 'I107'], ['name' => 'Gudang Logistik', 'description' => 'Penyimpanan FP']);
 
         // Materials
-        Material::firstOrCreate(['code' => 'RM-001'], ['name' => 'Baja Plat 3mm', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 15000]);
-        Material::firstOrCreate(['code' => 'RM-002'], ['name' => 'Aluminium Batang', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 35000]);
-        Material::firstOrCreate(['code' => 'RM-003'], ['name' => 'Baut M8x30', 'type' => 'RM', 'unit_of_measure' => 'SHT', 'standard_price' => 500]);
-        Material::firstOrCreate(['code' => 'RM-004'], ['name' => 'Cat Powder Coating', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 45000]);
-        Material::firstOrCreate(['code' => 'WIP-001'], ['name' => 'Rangka Besi Sub-assy', 'type' => 'WIP', 'unit_of_measure' => 'PCS', 'standard_price' => 120000]);
-        Material::firstOrCreate(['code' => 'FP-001'], ['name' => 'Meja Besi Industrial', 'type' => 'FP', 'unit_of_measure' => 'PCS', 'standard_price' => 850000]);
-        Material::firstOrCreate(['code' => 'FP-002'], ['name' => 'Rak Gudang 5 Tingkat', 'type' => 'FP', 'unit_of_measure' => 'PCS', 'standard_price' => 1250000]);
+        // Material::firstOrCreate(['code' => 'RM-001'], ['name' => 'Baja Plat 3mm', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 15000]);
+        // Material::firstOrCreate(['code' => 'RM-002'], ['name' => 'Aluminium Batang', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 35000]);
+        // Material::firstOrCreate(['code' => 'RM-003'], ['name' => 'Baut M8x30', 'type' => 'RM', 'unit_of_measure' => 'SHT', 'standard_price' => 500]);
+        // Material::firstOrCreate(['code' => 'RM-004'], ['name' => 'Cat Powder Coating', 'type' => 'RM', 'unit_of_measure' => 'Kg', 'standard_price' => 45000]);
+        // Material::firstOrCreate(['code' => 'WIP-001'], ['name' => 'Rangka Besi Sub-assy', 'type' => 'WIP', 'unit_of_measure' => 'PCS', 'standard_price' => 120000]);
+        // Material::firstOrCreate(['code' => 'FP-001'], ['name' => 'Meja Besi Industrial', 'type' => 'FP', 'unit_of_measure' => 'PCS', 'standard_price' => 850000]);
+        // Material::firstOrCreate(['code' => 'FP-002'], ['name' => 'Rak Gudang 5 Tingkat', 'type' => 'FP', 'unit_of_measure' => 'PCS', 'standard_price' => 1250000]);
 
         // Vendors
-        Vendor::firstOrCreate(['code' => 'VND-001'], ['name' => 'PT Baja Nusantara', 'contact_person' => 'Budi Santoso', 'email' => 'sales@bajanusantara.co.id', 'phone' => '021-55123456', 'address' => 'Jl. Industri No.1, Jakarta', 'is_active' => true]);
-        Vendor::firstOrCreate(['code' => 'VND-002'], ['name' => 'CV Logam Prima', 'contact_person' => 'Siti Rahayu', 'email' => 'info@logamprima.com', 'phone' => '031-7654321', 'address' => 'Jl. Pahlawan No.5, Surabaya', 'is_active' => true]);
-        Vendor::firstOrCreate(['code' => 'VND-003'], ['name' => 'UD Cat Warna Indah', 'contact_person' => 'Ahmad Fauzi', 'email' => 'order@catwarnaindah.com', 'phone' => '022-3456789', 'address' => 'Jl. Merdeka No.10, Bandung', 'is_active' => true]);
+        // Vendor::firstOrCreate(['code' => 'VND-001'], ['name' => 'PT Baja Nusantara', 'contact_person' => 'Budi Santoso', 'email' => 'sales@bajanusantara.co.id', 'phone' => '021-55123456', 'address' => 'Jl. Industri No.1, Jakarta', 'is_active' => true]);
+        // Vendor::firstOrCreate(['code' => 'VND-002'], ['name' => 'CV Logam Prima', 'contact_person' => 'Siti Rahayu', 'email' => 'info@logamprima.com', 'phone' => '031-7654321', 'address' => 'Jl. Pahlawan No.5, Surabaya', 'is_active' => true]);
+        // Vendor::firstOrCreate(['code' => 'VND-003'], ['name' => 'UD Cat Warna Indah', 'contact_person' => 'Ahmad Fauzi', 'email' => 'order@catwarnaindah.com', 'phone' => '022-3456789', 'address' => 'Jl. Merdeka No.10, Bandung', 'is_active' => true]);
 
         // Work Centers
         WorkCenter::firstOrCreate(['code' => 'WC-CUT'], ['name' => 'Mesin Cutting', 'description' => 'Pemotongan material', 'capacity_per_hour' => 50, 'cost_per_hour' => 75000, 'is_active' => true]);

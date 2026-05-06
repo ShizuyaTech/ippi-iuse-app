@@ -17,6 +17,7 @@
             <div class="text-3xl font-bold text-blue-700">{{ $stats['sj_this_month'] }}</div>
             <div class="text-xs text-gray-400 mt-1">{{ now()->translatedFormat('F Y') }}</div>
         </div>
+        @if(!$isCoilCenter)
         <div class="bg-white rounded-lg shadow p-5">
             <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Production Order Aktif</div>
             <div class="text-3xl font-bold text-indigo-700">{{ $stats['vpo_active'] }}</div>
@@ -27,6 +28,14 @@
             <div class="text-3xl font-bold text-orange-600">{{ $stats['kiriman_pending'] }}</div>
             <div class="text-xs text-gray-400 mt-1">Belum dikonfirmasi</div>
         </div>
+        @else
+        {{-- Coil center: ganti 2 card stats dengan informasi lain --}}
+        <div class="bg-white rounded-lg shadow p-5 col-span-2">
+            <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Tipe Vendor</div>
+            <div class="text-lg font-bold text-blue-700 mt-2">Coil Center</div>
+            <div class="text-xs text-gray-400 mt-1">Supplier Bahan Baku</div>
+        </div>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -72,8 +81,12 @@
         {{-- Stock Summary --}}
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between mb-3">
-                <h2 class="text-base font-semibold text-gray-700">Stok Material</h2>
+                <h2 class="text-base font-semibold text-gray-700">
+                    {{ $isCoilCenter ? 'Material yang Disuplai' : 'Stok Material' }}
+                </h2>
+                @if(!$isCoilCenter)
                 <a href="{{ route('vendor.stocks.index') }}" class="text-teal-600 hover:underline text-xs">Lihat Semua →</a>
+                @endif
             </div>
             @if($stockSummary->isEmpty())
                 <p class="text-sm text-gray-400 py-4 text-center">Tidak ada material dengan stok aktif.</p>

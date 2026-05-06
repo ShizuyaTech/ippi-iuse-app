@@ -84,13 +84,21 @@
         </div>
 
         {{-- Vendor info --}}
-        @php $vendor = auth()->user()->vendor; @endphp
+        @php
+            $vendor = auth()->user()->vendor;
+            $vTypeBadge = ['coil_center' => ['label' => 'Coil Center', 'class' => 'bg-blue-700 text-blue-100'], 'process' => ['label' => 'Process', 'class' => 'bg-purple-700 text-purple-100'], 'general' => ['label' => 'Umum', 'class' => 'bg-teal-700 text-teal-100']];
+            $badge = $vTypeBadge[$vendor?->vendor_type ?? 'general'] ?? $vTypeBadge['general'];
+        @endphp
         <div class="px-4 py-3 bg-teal-800 text-xs text-teal-200 flex-shrink-0">
             <div class="font-semibold text-white text-sm truncate">{{ $vendor?->name ?? '–' }}</div>
-            <div class="text-teal-300 text-xs mt-0.5">{{ $vendor?->code ?? '' }}</div>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-teal-300 text-xs">{{ $vendor?->code ?? '' }}</span>
+                <span class="px-1.5 py-0.5 rounded text-xs {{ $badge['class'] }}">{{ $badge['label'] }}</span>
+            </div>
         </div>
 
         {{-- Nav --}}
+        @php $vType = $vendor?->vendor_type ?? 'general'; @endphp
         <nav class="hide-scrollbar flex-1 min-h-0 overflow-y-auto py-3 text-sm">
             {{-- Dashboard --}}
             <a href="{{ route('vendor.dashboard') }}"
@@ -104,7 +112,7 @@
 
             <div class="mx-4 my-3 border-t border-teal-700/50"></div>
 
-            {{-- Purchase Orders --}}
+            {{-- Purchase Orders – semua tipe --}}
             <a href="{{ route('vendor.purchase-orders.index') }}"
                class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
                       {{ request()->routeIs('vendor.purchase-orders*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
@@ -114,7 +122,7 @@
                 Purchase Order
             </a>
 
-            {{-- Surat Jalan --}}
+            {{-- Surat Jalan – semua tipe --}}
             <a href="{{ route('vendor.delivery-notes.index') }}"
                class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
                       {{ request()->routeIs('vendor.delivery-notes*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
@@ -124,17 +132,7 @@
                 Surat Jalan
             </a>
 
-            {{-- Material Receipts (Kiriman dari IPPI) --}}
-            <a href="{{ route('vendor.material-receipts.index') }}"
-               class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
-                      {{ request()->routeIs('vendor.material-receipts*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8l-6-3m6 3l6-3"/>
-                </svg>
-                Kiriman Bahan
-            </a>
-
-            {{-- Goods Receipts --}}
+            {{-- Goods Receipt – semua tipe (konfirmasi pengiriman ke IPPI) --}}
             <a href="{{ route('vendor.goods-receipts.index') }}"
                class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
                       {{ request()->routeIs('vendor.goods-receipts*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
@@ -144,7 +142,20 @@
                 Goods Receipt
             </a>
 
-            {{-- Vendor Production Orders --}}
+            {{-- Kiriman Bahan – hanya process vendor (terima bahan dari IPPI) --}}
+            @if($vType === 'process' || $vType === 'general')
+            <a href="{{ route('vendor.material-receipts.index') }}"
+               class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
+                      {{ request()->routeIs('vendor.material-receipts*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8l-6-3m6 3l6-3"/>
+                </svg>
+                Kiriman Bahan
+            </a>
+            @endif
+
+            {{-- Production Order – hanya process vendor --}}
+            @if($vType === 'process' || $vType === 'general')
             <a href="{{ route('vendor.production-orders.index') }}"
                class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
                       {{ request()->routeIs('vendor.production-orders*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
@@ -153,8 +164,10 @@
                 </svg>
                 Production Order
             </a>
+            @endif
 
-            {{-- Stock Overview --}}
+            {{-- Stok Material – hanya process vendor --}}
+            @if($vType === 'process' || $vType === 'general')
             <a href="{{ route('vendor.stocks.index') }}"
                class="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-md transition
                       {{ request()->routeIs('vendor.stocks*') ? 'bg-teal-700 text-white' : 'text-teal-200 hover:bg-teal-800 hover:text-white' }}">
@@ -163,6 +176,7 @@
                 </svg>
                 Stok Material
             </a>
+            @endif
         </nav>
 
         {{-- User --}}

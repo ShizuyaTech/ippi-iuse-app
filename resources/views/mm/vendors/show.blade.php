@@ -11,6 +11,10 @@
             </div>
             <div class="space-y-2 text-sm">
                 <div><span class="text-gray-500">Nama:</span> <span class="font-medium">{{ $vendor->name }}</span></div>
+                <div><span class="text-gray-500">Tipe:</span>
+                    @php $typeColors = ['coil_center'=>'bg-blue-100 text-blue-700','process'=>'bg-purple-100 text-purple-700','general'=>'bg-gray-100 text-gray-600']; @endphp
+                    <span class="px-2 py-0.5 rounded text-xs {{ $typeColors[$vendor->vendor_type ?? 'general'] ?? 'bg-gray-100 text-gray-600' }}">{{ $vendor->getTypeLabel() }}</span>
+                </div>
                 <div><span class="text-gray-500">Kontak:</span> {{ $vendor->contact_person ?? '-' }}</div>
                 <div><span class="text-gray-500">Email:</span> {{ $vendor->email ?? '-' }}</div>
                 <div><span class="text-gray-500">Telepon:</span> {{ $vendor->phone ?? '-' }}</div>
