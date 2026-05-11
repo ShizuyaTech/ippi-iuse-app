@@ -103,6 +103,12 @@
             <div class="mx-4 mt-5 mb-4 border-t border-blue-700/50"></div>
 
             {{-- ── SAP MM ── --}}
+            @php
+                $canMm = auth()->user()->isAdmin()
+                    || collect(['mm.materials','mm.vendors','mm.customers','mm.storage_locations','mm.purchase_orders','mm.goods_receipts','mm.goods_issues','mm.stocks','mm.skm','mm.delivery_notes','mm.vendor_deliveries','mm.business_event_logs'])
+                        ->contains(fn($p) => auth()->user()->hasPermission($p . '.view'));
+            @endphp
+            @if($canMm)
             <div class="mb-1">
                 <button @click="openGroup = openGroup === 'mm' ? '' : 'mm'"
                         class="w-full flex items-center justify-between px-3 py-2.5 mx-2 rounded-md transition
@@ -134,6 +140,7 @@
                      class="mt-0.5 space-y-0.5 pb-1">
 
                     {{-- Master Material --}}
+                    @if(auth()->user()->hasPermission('mm.materials.view'))
                     <a href="{{ route('mm.materials.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.materials*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -142,8 +149,10 @@
                         </svg>
                         Master Material
                     </a>
+                    @endif
 
                     {{-- Vendor --}}
+                    @if(auth()->user()->hasPermission('mm.vendors.view'))
                     <a href="{{ route('mm.vendors.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.vendors*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -152,8 +161,10 @@
                         </svg>
                         Vendor
                     </a>
+                    @endif
 
                     {{-- Customer --}}
+                    @if(auth()->user()->hasPermission('mm.customers.view'))
                     <a href="{{ route('mm.customers.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.customers*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -162,8 +173,10 @@
                         </svg>
                         Customer
                     </a>
+                    @endif
 
                     {{-- Storage Location --}}
+                    @if(auth()->user()->hasPermission('mm.storage_locations.view'))
                     <a href="{{ route('mm.storage-locations.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.storage-locations*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -173,8 +186,10 @@
                         </svg>
                         Storage Location
                     </a>
+                    @endif
 
                     {{-- Purchase Order --}}
+                    @if(auth()->user()->hasPermission('mm.purchase_orders.view'))
                     <a href="{{ route('mm.purchase-orders.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.purchase-orders*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -183,8 +198,10 @@
                         </svg>
                         Purchase Order
                     </a>
+                    @endif
 
                     {{-- Goods Receipt --}}
+                    @if(auth()->user()->hasPermission('mm.goods_receipts.view'))
                     <a href="{{ route('mm.goods-receipts.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.goods-receipts*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -193,8 +210,10 @@
                         </svg>
                         Goods Receipt
                     </a>
+                    @endif
 
                     {{-- Goods Issue --}}
+                    @if(auth()->user()->hasPermission('mm.goods_issues.view'))
                     <a href="{{ route('mm.goods-issues.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.goods-issues*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -203,8 +222,10 @@
                         </svg>
                         Goods Issue
                     </a>
+                    @endif
 
                     {{-- Stock Overview --}}
+                    @if(auth()->user()->hasPermission('mm.stocks.view'))
                     <a href="{{ route('mm.stocks.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.stocks*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -213,8 +234,10 @@
                         </svg>
                         Stock Overview
                     </a>
+                    @endif
 
                     {{-- Summary Kanban --}}
+                    @if(auth()->user()->hasPermission('mm.skm.view'))
                     <a href="{{ route('mm.skm.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.skm*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -223,8 +246,10 @@
                         </svg>
                         Summary Kanban
                     </a>
+                    @endif
 
                     {{-- Business Event Logs --}}
+                    @if(auth()->user()->hasPermission('mm.business_event_logs.view'))
                     <a href="{{ route('mm.business-event-logs.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('mm.business-event-logs*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -233,10 +258,18 @@
                         </svg>
                         Business Logs
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
 
             {{-- ── SAP PP ── --}}
+            @php
+                $canPp = auth()->user()->isAdmin()
+                    || collect(['pp.work_centers','pp.boms','pp.routings','pp.production_orders','pp.mrp'])
+                        ->contains(fn($p) => auth()->user()->hasPermission($p . '.view'));
+            @endphp
+            @if($canPp)
             <div class="mb-1">
                 <button @click="openGroup = openGroup === 'pp' ? '' : 'pp'"
                         class="w-full flex items-center justify-between px-3 py-2.5 mx-2 rounded-md transition
@@ -269,6 +302,7 @@
                      class="mt-0.5 space-y-0.5 pb-1">
 
                     {{-- Work Center --}}
+                    @if(auth()->user()->hasPermission('pp.work_centers.view'))
                     <a href="{{ route('pp.work-centers.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('pp.work-centers*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -277,8 +311,10 @@
                         </svg>
                         Work Center
                     </a>
+                    @endif
 
                     {{-- Bill of Materials --}}
+                    @if(auth()->user()->hasPermission('pp.boms.view'))
                     <a href="{{ route('pp.boms.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('pp.boms*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -287,8 +323,10 @@
                         </svg>
                         Bill of Materials
                     </a>
+                    @endif
 
                     {{-- Routing --}}
+                    @if(auth()->user()->hasPermission('pp.routings.view'))
                     <a href="{{ route('pp.routings.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('pp.routings*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -297,8 +335,10 @@
                         </svg>
                         Routing
                     </a>
+                    @endif
 
                     {{-- Production Order --}}
+                    @if(auth()->user()->hasPermission('pp.production_orders.view'))
                     <a href="{{ route('pp.production-orders.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('pp.production-orders*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -307,8 +347,10 @@
                         </svg>
                         Production Order
                     </a>
+                    @endif
 
                     {{-- MRP --}}
+                    @if(auth()->user()->hasPermission('pp.mrp.view'))
                     <a href="{{ route('pp.mrp.index') }}"
                        class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
                               {{ request()->routeIs('pp.mrp*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
@@ -317,8 +359,10 @@
                         </svg>
                         MRP
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
 
             @if(auth()->user()->isAdmin())
             {{-- ── Admin ── --}}
