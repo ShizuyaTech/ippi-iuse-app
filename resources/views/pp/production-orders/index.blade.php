@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Production Order</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center mb-4">
@@ -6,10 +6,10 @@
             <a href="{{ route('pp.production-orders.create') }}" class="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800">+ Buat Production Order</a>
         </div>
         <form method="GET" class="flex flex-wrap gap-2 mb-4">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. Order / material..." class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tgl rencana mulai" class="border rounded px-3 py-2 text-sm">
-            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tgl rencana mulai" class="border rounded px-3 py-2 text-sm">
-            <select name="status" class="border rounded px-3 py-2 text-sm">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. Order / material..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tgl rencana mulai" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tgl rencana mulai" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Status</option>
                 @foreach(['created','released','in_progress','completed','cancelled'] as $st)
                 <option value="{{ $st }}" {{ request('status')==$st?'selected':'' }}>{{ ucfirst(str_replace('_',' ',$st)) }}</option>
@@ -28,6 +28,7 @@
                 <button type="button" onclick="clearSelection()" class="text-sm text-gray-500 hover:text-gray-700">Batal Pilih</button>
             </div>
 
+        <div class="mobile-cards overflow-x-auto">
         <table class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -51,15 +52,15 @@
                         <input type="checkbox" name="ids[]" value="{{ $prd->id }}" class="row-check cursor-pointer">
                         @endif
                     </td>
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium">{{ $prd->order_number }}</td>
-                    <td class="px-4 py-2">
+                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. Order">{{ $prd->order_number }}</td>
+                    <td class="px-4 py-2" data-label="Material">
                         <div class="font-mono text-xs text-gray-500">{{ $prd->material->code }}</div>
                         <div>{{ $prd->material->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right">{{ number_format($prd->quantity_planned, 3) }}</td>
-                    <td class="px-4 py-2">{{ $prd->planned_start_date?->format('d/m/Y') ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $prd->planned_end_date?->format('d/m/Y') ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center">
+                    <td class="px-4 py-2 text-right" data-label="Qty Plan">{{ number_format($prd->quantity_planned, 3) }}</td>
+                    <td class="px-4 py-2" data-label="Tgl Mulai">{{ $prd->planned_start_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td class="px-4 py-2" data-label="Tgl Selesai">{{ $prd->planned_end_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center" data-label="Status">
                         <span class="px-2 py-0.5 rounded text-xs
                             {{ $prd->status==='created'?'bg-gray-100 text-gray-600':''}}
                             {{ $prd->status==='released'?'bg-blue-100 text-blue-700':'' }}
@@ -90,6 +91,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         </form>
 
         <div class="mt-4">{{ $orders->links() }}</div>

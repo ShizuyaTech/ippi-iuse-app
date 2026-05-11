@@ -16,10 +16,10 @@
             </div>
         </div>
         <form method="GET" class="flex flex-wrap gap-2 mb-4 print:hidden">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. GI..." class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal issue" class="border rounded px-3 py-2 text-sm">
-            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal issue" class="border rounded px-3 py-2 text-sm">
-            <select name="location_id" class="border rounded px-3 py-2 text-sm">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. GI..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal issue" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal issue" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="location_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Lokasi</option>
                 @foreach($locations as $loc)
                 <option value="{{ $loc->id }}" {{ request('location_id')==$loc->id?'selected':'' }}>{{ $loc->code }} - {{ $loc->name }}</option>
@@ -28,6 +28,7 @@
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('mm.goods-issues.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
+        <div class="mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -41,10 +42,10 @@
             <tbody>
                 @forelse($issues as $gi)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium">{{ $gi->gi_number }}</td>
-                    <td class="px-4 py-2">{{ $gi->issue_date->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2">{{ $gi->storageLocation->name ?? '-' }}</td>
-                    <td class="px-4 py-2 text-gray-500 text-xs">{{ Str::limit($gi->notes, 40) }}</td>
+                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. GI">{{ $gi->gi_number }}</td>
+                    <td class="px-4 py-2" data-label="Tanggal">{{ $gi->issue_date->format('d/m/Y') }}</td>
+                    <td class="px-4 py-2" data-label="Dari Lokasi">{{ $gi->storageLocation->name ?? '-' }}</td>
+                    <td class="px-4 py-2 text-gray-500 text-xs" data-label="Keterangan">{{ Str::limit($gi->notes, 40) }}</td>
                     <td class="px-4 py-2 text-center print:hidden">
                         <div class="flex justify-center gap-2">
                             <a href="{{ route('mm.goods-issues.show', $gi) }}" class="text-blue-600 hover:underline">Detail</a>
@@ -61,6 +62,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div class="mt-4 print:hidden">{{ $issues->links() }}</div>
     </div>
 </x-app-layout>

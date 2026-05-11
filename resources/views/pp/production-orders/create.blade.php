@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat Production Order</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Buat Production Order</h2>
@@ -9,15 +9,15 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div class="col-span-2 md:col-span-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tgl Mulai Rencana *</label>
-                    <input type="date" name="planned_start_date" id="planned_start_date" value="{{ old('planned_start_date', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="planned_start_date" id="planned_start_date" value="{{ old('planned_start_date', user_now()->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div class="col-span-2 md:col-span-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tgl Selesai Rencana *</label>
-                    <input type="date" name="planned_end_date" id="planned_end_date" value="{{ old('planned_end_date', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="planned_end_date" id="planned_end_date" value="{{ old('planned_end_date', user_now()->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Umum</label>
-                    <input type="text" name="notes" value="{{ old('notes') }}" placeholder="Opsional" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="text" name="notes" value="{{ old('notes') }}" placeholder="Opsional" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
 

@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Edit Goods Issue {{ $goodsIssue->gi_number }}</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-1">Edit Goods Issue</h2>
@@ -13,16 +13,16 @@
         <form method="POST" action="{{ route('mm.goods-issues.update', $goodsIssue) }}" class="space-y-6">
             @csrf @method('PUT')
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Issue *</label>
                     <input type="date" name="issue_date"
                         value="{{ old('issue_date', $goodsIssue->issue_date->format('Y-m-d')) }}"
-                        class="w-full border rounded px-3 py-2 text-sm" required>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dari Storage Location *</label>
-                    <select name="storage_location_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="storage_location_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         <option value="">-- Pilih Lokasi --</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('storage_location_id', $goodsIssue->storage_location_id) == $loc->id ? 'selected' : '' }}>
@@ -35,7 +35,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                <textarea name="notes" rows="2" class="w-full border rounded px-3 py-2 text-sm">{{ old('notes', $goodsIssue->notes) }}</textarea>
+                <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ old('notes', $goodsIssue->notes) }}</textarea>
             </div>
 
             <div>

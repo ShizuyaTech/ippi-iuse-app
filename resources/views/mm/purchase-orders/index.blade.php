@@ -16,16 +16,16 @@
             </div>
         </div>
         <form method="GET" class="flex flex-wrap gap-2 mb-4 print:hidden">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. PO / Nama Vendor..." class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal order" class="border rounded px-3 py-2 text-sm">
-            <input type="date" name="date_to" value="{{ request('date_to') }}" title="Sampai tanggal order" class="border rounded px-3 py-2 text-sm">
-            <select name="vendor_id" class="border rounded px-3 py-2 text-sm">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. PO / Nama Vendor..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal order" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input type="date" name="date_to" value="{{ request('date_to') }}" title="Sampai tanggal order" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="vendor_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Vendor</option>
                 @foreach($vendors as $v)
                 <option value="{{ $v->id }}" {{ request('vendor_id')==$v->id?'selected':'' }}>{{ $v->name }}</option>
                 @endforeach
             </select>
-            <select name="status" class="border rounded px-3 py-2 text-sm">
+            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Status</option>
                 <option value="draft" {{ request('status')=='draft'?'selected':'' }}>Draft</option>
                 <option value="approved" {{ request('status')=='approved'?'selected':'' }}>Approved</option>
@@ -36,6 +36,7 @@
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('mm.purchase-orders.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
+        <div class="mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -51,12 +52,12 @@
             <tbody>
                 @forelse($pos as $po)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium">{{ $po->po_number }}</td>
-                    <td class="px-4 py-2">{{ $po->vendor->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $po->order_date->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2">{{ $po->expected_delivery_date?->format('d/m/Y') ?? '-' }}</td>
-                    <td class="px-4 py-2 text-right">{{ number_format($po->total_amount,0) }}</td>
-                    <td class="px-4 py-2 text-center">
+                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. PO">{{ $po->po_number }}</td>
+                    <td class="px-4 py-2" data-label="Vendor">{{ $po->vendor->name ?? '-' }}</td>
+                    <td class="px-4 py-2" data-label="Tgl Order">{{ $po->order_date->format('d/m/Y') }}</td>
+                    <td class="px-4 py-2" data-label="Est. Terima">{{ $po->expected_delivery_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td class="px-4 py-2 text-right" data-label="Total">{{ number_format($po->total_amount,0) }}</td>
+                    <td class="px-4 py-2 text-center" data-label="Status">
                         <span class="px-2 py-0.5 rounded text-xs
                             {{ $po->status==='draft'?'bg-gray-100 text-gray-600':'' }}
                             {{ $po->status==='approved'?'bg-blue-100 text-blue-700':'' }}
@@ -74,6 +75,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div class="mt-4 print:hidden">{{ $pos->links() }}</div>
     </div>
 </x-app-layout>

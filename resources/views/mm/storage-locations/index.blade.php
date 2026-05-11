@@ -25,12 +25,13 @@
         </div>
         {{-- Action Toolbar removed - merged into header above --}}
         <form method="GET" class="flex flex-wrap gap-2 mb-4 print:hidden">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode / nama lokasi..." class="border rounded px-3 py-2 text-sm flex-1 min-w-40">
-            {{-- <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal dibuat" class="border rounded px-3 py-2 text-sm"> --}}
-            {{-- <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal dibuat" class="border rounded px-3 py-2 text-sm"> --}}
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode / nama lokasi..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-40">
+            {{-- <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal dibuat" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"> --}}
+            {{-- <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal dibuat" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"> --}}
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('mm.storage-locations.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
+        <div class="mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -45,10 +46,10 @@
             <tbody>
                 @forelse($locations as $loc)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700">{{ $loc->code }}</td>
-                    <td class="px-4 py-2 font-medium">{{ $loc->name }}</td>
-                    <td class="px-4 py-2 text-gray-500">{{ $loc->description ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center">
+                    <td class="px-4 py-2 font-mono text-blue-700" data-label="Kode">{{ $loc->code }}</td>
+                    <td class="px-4 py-2 font-medium" data-label="Nama">{{ $loc->name }}</td>
+                    <td class="px-4 py-2 text-gray-500" data-label="Deskripsi">{{ $loc->description ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center" data-label="Tipe Material">
                         @if($loc->material_type)
                             <span class="inline-block px-2 py-0.5 rounded text-xs font-medium
                                 {{ $loc->material_type==='RM' ? 'bg-gray-100 text-gray-700' : ($loc->material_type==='WIP' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">{{ $loc->material_type }}</span>
@@ -56,7 +57,7 @@
                             <span class="text-gray-400 text-xs">Semua</span>
                         @endif
                     </td>
-                    <td class="px-4 py-2 text-center">
+                    <td class="px-4 py-2 text-center" data-label="Scrap">
                         @if($loc->is_scrap)
                             <span class="inline-block bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">Scrap</span>
                         @else
@@ -77,6 +78,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div class="mt-4 print:hidden">{{ $locations->links() }}</div>
     </div>
 
@@ -90,7 +92,7 @@
             <p class="text-sm text-gray-500 mb-3">Upload file Excel (.xlsx). Download <a href="{{ route('mm.storage-locations.template') }}" class="text-blue-600 hover:underline">template</a> terlebih dahulu.</p>
             <form method="POST" action="{{ route('mm.storage-locations.import') }}" enctype="multipart/form-data">
                 @csrf
-                <input type="file" name="file" accept=".xlsx,.xls" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border rounded px-3 py-2 mb-4">
+                <input type="file" name="file" accept=".xlsx,.xls" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg px-3 py-2 mb-4">
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="document.getElementById('import-modal').classList.add('hidden')" class="px-4 py-2 text-sm rounded border text-gray-600 hover:bg-gray-50">Batal</button>
                     <button type="submit" class="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700">Upload</button>

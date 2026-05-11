@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Edit Purchase Order</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Edit PO: {{ $purchaseOrder->po_number }}</h2>
@@ -9,7 +9,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi Gudang *</label>
-                    <select name="storage_location_id" id="location-select" class="w-full border rounded px-3 py-2 text-sm" required onchange="onLocationChange(this)">
+                    <select name="storage_location_id" id="location-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required onchange="onLocationChange(this)">
                         <option value="">-- Pilih Lokasi Gudang --</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" data-code="{{ $loc->code }}"
@@ -27,7 +27,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Vendor *</label>
-                    <select name="vendor_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="vendor_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         <option value="">-- Pilih Vendor --</option>
                         @foreach($vendors as $v)
                         <option value="{{ $v->id }}" {{ old('vendor_id',$purchaseOrder->vendor_id)==$v->id?'selected':'' }}>{{ $v->code }} - {{ $v->name }}</option>
@@ -36,16 +36,16 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Order *</label>
-                    <input type="date" name="order_date" value="{{ old('order_date', $purchaseOrder->order_date->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="order_date" value="{{ old('order_date', $purchaseOrder->order_date->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Est. Pengiriman</label>
-                    <input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date', $purchaseOrder->expected_delivery_date?->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date', $purchaseOrder->expected_delivery_date?->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
-                <textarea name="notes" rows="2" class="w-full border rounded px-3 py-2 text-sm">{{ old('notes', $purchaseOrder->notes) }}</textarea>
+                <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ old('notes', $purchaseOrder->notes) }}</textarea>
             </div>
             <div>
                 <div class="flex justify-between items-center mb-2">

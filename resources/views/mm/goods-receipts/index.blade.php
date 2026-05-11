@@ -17,16 +17,16 @@
         </div>
 
         <form method="GET" class="flex flex-wrap gap-2 mb-4 print:hidden">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. GR / No. PO..." class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal terima" class="border rounded px-3 py-2 text-sm">
-            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal terima" class="border rounded px-3 py-2 text-sm">
-            <select name="vendor_id" class="border rounded px-3 py-2 text-sm">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. GR / No. PO..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal terima" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal terima" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="vendor_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Vendor</option>
                 @foreach($vendors as $v)
                 <option value="{{ $v->id }}" {{ request('vendor_id')==$v->id?'selected':'' }}>{{ $v->name }}</option>
                 @endforeach
             </select>
-            <select name="location_id" class="border rounded px-3 py-2 text-sm">
+            <select name="location_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Lokasi</option>
                 @foreach($locations as $loc)
                 <option value="{{ $loc->id }}" {{ request('location_id')==$loc->id?'selected':'' }}>{{ $loc->code }} - {{ $loc->name }}</option>
@@ -36,6 +36,7 @@
             <a href="{{ route('mm.goods-receipts.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
 
+        <div class="mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -51,12 +52,12 @@
             <tbody>
                 @forelse($receipts as $gr)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium">{{ $gr->gr_number }}</td>
-                    <td class="px-4 py-2 font-mono">{{ $gr->purchaseOrder->po_number ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $gr->purchaseOrder->vendor->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $gr->receipt_date->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2">{{ $gr->storageLocation->name ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center"><span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">{{ $gr->status }}</span></td>
+                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. GR">{{ $gr->gr_number }}</td>
+                    <td class="px-4 py-2 font-mono" data-label="No. PO">{{ $gr->purchaseOrder->po_number ?? '-' }}</td>
+                    <td class="px-4 py-2" data-label="Vendor">{{ $gr->purchaseOrder->vendor->name ?? '-' }}</td>
+                    <td class="px-4 py-2" data-label="Tgl Terima">{{ $gr->receipt_date->format('d/m/Y') }}</td>
+                    <td class="px-4 py-2" data-label="Lokasi">{{ $gr->storageLocation->name ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center" data-label="Status"><span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">{{ $gr->status }}</span></td>
                     <td class="px-4 py-2 text-center print:hidden">
                         <div class="flex justify-center gap-2">
                             <a href="{{ route('mm.goods-receipts.show', $gr) }}" class="text-blue-600 hover:underline">Detail</a>
@@ -73,6 +74,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div class="mt-4 print:hidden">{{ $receipts->links() }}</div>
     </div>
 </x-app-layout>

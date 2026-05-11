@@ -1,25 +1,25 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat Routing</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Buat Routing Produksi Baru</h2>
         <form method="POST" action="{{ route('pp.routings.store') }}" class="space-y-6">
             @csrf
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div style="position:relative;overflow:visible;">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Material *</label>
                     <input type="text" id="mat-text" placeholder="Ketik kode / nama material..." autocomplete="off"
-                        class="w-full border rounded px-3 py-2 text-sm" oninput="matSearch(this)" onkeydown="matKeydown(event)" onblur="hideMat()">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" oninput="matSearch(this)" onkeydown="matKeydown(event)" onblur="hideMat()">
                     <input type="hidden" name="material_id" id="mat-id" required>
                     <ul id="mat-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #cbd5e1;border-radius:6px;max-height:180px;overflow-y:auto;z-index:999;list-style:none;margin:0;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,.12);"></ul>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                    <input type="text" name="description" value="{{ old('description') }}" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="text" name="description" value="{{ old('description') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-gray-700 mr-2">Status:</label>
-                <select name="status" class="border rounded px-3 py-2 text-sm">
+                <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     <option value="active" {{ old('status','active')==='active'?'selected':'' }}>Aktif</option>
                     <option value="inactive" {{ old('status')==='inactive'?'selected':'' }}>Nonaktif</option>
                 </select>

@@ -55,7 +55,7 @@
             @if($demands->isEmpty())
             <p class="text-sm text-gray-400 italic text-center py-4">Belum ada demand. Upload file Excel di atas.</p>
             @else
-            <div class="overflow-x-auto">
+            <div class="mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-gray-100 text-gray-600 text-xs">
                     <tr>
@@ -72,18 +72,18 @@
                 <tbody>
                     @foreach($demands as $i => $d)
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="px-3 py-1.5 text-gray-400 text-xs">{{ $i + 1 }}</td>
-                        <td class="px-3 py-1.5 font-mono text-xs text-blue-700 font-semibold">{{ $d->material->code }}</td>
-                        <td class="px-3 py-1.5 text-gray-700">{{ $d->material->name }}</td>
-                        <td class="px-3 py-1.5 text-center">
+                        <td class="px-3 py-1.5 text-gray-400 text-xs" data-label="#">{{ $i + 1 }}</td>
+                        <td class="px-3 py-1.5 font-mono text-xs text-blue-700 font-semibold" data-label="Kode">{{ $d->material->code }}</td>
+                        <td class="px-3 py-1.5 text-gray-700" data-label="Nama Material">{{ $d->material->name }}</td>
+                        <td class="px-3 py-1.5 text-center" data-label="Tipe">
                             <span class="px-1.5 py-0.5 rounded text-xs font-medium
                                 {{ $d->material->type === 'FP' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
                                 {{ $d->material->type }}
                             </span>
                         </td>
-                        <td class="px-3 py-1.5 text-right font-medium">{{ number_format($d->order_quantity, 3) }}</td>
-                        <td class="px-3 py-1.5 text-gray-600 text-xs">{{ $d->customer_name ?? '-' }}</td>
-                        <td class="px-3 py-1.5 text-gray-400 text-xs">{{ $d->notes ?? '-' }}</td>
+                        <td class="px-3 py-1.5 text-right font-medium" data-label="Qty Order">{{ number_format($d->order_quantity, 3) }}</td>
+                        <td class="px-3 py-1.5 text-gray-600 text-xs" data-label="Customer">{{ $d->customer_name ?? '-' }}</td>
+                        <td class="px-3 py-1.5 text-gray-400 text-xs" data-label="Catatan">{{ $d->notes ?? '-' }}</td>
                         <td class="px-3 py-1.5 text-center">
                             <form method="POST" action="{{ route('pp.mrp.demands.destroy', $d) }}"
                                   onsubmit="return confirm('Hapus demand ini?')">
@@ -123,8 +123,7 @@
 
         {{-- â”€â”€ Riwayat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="font-semibold text-gray-700 mb-3">Riwayat MRP Run</h3>
-            <table class="w-full text-sm border-collapse">
+            <h3 class="font-semibold text-gray-700 mb-3">Riwayat MRP Run</h3>            <div class="mobile-cards overflow-x-auto">            <table class="w-full text-sm border-collapse">
                 <thead class="bg-blue-900 text-white">
                     <tr>
                         <th class="px-4 py-2 text-left">Tanggal Run</th>
@@ -136,9 +135,9 @@
                 <tbody>
                     @forelse($runs as $run)
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2">{{ $run->created_at->format('d M Y H:i') }}</td>
-                        <td class="px-4 py-2 text-right font-medium">{{ $run->results->count() }} material</td>
-                        <td class="px-4 py-2">{{ $run->runBy->name ?? '-' }}</td>
+                        <td class="px-4 py-2" data-label="Tanggal Run">{{ $run->created_at->format('d M Y H:i') }}</td>
+                        <td class="px-4 py-2 text-right font-medium" data-label="Jml Hasil">{{ $run->results->count() }} material</td>
+                        <td class="px-4 py-2" data-label="Dijalankan oleh">{{ $run->runBy->name ?? '-' }}</td>
                         <td class="px-4 py-2 text-center">
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('pp.mrp.show', $run) }}" class="text-blue-600 hover:underline text-sm">Lihat Hasil</a>
@@ -155,6 +154,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
             <div class="mt-4">{{ $runs->links() }}</div>
         </div>
     </div>

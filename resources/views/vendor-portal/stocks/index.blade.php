@@ -1,4 +1,4 @@
-<x-vendor-layout>
+﻿<x-vendor-layout>
     <x-slot name="title">Stok Material</x-slot>
 
     <div class="bg-white rounded-lg shadow p-6">
@@ -16,8 +16,8 @@
         {{-- Filter --}}
         <form method="GET" class="flex flex-wrap gap-2 mb-5">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode / Nama Material..."
-                   class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <select name="type" class="border rounded px-3 py-2 text-sm">
+                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <select name="type" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Tipe</option>
                 <option value="RM"  {{ request('type')==='RM'  ? 'selected' : '' }}>RM – Bahan Baku</option>
                 <option value="WIP" {{ request('type')==='WIP' ? 'selected' : '' }}>WIP – Semi Jadi</option>

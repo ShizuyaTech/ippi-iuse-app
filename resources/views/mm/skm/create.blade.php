@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat SKM - Summary Kanban Material</x-slot>
     <div class="space-y-6">
 
@@ -21,16 +21,16 @@
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal Order *</label>
                         <input type="date" name="order_date" value="{{ user_now()->format('Y-m-d') }}" required
-                               class="border rounded px-3 py-1.5 text-sm">
+                               class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">Est. Pengiriman</label>
                         <input type="date" name="expected_delivery_date"
-                               class="border rounded px-3 py-1.5 text-sm">
+                               class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">Lokasi Gudang Tujuan</label>
-                        <select name="storage_location_id" class="border rounded px-3 py-1.5 text-sm min-w-48">
+                        <select name="storage_location_id" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm min-w-48">
                             <option value="">— Pilih Lokasi —</option>
                             @foreach($storageLocations as $loc)
                             <option value="{{ $loc->id }}">{{ $loc->code }} - {{ $loc->name }}</option>
@@ -40,7 +40,7 @@
                     <div class="flex-1 min-w-48">
                         <label class="block text-xs font-medium text-gray-600 mb-1">Catatan SKM</label>
                         <input type="text" name="notes" placeholder="Opsional..."
-                               class="w-full border rounded px-3 py-1.5 text-sm">
+                               class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
                     </div>
                 </div>
 

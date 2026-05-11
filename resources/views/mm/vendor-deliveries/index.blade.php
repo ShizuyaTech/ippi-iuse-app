@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Kiriman Bahan ke Vendor</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center mb-4">
@@ -12,14 +12,14 @@
 
         <form method="GET" class="flex flex-wrap gap-2 mb-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="No. VMD / Vendor..."
-                class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <select name="vendor_id" class="border rounded px-3 py-2 text-sm">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <select name="vendor_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Vendor</option>
                 @foreach($vendors as $v)
                     <option value="{{ $v->id }}" {{ request('vendor_id')==$v->id ? 'selected' : '' }}>{{ $v->name }}</option>
                 @endforeach
             </select>
-            <select name="status" class="border rounded px-3 py-2 text-sm">
+            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Status</option>
                 <option value="sent"      {{ request('status')=='sent'      ? 'selected' : '' }}>Dikirim</option>
                 <option value="confirmed" {{ request('status')=='confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>

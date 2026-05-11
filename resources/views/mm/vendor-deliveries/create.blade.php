@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat Kiriman Bahan ke Vendor</x-slot>
     <div class="max-w-4xl bg-white rounded-lg shadow p-6">
         <div class="flex items-center gap-3 mb-4">
@@ -16,10 +16,10 @@
             @csrf
 
             {{-- Header --}}
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Vendor *</label>
-                    <select name="vendor_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="vendor_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         <option value="">-- Pilih Vendor --</option>
                         @foreach($vendors as $v)
                         <option value="{{ $v->id }}" {{ old('vendor_id')==$v->id ? 'selected' : '' }}>{{ $v->name }}</option>
@@ -29,11 +29,11 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kirim *</label>
                     <input type="date" name="delivery_date" value="{{ old('delivery_date', user_now()->format('Y-m-d')) }}"
-                        class="w-full border rounded px-3 py-2 text-sm" required>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Storage Location (Sumber) *</label>
-                    <select name="storage_location_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="storage_location_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         <option value="">-- Pilih Lokasi --</option>
                         @foreach($locations as $l)
                         <option value="{{ $l->id }}" {{ old('storage_location_id')==$l->id ? 'selected' : '' }}>{{ $l->code }} – {{ $l->name }}</option>
@@ -43,17 +43,17 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">No. Kendaraan</label>
                     <input type="text" name="vehicle_number" value="{{ old('vehicle_number') }}"
-                        class="w-full border rounded px-3 py-2 text-sm" placeholder="Contoh: B 1234 CD">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Contoh: B 1234 CD">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Driver</label>
                     <input type="text" name="driver_name" value="{{ old('driver_name') }}"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
                     <input type="text" name="notes" value="{{ old('notes') }}"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
 

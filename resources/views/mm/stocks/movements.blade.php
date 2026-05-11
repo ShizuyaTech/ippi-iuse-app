@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Riwayat Mutasi Stok</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
@@ -6,16 +6,16 @@
             <a href="{{ route('mm.stocks.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded text-sm print:hidden">Stock Overview</a>
         </div>
         <form method="GET" class="flex flex-wrap gap-2 mb-4 print:hidden">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode/nama material..." class="border rounded px-3 py-2 text-sm flex-1 min-w-[180px]">
-            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal" class="border rounded px-3 py-2 text-sm">
-            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal" class="border rounded px-3 py-2 text-sm">
-            <select name="location" class="border rounded px-3 py-2 text-sm">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode/nama material..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-[180px]">
+            <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <select name="location" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Lokasi</option>
                 @foreach($locations as $loc)
                 <option value="{{ $loc->id }}" {{ request('location')==$loc->id?'selected':'' }}>{{ $loc->code }} - {{ $loc->name }}</option>
                 @endforeach
             </select>
-            <select name="type" class="border rounded px-3 py-2 text-sm">
+            <select name="type" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Tipe</option>
                 <option value="GR"     {{ request('type')=='GR'    ?'selected':'' }}>GR (Goods Receipt)</option>
                 <option value="GI"     {{ request('type')=='GI'    ?'selected':'' }}>GI (Goods Issue)</option>

@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Routing</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
@@ -28,7 +28,7 @@
                 @csrf
                 <div>
                     <label class="block text-xs text-gray-600 mb-1">Pilih File Excel (.xlsx/.xls)</label>
-                    <input type="file" name="file" accept=".xlsx,.xls" required class="border rounded px-3 py-1.5 text-sm bg-white">
+                    <input type="file" name="file" accept=".xlsx,.xls" required class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white">
                 </div>
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">Upload &amp; Import</button>
             </form>
@@ -44,12 +44,13 @@
         </div>
         @endif
         <form method="GET" class="flex flex-wrap gap-2 mb-4">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. Routing / nama material..." class="border rounded px-3 py-2 text-sm flex-1 min-w-40">
-            {{-- <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal dibuat" class="border rounded px-3 py-2 text-sm">
-            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal dibuat" class="border rounded px-3 py-2 text-sm"> --}}
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="No. Routing / nama material..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-40">
+            {{-- <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal dibuat" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input type="date" name="date_to"   value="{{ request('date_to') }}"   title="Sampai tanggal dibuat" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"> --}}
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('pp.routings.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
+        <div class="mobile-cards overflow-x-auto">
         <table class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -63,13 +64,13 @@
             <tbody>
                 @forelse($routings as $rtg)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium">{{ $rtg->routing_number }}</td>
-                    <td class="px-4 py-2">
+                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. Routing">{{ $rtg->routing_number }}</td>
+                    <td class="px-4 py-2" data-label="Material">
                         <div class="font-mono text-xs text-gray-500">{{ $rtg->material->code }}</div>
                         <div>{{ $rtg->material->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right">{{ $rtg->operations->count() }}</td>
-                    <td class="px-4 py-2 text-center">
+                    <td class="px-4 py-2 text-right" data-label="Jml Operasi">{{ $rtg->operations->count() }}</td>
+                    <td class="px-4 py-2 text-center" data-label="Status">
                         <span class="px-2 py-0.5 rounded text-xs {{ $rtg->status==='active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                             {{ $rtg->status === 'active' ? 'Aktif' : 'Nonaktif' }}
                         </span>
@@ -88,6 +89,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div class="mt-4">{{ $routings->links() }}</div>
     </div>
 </x-app-layout>

@@ -1,52 +1,52 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Summary Kanban Material (SKM)</x-slot>
     <div class="space-y-6">
 
         {{-- Stats Cards --}}
-        <div class="flex gap-4">
-            <div class="flex-1 bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-2xl font-bold text-blue-700">{{ $stats['total'] }}</div>
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+            <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center">
+                <div class="text-xl md:text-2xl font-bold text-blue-700">{{ $stats['total'] }}</div>
                 <div class="text-xs text-gray-500 mt-1">Total SKM</div>
             </div>
-            <div class="flex-1 bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-2xl font-bold text-gray-600">{{ $stats['draft'] }}</div>
+            <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center">
+                <div class="text-xl md:text-2xl font-bold text-gray-600">{{ $stats['draft'] }}</div>
                 <div class="text-xs text-gray-500 mt-1">Draft</div>
             </div>
-            <div class="flex-1 bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-2xl font-bold text-blue-600">{{ $stats['sent'] }}</div>
-                <div class="text-xs text-gray-500 mt-1">Dikirim ke Vendor</div>
+            <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center">
+                <div class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['sent'] }}</div>
+                <div class="text-xs text-gray-500 mt-1">Dikirim</div>
             </div>
-            <div class="flex-1 bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-2xl font-bold text-yellow-600">{{ $stats['partial_received'] }}</div>
-                <div class="text-xs text-gray-500 mt-1">Diterima Sebagian</div>
+            <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center">
+                <div class="text-xl md:text-2xl font-bold text-yellow-600">{{ $stats['partial_received'] }}</div>
+                <div class="text-xs text-gray-500 mt-1">Sebagian</div>
             </div>
-            <div class="flex-1 bg-white rounded-lg shadow p-4 text-center">
-                <div class="text-2xl font-bold text-green-600">{{ $stats['completed'] }}</div>
-                <div class="text-xs text-gray-500 mt-1">Selesai (Semua Diterima)</div>
+            <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center">
+                <div class="text-xl md:text-2xl font-bold text-green-600">{{ $stats['completed'] }}</div>
+                <div class="text-xs text-gray-500 mt-1">Selesai</div>
             </div>
-            <div class="flex-1 bg-white rounded-lg shadow p-4 text-center border-2 {{ $stats['pending'] > 0 ? 'border-red-400' : 'border-gray-200' }}">
-                <div class="text-2xl font-bold {{ $stats['pending'] > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ $stats['pending'] }}</div>
-                <div class="text-xs {{ $stats['pending'] > 0 ? 'text-red-500 font-semibold' : 'text-gray-500' }} mt-1">Item Perlu Order</div>
+            <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center border-2 {{ $stats['pending'] > 0 ? 'border-red-400' : 'border-gray-200' }}">
+                <div class="text-xl md:text-2xl font-bold {{ $stats['pending'] > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ $stats['pending'] }}</div>
+                <div class="text-xs {{ $stats['pending'] > 0 ? 'text-red-500 font-semibold' : 'text-gray-500' }} mt-1">Perlu Order</div>
             </div>
         </div>
 
         {{-- Pending Alert + Create Button --}}
         @if($stats['pending'] > 0)
-        <div class="bg-red-50 border border-red-300 rounded-lg p-4 flex items-center justify-between">
-            <div>
+        <div class="bg-red-50 border border-red-300 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0">
                 <div class="font-semibold text-red-700">{{ $stats['pending'] }} material SKM stoknya di bawah minimum!</div>
                 <div class="text-sm text-red-600 mt-0.5">Buat dokumen SKM sekarang untuk memesan material yang dibutuhkan.</div>
             </div>
             <a href="{{ route('mm.skm.create') }}"
-               class="bg-red-600 text-white px-5 py-2 rounded text-sm font-semibold hover:bg-red-700 whitespace-nowrap">
+               class="bg-red-600 text-white px-5 py-2 rounded text-sm font-semibold hover:bg-red-700 whitespace-nowrap flex-shrink-0">
                 Buat SKM Sekarang
             </a>
         </div>
         @else
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
-            <div class="text-green-700 text-sm font-medium">Semua stok material SKM mencukupi. Tidak ada item yang perlu dipesan.</div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="text-green-700 text-sm font-medium min-w-0">Semua stok material SKM mencukupi. Tidak ada item yang perlu dipesan.</div>
             <a href="{{ route('mm.skm.create') }}"
-               class="bg-blue-700 text-white px-5 py-2 rounded text-sm hover:bg-blue-800 whitespace-nowrap">
+               class="bg-blue-700 text-white px-5 py-2 rounded text-sm hover:bg-blue-800 whitespace-nowrap flex-shrink-0">
                 Buat SKM Manual
             </a>
         </div>
@@ -55,7 +55,7 @@
         {{-- SKM Orders Table --}}
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Riwayat SKM</h3>
-            <div class="overflow-x-auto">
+            <div class="mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-blue-900 text-white">
                     <tr>
@@ -70,16 +70,16 @@
                 <tbody>
                     @forelse($orders as $order)
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2 font-mono font-semibold text-blue-700">{{ $order->skm_number }}</td>
-                        <td class="px-4 py-2">{{ $order->order_date->format('d M Y') }}</td>
-                        <td class="px-4 py-2 text-right font-medium">{{ $order->items_count }}</td>
-                        <td class="px-4 py-2 text-center">
+                        <td class="px-4 py-2 font-mono font-semibold text-blue-700" data-label="Nomor SKM">{{ $order->skm_number }}</td>
+                        <td class="px-4 py-2" data-label="Tanggal">{{ $order->order_date->format('d M Y') }}</td>
+                        <td class="px-4 py-2 text-right font-medium" data-label="Jml Item">{{ $order->items_count }}</td>
+                        <td class="px-4 py-2 text-center" data-label="Status">
                             <span class="px-2 py-0.5 rounded text-xs font-semibold {{ $order->status_color }}">
                                 {{ $order->status_label }}
                             </span>
                         </td>
-                        <td class="px-4 py-2 text-gray-600">{{ $order->createdBy->name ?? '-' }}</td>
-                        <td class="px-4 py-2 text-center">
+                        <td class="px-4 py-2 text-gray-600" data-label="Dibuat oleh">{{ $order->createdBy->name ?? '-' }}</td>
+                        <td class="px-4 py-2 text-center" data-label="Aksi">
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('mm.skm.show', $order) }}" class="text-blue-600 hover:underline text-sm">Detail</a>
                                 @if($order->status === 'draft')
@@ -180,7 +180,7 @@
                 <div class="flex-1 min-w-0">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Upload File Excel (Demand Bulan Ini)</label>
                     <input type="file" name="file" accept=".xlsx,.xls" required
-                           class="w-full border rounded px-3 py-1.5 text-sm">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
                 </div>
                 <button class="bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-800 whitespace-nowrap flex-shrink-0">
                     Import &amp; Ganti Demand

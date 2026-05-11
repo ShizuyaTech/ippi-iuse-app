@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat User Baru</x-slot>
     <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
         <div class="flex items-center gap-3 mb-6">
@@ -19,16 +19,16 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label>
                     <input type="text" name="name" value="{{ old('name') }}"
-                        class="w-full border rounded px-3 py-2 text-sm @error('name') border-red-400 @enderror">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('name') border-red-400 @enderror">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
                     <input type="email" name="email" value="{{ old('email') }}"
-                        class="w-full border rounded px-3 py-2 text-sm @error('email') border-red-400 @enderror">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('email') border-red-400 @enderror">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                    <select name="role_id" class="w-full border rounded px-3 py-2 text-sm">
+                    <select name="role_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">– Tanpa Role –</option>
                         @foreach($roles as $role)
                             <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
@@ -41,7 +41,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Vendor
                         <span class="text-xs text-gray-400 font-normal">(isi jika user adalah akun vendor)</span>
                     </label>
-                    <select name="vendor_id" class="w-full border rounded px-3 py-2 text-sm">
+                    <select name="vendor_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">– Bukan User Vendor –</option>
                         @foreach($vendors as $vendor)
                             <option value="{{ $vendor->id }}" {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>
@@ -53,16 +53,16 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
                     <input type="password" name="password"
-                        class="w-full border rounded px-3 py-2 text-sm @error('password') border-red-400 @enderror">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('password') border-red-400 @enderror">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password <span class="text-red-500">*</span></label>
                     <input type="password" name="password_confirmation"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Zona Waktu</label>
-                    <select name="timezone" class="w-full border rounded px-3 py-2 text-sm">
+                    <select name="timezone" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         @foreach(App\Models\User::TIMEZONES as $tz => $label)
                             <option value="{{ $tz }}" {{ old('timezone', 'Asia/Jakarta') === $tz ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach

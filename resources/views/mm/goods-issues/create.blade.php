@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat Goods Issue</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Buat Goods Issue</h2>
@@ -13,14 +13,14 @@
             @csrf
 
             {{-- Row 1: Tanggal + Lokasi Asal --}}
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Issue *</label>
-                    <input type="date" name="issue_date" value="{{ old('issue_date', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="issue_date" value="{{ old('issue_date', user_now()->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dari Storage Location *</label>
-                    <select name="storage_location_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="storage_location_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         <option value="">-- Pilih Lokasi --</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('storage_location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->code }} - {{ $loc->name }}</option>
@@ -30,10 +30,10 @@
             </div>
 
             {{-- Row 2: Tipe Issue + Tujuan --}}
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Issue *</label>
-                    <select id="issue_type" name="issue_type" class="w-full border rounded px-3 py-2 text-sm" required onchange="toggleDestination()">
+                    <select id="issue_type" name="issue_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required onchange="toggleDestination()">
                         <option value="internal"     {{ old('issue_type','internal')=='internal'     ? 'selected' : '' }}>Pemakaian Internal</option>
                         <option value="to_vendor"    {{ old('issue_type')=='to_vendor'    ? 'selected' : '' }}>Kirim ke Vendor (Proses)</option>
                         <option value="to_customer"  {{ old('issue_type')=='to_customer'  ? 'selected' : '' }}>Kirim ke Customer</option>
@@ -45,14 +45,14 @@
                 <div id="destination-wrap" class="hidden">
                     <label id="destination-label" class="block text-sm font-medium text-gray-700 mb-1">Tujuan *</label>
                     {{-- Internal: destination storage location --}}
-                    <select id="location-select" name="destination_storage_location_id" class="w-full border rounded px-3 py-2 text-sm hidden" disabled>
+                    <select id="location-select" name="destination_storage_location_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm hidden" disabled>
                         <option value="">-- Pilih Lokasi Tujuan --</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('destination_storage_location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->code }} - {{ $loc->name }}</option>
                         @endforeach
                     </select>
                     {{-- Vendor dropdown (to_vendor) --}}
-                    <select id="vendor-select" class="w-full border rounded px-3 py-2 text-sm hidden" disabled>
+                    <select id="vendor-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm hidden" disabled>
                         <option value="">-- Pilih Vendor --</option>
                         @foreach($vendors as $v)
                         <option value="{{ $v->id }}" data-name="{{ $v->name }}" {{ old('vendor_id') == $v->id ? 'selected' : '' }}>{{ $v->code }} - {{ $v->name }}</option>
@@ -61,16 +61,23 @@
                     {{-- Hidden fields for GI to_vendor --}}
                     <input type="hidden" id="vendor-id-input" name="vendor_id" value="{{ old('vendor_id') }}">
                     <input type="hidden" id="vendor-destination-name" name="destination_name" value="{{ old('destination_name') }}">
-                    {{-- Customer text input (to_customer) --}}
-                    <input id="customer-input" type="text" name="destination_name" value="{{ old('destination_name') }}"
-                           placeholder="Nama / ID Customer" class="w-full border rounded px-3 py-2 text-sm hidden" disabled>
+                    {{-- Customer dropdown (to_customer) --}}
+                    <select id="customer-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm hidden" disabled>
+                        <option value="">-- Pilih Customer --</option>
+                        @foreach($customers as $c)
+                        <option value="{{ $c->id }}" data-name="{{ $c->name }}" {{ old('customer_id') == $c->id ? 'selected' : '' }}>{{ $c->code }} - {{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                    {{-- Hidden fields for GI to_customer --}}
+                    <input type="hidden" id="customer-id-input" name="customer_id" value="{{ old('customer_id') }}">
+                    <input type="hidden" id="customer-destination-name" name="destination_name" value="{{ old('destination_name') }}">
                 </div>
             </div>
 
             {{-- Notes --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                <textarea name="notes" rows="2" class="w-full border rounded px-3 py-2 text-sm">{{ old('notes') }}</textarea>
+                <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ old('notes') }}</textarea>
             </div>
 
             {{-- Items Table --}}
@@ -213,9 +220,9 @@
         function toggleDestination() {
             const type = document.getElementById('issue_type').value;
             const wrap = document.getElementById('destination-wrap');
-            const locSel    = document.getElementById('location-select');
-            const vendorSel = document.getElementById('vendor-select');
-            const custInput = document.getElementById('customer-input');
+            const locSel      = document.getElementById('location-select');
+            const vendorSel   = document.getElementById('vendor-select');
+            const customerSel = document.getElementById('customer-select');
             const label = document.getElementById('destination-label');
             const hints = {
                 'internal':    document.getElementById('hint-internal'),
@@ -227,14 +234,16 @@
             Object.keys(hints).forEach(k => hints[k].classList.toggle('hidden', k !== type));
 
             // reset all
-            [locSel, vendorSel, custInput].forEach(el => {
+            [locSel, vendorSel, customerSel].forEach(el => {
                 el.classList.add('hidden');
                 el.disabled = true;
                 el.name = '';
             });
-            // clear hidden vendor fields when type changes
+            // clear hidden fields when type changes
             document.getElementById('vendor-id-input').value = '';
             document.getElementById('vendor-destination-name').value = '';
+            document.getElementById('customer-id-input').value = '';
+            document.getElementById('customer-destination-name').value = '';
 
             if (type === 'internal') {
                 wrap.classList.remove('hidden');
@@ -262,9 +271,20 @@
             } else {
                 wrap.classList.remove('hidden');
                 label.textContent = 'Tujuan Customer *';
-                custInput.classList.remove('hidden');
-                custInput.disabled = false;
-                custInput.name = 'destination_name';
+                customerSel.classList.remove('hidden');
+                customerSel.disabled = false;
+                // sync hidden inputs when customer changes
+                customerSel.onchange = function() {
+                    const opt = this.options[this.selectedIndex];
+                    document.getElementById('customer-id-input').value = opt.value || '';
+                    document.getElementById('customer-destination-name').value = opt.dataset.name || '';
+                };
+                // sync immediately in case old value is present
+                if (customerSel.value) {
+                    const opt = customerSel.options[customerSel.selectedIndex];
+                    document.getElementById('customer-id-input').value = opt.value || '';
+                    document.getElementById('customer-destination-name').value = opt.dataset.name || '';
+                }
             }
         }
 

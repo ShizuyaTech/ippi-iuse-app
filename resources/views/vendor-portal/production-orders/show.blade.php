@@ -1,4 +1,4 @@
-<x-vendor-layout>
+﻿<x-vendor-layout>
     <x-slot name="title">Detail Order: {{ $productionOrder->order_number }}</x-slot>
 
     <div class="max-w-4xl space-y-4">
@@ -110,19 +110,19 @@
                 @csrf
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Tanggal</label>
-                    <input type="date" name="report_date" value="{{ user_now()->format('Y-m-d') }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="report_date" value="{{ user_now()->format('Y-m-d') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Qty OK</label>
-                    <input type="number" name="quantity_ok" min="0" step="0.001" value="0" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="number" name="quantity_ok" min="0" step="0.001" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Qty NG</label>
-                    <input type="number" name="quantity_ng" min="0" step="0.001" value="0" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="number" name="quantity_ng" min="0" step="0.001" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div class="md:col-span-4">
                     <label class="block text-xs text-gray-500 mb-1">Notes</label>
-                    <input type="text" name="notes" class="w-full border rounded px-3 py-2 text-sm" placeholder="Opsional">
+                    <input type="text" name="notes" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Opsional">
                 </div>
                 <div class="md:col-span-4">
                     <button type="submit" class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800">Simpan Report</button>

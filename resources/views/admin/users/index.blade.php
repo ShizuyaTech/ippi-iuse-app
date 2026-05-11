@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Manajemen User</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center mb-4">
@@ -15,8 +15,8 @@
 
         <form method="GET" class="flex gap-2 mb-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama / email..."
-                class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
-            <select name="role_id" class="border rounded px-3 py-2 text-sm">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            <select name="role_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Role</option>
                 @foreach($roles as $role)
                     <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>

@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat Purchase Order</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Buat Purchase Order Baru</h2>
@@ -9,7 +9,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi Gudang *</label>
-                    <select name="storage_location_id" id="location-select" class="w-full border rounded px-3 py-2 text-sm" required onchange="onLocationChange(this)">
+                    <select name="storage_location_id" id="location-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required onchange="onLocationChange(this)">
                         <option value="">-- Pilih Lokasi Gudang --</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" data-code="{{ $loc->code }}"
@@ -33,7 +33,7 @@
                                value="{{ old('vendor_id') ? ($vendors->firstWhere('id', old('vendor_id'))?->code.' - '.$vendors->firstWhere('id', old('vendor_id'))?->name) : '' }}"
                                placeholder="Ketik kode atau nama vendor..."
                                autocomplete="off"
-                               class="w-full border rounded px-3 py-2 text-sm"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                                oninput="vendorSearch(this)"
                                onkeydown="vendorKeydown(event)">
                         <input type="hidden" name="vendor_id" id="vendor-id-hidden" value="{{ old('vendor_id') }}">
@@ -43,17 +43,17 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Order *</label>
-                    <input type="date" name="order_date" value="{{ old('order_date', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="order_date" value="{{ old('order_date', user_now()->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Est. Pengiriman</label>
-                    <input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date') }}" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="date" name="expected_delivery_date" value="{{ old('expected_delivery_date') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
-                <textarea name="notes" rows="2" class="w-full border rounded px-3 py-2 text-sm">{{ old('notes') }}</textarea>
+                <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ old('notes') }}</textarea>
             </div>
 
             {{-- Import Excel Panel --}}

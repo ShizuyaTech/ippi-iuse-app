@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Business Event Logs</x-slot>
 
     <div class="bg-white rounded-lg shadow p-6">
@@ -12,16 +12,16 @@
 
         <form method="GET" class="flex flex-wrap gap-2 mb-4">
             <input type="text" name="event_type" value="{{ request('event_type') }}" placeholder="event_type..."
-                class="border rounded px-3 py-2 text-sm">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <input type="text" name="entity_type" value="{{ request('entity_type') }}" placeholder="entity_type..."
-                class="border rounded px-3 py-2 text-sm">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <input type="number" name="entity_id" value="{{ request('entity_id') }}" placeholder="entity_id"
-                class="border rounded px-3 py-2 text-sm w-32">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32">
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Filter</button>
             <a href="{{ route('mm.business-event-logs.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border">Reset</a>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-blue-800 text-white">
                     <tr>
@@ -36,12 +36,12 @@
                 <tbody>
                     @forelse($logs as $log)
                     <tr class="border-b align-top hover:bg-gray-50">
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $log->created_at?->format('d/m/Y H:i:s') }}</td>
-                        <td class="px-4 py-2 font-mono text-xs text-blue-700">{{ $log->event_type }}</td>
-                        <td class="px-4 py-2 font-mono text-xs">{{ $log->entity_type }}</td>
-                        <td class="px-4 py-2">{{ $log->entity_id ?? '-' }}</td>
-                        <td class="px-4 py-2">{{ $log->user?->name ?? '-' }}</td>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 whitespace-nowrap" data-label="Waktu">{{ $log->created_at?->format('d/m/Y H:i:s') }}</td>
+                        <td class="px-4 py-2 font-mono text-xs text-blue-700" data-label="Event">{{ $log->event_type }}</td>
+                        <td class="px-4 py-2 font-mono text-xs" data-label="Entity">{{ $log->entity_type }}</td>
+                        <td class="px-4 py-2" data-label="Entity ID">{{ $log->entity_id ?? '-' }}</td>
+                        <td class="px-4 py-2" data-label="User">{{ $log->user?->name ?? '-' }}</td>
+                        <td class="px-4 py-2" data-label="Payload">
                             <pre class="text-[11px] whitespace-pre-wrap break-all text-gray-600">{{ json_encode($log->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </td>
                     </tr>

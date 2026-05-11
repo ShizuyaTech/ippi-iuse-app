@@ -37,7 +37,8 @@ class GoodsIssueController extends Controller
         $materials = Material::where('is_active', true)->orderBy('code')->get();
         $locations = StorageLocation::all();
         $vendors   = Vendor::where('is_active', true)->orderBy('name')->get();
-        return view('mm.goods-issues.create', compact('materials', 'locations', 'vendors'));
+        $customers = \App\Models\Customer::where('is_active', true)->orderBy('name')->get();
+        return view('mm.goods-issues.create', compact('materials', 'locations', 'vendors', 'customers'));
     }
 
     public function store(Request $request)

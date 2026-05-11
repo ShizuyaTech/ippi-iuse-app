@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Edit Goods Receipt {{ $goodsReceipt->gr_number }}</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-1">Edit Goods Receipt</h2>
@@ -17,16 +17,16 @@
         <form method="POST" action="{{ route('mm.goods-receipts.update', $goodsReceipt) }}" class="space-y-4">
             @csrf @method('PUT')
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penerimaan *</label>
                     <input type="date" name="receipt_date"
                         value="{{ old('receipt_date', $goodsReceipt->receipt_date->format('Y-m-d')) }}"
-                        class="w-full border rounded px-3 py-2 text-sm" required>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Storage Location</label>
-                    <div class="border rounded px-3 py-2 text-sm bg-gray-50 text-gray-600">
+                    <div class="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-600">
                         {{ $goodsReceipt->storageLocation?->code }} - {{ $goodsReceipt->storageLocation?->name }}
                         <span class="text-xs text-gray-400">(tidak dapat diubah)</span>
                     </div>
@@ -35,7 +35,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan GR</label>
-                <textarea name="notes" rows="2" class="w-full border rounded px-3 py-2 text-sm">{{ old('notes', $goodsReceipt->notes) }}</textarea>
+                <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ old('notes', $goodsReceipt->notes) }}</textarea>
             </div>
 
             <div>

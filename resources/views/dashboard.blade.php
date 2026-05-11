@@ -2,22 +2,22 @@
     <x-slot name="title">Dashboard</x-slot>
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-blue-600">
-            <div class="text-sm text-gray-500">Total Material</div>
-            <div class="text-3xl font-bold text-blue-700">{{ $total_materials }}</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-3 md:p-5 border-l-4 border-blue-600">
+            <div class="text-xs md:text-sm text-gray-500">Total Material</div>
+            <div class="text-2xl md:text-3xl font-bold text-blue-700">{{ $total_materials }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-green-600">
-            <div class="text-sm text-gray-500">Total Vendor</div>
-            <div class="text-3xl font-bold text-green-700">{{ $total_vendors }}</div>
+        <div class="bg-white rounded-lg shadow p-3 md:p-5 border-l-4 border-green-600">
+            <div class="text-xs md:text-sm text-gray-500">Total Vendor</div>
+            <div class="text-2xl md:text-3xl font-bold text-green-700">{{ $total_vendors }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-yellow-500">
-            <div class="text-sm text-gray-500">PO Open</div>
-            <div class="text-3xl font-bold text-yellow-600">{{ $open_pos }}</div>
+        <div class="bg-white rounded-lg shadow p-3 md:p-5 border-l-4 border-yellow-500">
+            <div class="text-xs md:text-sm text-gray-500">PO Open</div>
+            <div class="text-2xl md:text-3xl font-bold text-yellow-600">{{ $open_pos }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-red-500">
-            <div class="text-sm text-gray-500">Produksi Aktif</div>
-            <div class="text-3xl font-bold text-red-600">{{ $active_production }}</div>
+        <div class="bg-white rounded-lg shadow p-3 md:p-5 border-l-4 border-red-500">
+            <div class="text-xs md:text-sm text-gray-500">Produksi Aktif</div>
+            <div class="text-2xl md:text-3xl font-bold text-red-600">{{ $active_production }}</div>
         </div>
     </div>
 

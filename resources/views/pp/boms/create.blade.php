@@ -1,10 +1,10 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Buat BOM</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Buat Bill of Materials Baru</h2>
         <form method="POST" action="{{ route('pp.boms.store') }}" id="bom-form" class="space-y-6">
             @csrf
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Material Hasil (FP/WIP) *</label>
                     <div class="relative">
@@ -12,7 +12,7 @@
                                value="{{ old('material_id') ? ($materials->firstWhere('id', old('material_id'))?->code.' - '.$materials->firstWhere('id', old('material_id'))?->name) : '' }}"
                                placeholder="Ketik kode atau nama material..."
                                autocomplete="off"
-                               class="w-full border rounded px-3 py-2 text-sm"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                                oninput="fpSearch(this)"
                                onkeydown="fpKeydown(event)">
                         <input type="hidden" name="material_id" id="fp-id" value="{{ old('material_id') }}">
@@ -22,15 +22,15 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Qty Base *</label>
-                    <input type="number" name="base_quantity" value="{{ old('base_quantity', 1) }}" class="w-full border rounded px-3 py-2 text-sm" min="0.001" step="0.001" required>
+                    <input type="number" name="base_quantity" value="{{ old('base_quantity', 1) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" min="0.001" step="0.001" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Berlaku Mulai *</label>
-                    <input type="date" name="valid_from" value="{{ old('valid_from', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="valid_from" value="{{ old('valid_from', user_now()->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Berlaku Hingga</label>
-                    <input type="date" name="valid_to" value="{{ old('valid_to') }}" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="date" name="valid_to" value="{{ old('valid_to') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
             <div class="flex items-center gap-2">

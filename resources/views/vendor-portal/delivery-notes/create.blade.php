@@ -1,4 +1,4 @@
-<x-vendor-layout>
+﻿<x-vendor-layout>
     <x-slot name="title">Buat Surat Jalan</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center gap-3 mb-4">
@@ -22,7 +22,7 @@
             <div class="relative">
                 <input type="text" id="po-search" value="{{ $selectedPoLabel }}"
                     placeholder="Ketik nomor PO..." autocomplete="off"
-                    class="w-full border rounded px-3 py-2 text-sm"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     oninput="poSearch(this)" onkeydown="poKeydown(event)">
                 <input type="hidden" name="po_id" id="po-id-hidden" value="{{ request('po_id') }}">
                 <div id="po-suggestions"
@@ -83,24 +83,24 @@
                     <input type="date" name="estimated_delivery_date"
                         value="{{ old('estimated_delivery_date', date('Y-m-d', strtotime('+1 day'))) }}"
                         min="{{ date('Y-m-d') }}"
-                        class="w-full border rounded px-3 py-2 text-sm" required>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">No. Kendaraan</label>
                     <input type="text" name="vehicle_number" value="{{ old('vehicle_number') }}"
                         placeholder="Contoh: B 1234 XYZ"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Driver</label>
                     <input type="text" name="driver_name" value="{{ old('driver_name') }}"
                         placeholder="Nama pengemudi"
-                        class="w-full border rounded px-3 py-2 text-sm">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
-                <textarea name="notes" rows="2" class="w-full border rounded px-3 py-2 text-sm">{{ old('notes') }}</textarea>
+                <textarea name="notes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ old('notes') }}</textarea>
             </div>
 
             <h3 class="font-semibold text-gray-700 mb-2">Item yang Akan Dikirim</h3>
@@ -142,7 +142,7 @@
                                 id="qty_{{ $idx }}"
                                 step="0.001" min="0.001" max="{{ $remaining }}"
                                 value="{{ old("items.{$idx}.quantity", $canSend ? number_format($remaining, 3, '.', '') : '') }}"
-                                class="border rounded px-3 py-1.5 text-sm w-36 {{ !$canSend ? 'bg-gray-100' : '' }}"
+                                class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-36 {{ !$canSend ? 'bg-gray-100' : '' }}"
                                 {{ !$canSend ? 'disabled' : '' }}>
                             <span class="text-sm text-gray-500">{{ $item->material->unit_of_measure }}</span>
                             @if(!$canSend)

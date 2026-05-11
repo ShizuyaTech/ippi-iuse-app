@@ -1,13 +1,13 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Edit Routing</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Edit Routing: {{ $routing->routing_number }}</h2>
         <form method="POST" action="{{ route('pp.routings.update', $routing) }}" class="space-y-6">
             @csrf @method('PATCH')
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Material *</label>
-                    <select name="material_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="material_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         @foreach($materials as $m)
                         <option value="{{ $m->id }}" {{ old('material_id', $routing->material_id)==$m->id?'selected':'' }}>{{ $m->code }} - {{ $m->name }}</option>
                         @endforeach
@@ -15,12 +15,12 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                    <input type="text" name="description" value="{{ old('description', $routing->description) }}" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="text" name="description" value="{{ old('description', $routing->description) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-gray-700 mr-2">Status:</label>
-                <select name="status" class="border rounded px-3 py-2 text-sm">
+                <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     <option value="active" {{ old('status', $routing->status)==='active'?'selected':'' }}>Aktif</option>
                     <option value="inactive" {{ old('status', $routing->status)==='inactive'?'selected':'' }}>Nonaktif</option>
                 </select>

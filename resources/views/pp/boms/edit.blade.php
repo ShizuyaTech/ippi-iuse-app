@@ -1,13 +1,13 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="title">Edit BOM</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Edit BOM: {{ $bom->bom_number }}</h2>
         <form method="POST" action="{{ route('pp.boms.update', $bom) }}" class="space-y-6">
             @csrf @method('PATCH')
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Material Hasil *</label>
-                    <select name="material_id" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <select name="material_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                         @foreach($materials as $m)
                         <option value="{{ $m->id }}" {{ old('material_id', $bom->material_id)==$m->id?'selected':'' }}>{{ $m->code }} - {{ $m->name }}</option>
                         @endforeach
@@ -15,15 +15,15 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Qty Base *</label>
-                    <input type="number" name="base_quantity" value="{{ old('base_quantity', $bom->base_quantity) }}" class="w-full border rounded px-3 py-2 text-sm" min="0.001" step="0.001" required>
+                    <input type="number" name="base_quantity" value="{{ old('base_quantity', $bom->base_quantity) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" min="0.001" step="0.001" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Berlaku Mulai *</label>
-                    <input type="date" name="valid_from" value="{{ old('valid_from', $bom->valid_from?->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="valid_from" value="{{ old('valid_from', $bom->valid_from?->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Berlaku Hingga</label>
-                    <input type="date" name="valid_to" value="{{ old('valid_to', $bom->valid_to?->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm">
+                    <input type="date" name="valid_to" value="{{ old('valid_to', $bom->valid_to?->format('Y-m-d')) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
             </div>
             <div class="flex items-center gap-2">

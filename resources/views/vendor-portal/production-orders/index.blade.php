@@ -1,4 +1,4 @@
-<x-vendor-layout>
+﻿<x-vendor-layout>
     <x-slot name="title">Vendor Production Orders</x-slot>
 
     <div class="bg-white rounded-lg shadow p-6">
@@ -11,8 +11,8 @@
 
         <form method="GET" class="flex flex-wrap md:flex-nowrap gap-2 mb-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="No. Order / Material..."
-                class="border rounded px-3 py-2 text-sm w-full md:flex-1 md:min-w-[26rem]">
-            <select name="status" class="border rounded px-3 py-2 text-sm">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full md:flex-1 md:min-w-[26rem]">
+            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Status</option>
                 @foreach(['draft', 'released', 'in_progress', 'completed', 'cancelled'] as $status)
                     <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ strtoupper($status) }}</option>
