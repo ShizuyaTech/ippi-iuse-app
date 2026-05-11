@@ -106,7 +106,8 @@
         </script>
 
         @if($selectedPo)
-        <form method="POST" action="{{ route('mm.goods-receipts.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('mm.goods-receipts.store') }}" class="space-y-4"
+              onkeydown="if(event.key==='Enter' && event.target.tagName !== 'TEXTAREA' && event.target.type !== 'submit'){ event.preventDefault(); }">
             @csrf
             <input type="hidden" name="purchase_order_id" value="{{ $selectedPo->id }}">
             <div class="grid grid-cols-2 gap-4">
@@ -230,7 +231,7 @@
                                 <input type="text"
                                     name="items[{{ $rowIndex }}][packing_note]"
                                     placeholder="Contoh: CASE-{{ str_pad($cIdx+1,3,'0',STR_PAD_LEFT) }}"
-                                    class="w-full border rounded px-2 py-1 text-sm row-input"
+                                    class="w-full border rounded px-2 py-1 text-sm row-input scanner-input"
                                     maxlength="100"
                                     disabled>
                             </td>
@@ -281,6 +282,32 @@
                     toggleRow(cb);
                 });
             }
+
+            // Scanner support: Enter on packing_note auto-checks the row and moves focus to next scanner-input
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Enter') return;
+                const target = e.target;
+                if (!target.classList.contains('scanner-input')) return;
+                e.preventDefault();
+
+                // Auto-check the row checkbox if not already checked
+                const row = target.closest('tr');
+                if (row) {
+                    const cb = row.querySelector('.row-check');
+                    if (cb && !cb.checked) {
+                        cb.checked = true;
+                        toggleRow(cb);
+                    }
+                }
+
+                // Move focus to next enabled scanner-input
+                const allInputs = Array.from(document.querySelectorAll('.scanner-input:not([disabled])'));
+                const idx = allInputs.indexOf(target);
+                if (idx >= 0 && idx < allInputs.length - 1) {
+                    allInputs[idx + 1].focus();
+                    allInputs[idx + 1].select();
+                }
+            });
         </script>
         @else
         <div class="text-center py-8 text-gray-400">Pilih Purchase Order di atas untuk melanjutkan.</div>
