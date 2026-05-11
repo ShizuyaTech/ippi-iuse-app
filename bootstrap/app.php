@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'            => \App\Http\Middleware\CheckRole::class,
             'permission'      => \App\Http\Middleware\CheckPermission::class,
             'vendor.scope'    => \App\Http\Middleware\EnsureVendorScope::class,
+            'vendor.portal'   => \App\Http\Middleware\CanAccessVendorPortal::class,
             'no.vendor'       => \App\Http\Middleware\RedirectIfVendor::class,
             'route.permission' => \App\Http\Middleware\RoutePermissionGuard::class,
         ]);

@@ -4,8 +4,6 @@ namespace App\Http\Controllers\MM;
 
 use App\Http\Controllers\Controller;
 use App\Models\Material;
-use App\Models\Stock;
-use App\Models\StockMovement;
 use App\Models\StorageLocation;
 use App\Models\Vendor;
 use App\Models\VendorMaterialDelivery;
@@ -80,25 +78,9 @@ class VendorMaterialDeliveryController extends Controller
                     'quantity'            => $row['quantity'],
                     'notes'               => $row['notes'] ?? null,
                 ]);
-
-                // Reduce stock from source storage location
-                $stock = Stock::firstOrCreate(
-                    ['material_id' => $row['material_id'], 'storage_location_id' => $storageLocationId],
-                    ['quantity' => 0]
-                );
-                $stock->decrement('quantity', $row['quantity']);
-                $stock->refresh();
-
-                StockMovement::create([
-                    'material_id'         => $row['material_id'],
-                    'storage_location_id' => $storageLocationId,
-                    'movement_type'       => 'GI',
-                    'quantity'            => -$row['quantity'],
-                    'quantity_after'      => $stock->quantity,
-                    'reference_document'  => $vmd->vmd_number,
-                    'movement_date'       => $request->delivery_date,
-                    'created_by'          => $user->id,
-                ]);
+                // Stock IPPI tidak dikurangi di sini.
+                // Stok baru akan dikurangi saat vendor mengkonfirmasi penerimaan
+                // dengan qty aktual melalui portal vendor.
             }
         });
 

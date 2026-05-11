@@ -7,6 +7,11 @@ use App\Models\DeliveryNote;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\User;
+use App\Models\VendorStock;
+use App\Models\VendorStockMovement;
+use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use App\Services\ExcelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 
 class DeliveryNoteController extends Controller
 {
-    private function vendorId(): int
+    private function vendorScopeId(): ?int
     {
         /** @var User $user */
         $user = Auth::user();
@@ -24,7 +29,7 @@ class DeliveryNoteController extends Controller
     public function index(Request $request)
     {
         $query = DeliveryNote::with('purchaseOrder')
-            ->where('vendor_id', $this->vendorId());
+            ->when($this->vendorScopeId(), fn($q, $v) => $q->where('vendor_id', $v));
 
         if ($request->search) {
             $query->where(fn($q) => $q
@@ -48,12 +53,15 @@ class DeliveryNoteController extends Controller
 
     public function create(Request $request)
     {
-        $pos = PurchaseOrder::where('vendor_id', $this->vendorId())
+        // Only actual vendors can create SJ — internal users are read-only
+        abort_unless(Auth::user()->isVendor(), 403, 'Hanya vendor yang dapat membuat Surat Jalan.');
+
+        $pos = PurchaseOrder::where('vendor_id', $this->vendorScopeId())
             ->whereIn('status', ['approved', 'partially_received'])
             ->get();
 
         $selectedPo = $request->po_id
-            ? PurchaseOrder::where('vendor_id', $this->vendorId())
+            ? PurchaseOrder::where('vendor_id', $this->vendorScopeId())
                 ->with('items.material')
                 ->findOrFail($request->po_id)
             : null;
@@ -63,6 +71,9 @@ class DeliveryNoteController extends Controller
 
     public function store(Request $request)
     {
+        // Only actual vendors can create SJ
+        abort_unless(Auth::user()->isVendor(), 403, 'Hanya vendor yang dapat membuat Surat Jalan.');
+
         $request->validate([
             'purchase_order_id'        => ['required', 'exists:purchase_orders,id'],
             'estimated_delivery_date'  => ['required', 'date', 'after_or_equal:today'],
@@ -72,16 +83,21 @@ class DeliveryNoteController extends Controller
             'items'                    => ['required', 'array', 'min:1'],
             'items.*.po_item_id'       => ['required', 'exists:purchase_order_items,id'],
             'items.*.quantity'         => ['required', 'numeric', 'min:0.001'],
+        ], [
+            'items.required' => 'Pilih minimal satu item yang akan dikirim (centang checkbox).',
+            'items.min'      => 'Pilih minimal satu item yang akan dikirim (centang checkbox).',
+            'items.*.quantity.min' => 'Qty harus lebih dari 0 untuk setiap item yang dipilih.',
         ]);
 
-        $po = PurchaseOrder::where('vendor_id', $this->vendorId())
+        $po = PurchaseOrder::where('vendor_id', $this->vendorScopeId())
             ->whereIn('status', ['approved', 'partially_received'])
             ->findOrFail($request->purchase_order_id);
 
-        DB::transaction(function () use ($request, $po) {
-            /** @var User $user */
-            $user = Auth::user();
+        /** @var User $user */
+        $user = Auth::user();
+        $isProcessVendor = $user->vendor?->vendor_type === 'process';
 
+        DB::transaction(function () use ($request, $po, $user, $isProcessVendor) {
             $poItems = PurchaseOrderItem::where('purchase_order_id', $po->id)
                 ->get()
                 ->keyBy('id');
@@ -121,10 +137,33 @@ class DeliveryNoteController extends Controller
                 }
             }
 
+            // Validasi stok vendor untuk vendor process
+            if ($isProcessVendor) {
+                $requestedByMaterial = [];
+                foreach ($request->items as $item) {
+                    $qty = (float) ($item['quantity'] ?? 0);
+                    if ($qty <= 0) continue;
+                    $poItem = $poItems[(int) $item['po_item_id']] ?? null;
+                    if (!$poItem) continue;
+                    $requestedByMaterial[$poItem->material_id] =
+                        ($requestedByMaterial[$poItem->material_id] ?? 0) + $qty;
+                }
+                foreach ($requestedByMaterial as $materialId => $totalQty) {
+                    $stock = VendorStock::where('vendor_id', $this->vendorScopeId())
+                        ->where('material_id', $materialId)
+                        ->first();
+                    if (!$stock || $stock->quantity < $totalQty - 0.001) {
+                        throw ValidationException::withMessages([
+                            'items' => 'Stok vendor tidak mencukupi untuk salah satu material yang diminta.',
+                        ]);
+                    }
+                }
+            }
+
             $dn = DeliveryNote::create([
                 'dn_number'               => DeliveryNote::generateNumber(),
                 'purchase_order_id'       => $po->id,
-                'vendor_id'               => $this->vendorId(),
+                'vendor_id'               => $this->vendorScopeId(),
                 'estimated_delivery_date' => $request->estimated_delivery_date,
                 'vehicle_number'          => $request->vehicle_number,
                 'driver_name'             => $request->driver_name,
@@ -144,28 +183,117 @@ class DeliveryNoteController extends Controller
                     ]);
                 }
             }
+
         });
 
+        $label = $isProcessVendor ? 'Good Issue' : 'Surat Jalan';
         return redirect()->route('vendor.delivery-notes.index')
-            ->with('success', 'Surat Jalan berhasil dibuat. Menunggu konfirmasi dari IPPI.');
+            ->with('success', "{$label} berhasil dibuat. Menunggu konfirmasi dari IPPI.");
     }
 
     public function show(DeliveryNote $deliveryNote)
     {
-        abort_if($deliveryNote->vendor_id !== $this->vendorId(), 403);
+        // Vendor users: only own SJ; internal users: any SJ
+        if ($this->vendorScopeId() !== null) {
+            abort_if($deliveryNote->vendor_id !== $this->vendorScopeId(), 403);
+        }
 
         $deliveryNote->load('purchaseOrder.vendor', 'items.purchaseOrderItem.material');
 
         return view('vendor-portal.delivery-notes.show', compact('deliveryNote'));
     }
 
+    public function printPdf(DeliveryNote $deliveryNote)
+    {
+        if ($this->vendorScopeId() !== null) {
+            abort_if($deliveryNote->vendor_id !== $this->vendorScopeId(), 403);
+        }
+
+        $deliveryNote->load('purchaseOrder.vendor', 'vendor', 'items.purchaseOrderItem.material');
+
+        $pdf = Pdf::loadView('vendor-portal.delivery-notes.pdf', compact('deliveryNote'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("SJ-{$deliveryNote->dn_number}.pdf");
+    }
+
+    public function exportExcel(DeliveryNote $deliveryNote)
+    {
+        if ($this->vendorScopeId() !== null) {
+            abort_if($deliveryNote->vendor_id !== $this->vendorScopeId(), 403);
+        }
+
+        $deliveryNote->load('purchaseOrder.vendor', 'vendor', 'items.purchaseOrderItem.material');
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Surat Jalan');
+
+        // Header info
+        $sheet->setCellValue('A1', 'SURAT JALAN');
+        $sheet->setCellValue('A2', 'No. SJ');
+        $sheet->setCellValue('B2', $deliveryNote->dn_number);
+        $sheet->setCellValue('A3', 'No. PO');
+        $sheet->setCellValue('B3', $deliveryNote->purchaseOrder?->po_number ?? '-');
+        $sheet->setCellValue('A4', 'Vendor');
+        $sheet->setCellValue('B4', $deliveryNote->vendor?->name ?? '-');
+        $sheet->setCellValue('A5', 'Est. Tgl Pengiriman');
+        $sheet->setCellValue('B5', $deliveryNote->estimated_delivery_date?->format('d/m/Y') ?? '-');
+        $sheet->setCellValue('A6', 'No. Kendaraan');
+        $sheet->setCellValue('B6', $deliveryNote->vehicle_number ?? '-');
+        $sheet->setCellValue('A7', 'Nama Driver');
+        $sheet->setCellValue('B7', $deliveryNote->driver_name ?? '-');
+        $sheet->setCellValue('A8', 'Status');
+        $sheet->setCellValue('B8', $deliveryNote->statusLabel());
+        $sheet->setCellValue('A9', 'Catatan');
+        $sheet->setCellValue('B9', $deliveryNote->notes ?? '-');
+
+        // Items table header
+        $headers = ['No', 'Kode Material', 'Nama Material', 'Qty Dikirim', 'Satuan', 'Catatan'];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue(chr(65 + $i) . '11', $h);
+        }
+        ExcelService::applyHeaderStyle($spreadsheet, 'A11:F11');
+
+        $row = 12;
+        foreach ($deliveryNote->items as $idx => $item) {
+            $material = $item->purchaseOrderItem?->material;
+            $sheet->setCellValue("A{$row}", $idx + 1);
+            $sheet->setCellValue("B{$row}", $material?->code ?? '-');
+            $sheet->setCellValue("C{$row}", $material?->name ?? '-');
+            $sheet->setCellValue("D{$row}", (float) $item->quantity);
+            $sheet->setCellValue("E{$row}", $material?->unit_of_measure ?? '-');
+            $sheet->setCellValue("F{$row}", $item->notes ?? '-');
+            ExcelService::applyDataStyle($spreadsheet, "A{$row}:F{$row}", $row % 2 !== 0);
+            $row++;
+        }
+
+        foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        return ExcelService::download($spreadsheet, "SJ-{$deliveryNote->dn_number}.xlsx");
+    }
+
     public function cancel(DeliveryNote $deliveryNote)
     {
-        abort_if($deliveryNote->vendor_id !== $this->vendorId(), 403);
+        // Vendor users: only own SJ; internal users: any SJ
+        if ($this->vendorScopeId() !== null) {
+            abort_if($deliveryNote->vendor_id !== $this->vendorScopeId(), 403);
+        }
         abort_if($deliveryNote->status !== 'pending', 403, 'Hanya Surat Jalan berstatus pending yang dapat dibatalkan.');
 
-        $deliveryNote->update(['status' => 'cancelled']);
+        /** @var User $user */
+        $user = Auth::user();
+        $isProcessVendor = $user->vendor?->vendor_type === 'process';
 
-        return back()->with('success', 'Surat Jalan berhasil dibatalkan.');
+        DB::transaction(function () use ($deliveryNote, $user, $isProcessVendor) {
+            $deliveryNote->update(['status' => 'cancelled']);
+
+            // Stok vendor tidak dikurangi saat SJ dibuat (hanya dikurangi saat IPPI konfirmasi GR),
+            // sehingga tidak perlu dikembalikan saat SJ dibatalkan.
+        });
+
+        return back()->with('success', 'Dokumen berhasil dibatalkan. Stok vendor telah dikembalikan.');
     }
 }

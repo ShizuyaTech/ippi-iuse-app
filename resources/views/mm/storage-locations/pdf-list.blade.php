@@ -35,7 +35,7 @@
         </div>
         <div class="header-right">
             <div class="doc-title">DAFTAR STORAGE LOCATION</div>
-            <div class="doc-sub">Dicetak: {{ now()->format('d M Y, H:i') }} WIB &nbsp;|&nbsp; Oleh: {{ auth()->user()->name ?? '-' }}</div>
+            <div class="doc-sub">Dicetak: {{ user_now()->format('d M Y, H:i') }} {{ user_tz_label() }} &nbsp;|&nbsp; Oleh: {{ auth()->user()->name ?? '-' }}</div>
         </div>
     </div>
 
@@ -44,7 +44,8 @@
             <tr>
                 <th style="width:4%">No</th>
                 <th style="width:15%">Kode</th>
-                <th style="width:30%">Nama Lokasi</th>
+                <th style="width:28%">Nama Lokasi</th>
+                <th style="width:12%">Tipe Material</th>
                 <th>Deskripsi</th>
             </tr>
         </thead>
@@ -54,16 +55,17 @@
                 <td class="center">{{ $i + 1 }}</td>
                 <td style="font-family: monospace; color: #1d4ed8; font-weight: bold;">{{ $loc->code }}</td>
                 <td style="font-weight: bold;">{{ $loc->name }}</td>
+                <td class="center">{{ $loc->material_type ?? '-' }}</td>
                 <td>{{ $loc->description ?? '-' }}</td>
             </tr>
             @empty
-            <tr><td colspan="4" style="text-align:center; color:#9ca3af; padding:16px;">Tidak ada data.</td></tr>
+            <tr><td colspan="5" style="text-align:center; color:#9ca3af; padding:16px;">Tidak ada data.</td></tr>
             @endforelse
         </tbody>
     </table>
 
     <div style="font-size:8px; color:#6b7280; margin-bottom:4px;">Total {{ count($locations) }} storage location ditampilkan.</div>
-    <div class="footer">Dokumen ini dihasilkan secara otomatis oleh sistem IPPI &mdash; {{ now()->format('d M Y H:i') }}</div>
+    <div class="footer">Dokumen ini dihasilkan secara otomatis oleh sistem IPPI &mdash; {{ user_now()->format('d M Y H:i') }} {{ user_tz_label() }}</div>
 </div>
 </body>
 </html>

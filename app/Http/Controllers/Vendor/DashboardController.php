@@ -18,37 +18,42 @@ class DashboardController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $vendorId = $user->vendor_id;
+        $vendorId = $user->vendor_id; // null for internal IPPI users
         $vendor   = $user->vendor;
-        $vType    = $vendor?->vendor_type ?? 'general';
-        $isCoilCenter = ($vType === 'coil_center');
+        $vType    = $vendor?->vendor_type ?? null;
+        $isCoilCenter  = ($vType === 'coil_center');
+        $isInternalUser = ($vendorId === null);
 
         $stats = [
-            'po_open'         => PurchaseOrder::where('vendor_id', $vendorId)
+            'po_open'        => PurchaseOrder::when($vendorId, fn($q, $v) => $q->where('vendor_id', $v))
                                     ->whereIn('status', ['draft', 'approved', 'partially_received'])
                                     ->count(),
-            'sj_this_month'   => DeliveryNote::where('vendor_id', $vendorId)
+            'sj_this_month'  => DeliveryNote::when($vendorId, fn($q, $v) => $q->where('vendor_id', $v))
                                     ->whereMonth('created_at', now()->month)
                                     ->whereYear('created_at', now()->year)
                                     ->count(),
-            'vpo_active'      => $isCoilCenter ? null : VendorProductionOrder::where('vendor_id', $vendorId)
+            'vpo_active'     => ($isCoilCenter && !$isInternalUser) ? null : VendorProductionOrder::when($vendorId, fn($q, $v) => $q->where('vendor_id', $v))
                                     ->whereIn('status', ['draft', 'released', 'in_progress'])
                                     ->count(),
-            'kiriman_pending'  => $isCoilCenter ? null : VendorMaterialDelivery::where('vendor_id', $vendorId)
+            'kiriman_pending' => ($isCoilCenter && !$isInternalUser) ? null : VendorMaterialDelivery::when($vendorId, fn($q, $v) => $q->where('vendor_id', $v))
                                     ->where('status', 'sent')
                                     ->count(),
         ];
 
-        $recentPos = PurchaseOrder::where('vendor_id', $vendorId)
+        $recentPos = PurchaseOrder::when($vendorId, fn($q, $v) => $q->where('vendor_id', $v))
             ->with('items')
             ->latest()
             ->take(5)
             ->get();
 
-        // Stock overview: untuk coil center gunakan vendor_id, untuk process gunakan process_vendor_id
-        $stockQuery = $isCoilCenter
-            ? Material::with(['stocks' => fn($q) => $q->with('storageLocation')])->where('vendor_id', $vendorId)
-            : Material::with(['stocks' => fn($q) => $q->with('storageLocation')])->where('process_vendor_id', $vendorId);
+        // Stock overview
+        if ($isInternalUser) {
+            $stockQuery = Material::with(['stocks' => fn($q) => $q->with('storageLocation')]);
+        } elseif ($isCoilCenter) {
+            $stockQuery = Material::with(['stocks' => fn($q) => $q->with('storageLocation')])->where('vendor_id', $vendorId);
+        } else {
+            $stockQuery = Material::with(['stocks' => fn($q) => $q->with('storageLocation')])->where('process_vendor_id', $vendorId);
+        }
 
         $stockSummary = $stockQuery
             ->where('is_active', true)
@@ -65,6 +70,6 @@ class DashboardController extends Controller
             ->filter(fn($m) => $m['total'] > 0)
             ->values();
 
-        return view('vendor-portal.dashboard', compact('stats', 'recentPos', 'stockSummary', 'isCoilCenter'));
+        return view('vendor-portal.dashboard', compact('stats', 'recentPos', 'stockSummary', 'isCoilCenter', 'isInternalUser'));
     }
 }

@@ -5,6 +5,13 @@
         <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-2 rounded text-sm">{{ session('success') }}</div>
     @endif
 
+    @if($isInternalUser)
+    <div class="mb-4 bg-amber-50 border border-amber-300 text-amber-800 px-4 py-3 rounded text-sm flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <span><strong>Mode Monitor Internal IPPI</strong> — Anda melihat data semua vendor. Aksi tulis (buat SJ, order produksi, dll.) hanya tersedia untuk akun vendor.</span>
+    </div>
+    @endif
+
     {{-- Stats row --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-5">
@@ -15,7 +22,7 @@
         <div class="bg-white rounded-lg shadow p-5">
             <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Surat Jalan Bulan Ini</div>
             <div class="text-3xl font-bold text-blue-700">{{ $stats['sj_this_month'] }}</div>
-            <div class="text-xs text-gray-400 mt-1">{{ now()->translatedFormat('F Y') }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ user_now()->translatedFormat('F Y') }}</div>
         </div>
         @if(!$isCoilCenter)
         <div class="bg-white rounded-lg shadow p-5">

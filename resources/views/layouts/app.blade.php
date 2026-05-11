@@ -80,7 +80,7 @@
         class="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] bg-blue-900 text-white flex flex-col flex-shrink-0 min-h-0 transform transition-transform duration-200 -translate-x-full lg:translate-x-0 lg:static lg:w-64 lg:max-w-none">
         {{-- Logo --}}
         <div class="flex items-center h-16 px-6 bg-blue-950 font-bold text-lg tracking-wide flex-shrink-0">
-            <span class="text-yellow-400">SAP</span><span class="ml-1">Mini ERP</span>
+            <span class="text-yellow-400">IUse</span><span class="ml-1">IPPI</span>
         </div>
 
         {{-- Nav --}}
@@ -192,26 +192,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                         </svg>
                         Goods Receipt
-                    </a>
-
-                    {{-- Surat Jalan (dari Vendor) --}}
-                    <a href="{{ route('mm.delivery-notes.index') }}"
-                       class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
-                              {{ request()->routeIs('mm.delivery-notes*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Surat Jalan Vendor
-                    </a>
-
-                    {{-- Vendor Material Deliveries --}}
-                    <a href="{{ route('mm.vendor-deliveries.index') }}"
-                       class="flex items-center gap-3 pl-7 pr-4 py-2 mx-2 rounded-md transition text-base
-                              {{ request()->routeIs('mm.vendor-deliveries*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8l-6-3m6 3l6-3"/>
-                        </svg>
-                        Kiriman ke Vendor
                     </a>
 
                     {{-- Goods Issue --}}
@@ -391,14 +371,14 @@
         </nav>
 
         {{-- User --}}
-        <div class="px-5 py-4 bg-blue-950 text-xs text-blue-300 flex-shrink-0">
+        {{-- <div class="px-5 py-4 bg-blue-950 text-xs text-blue-300 flex-shrink-0">
             <div class="font-semibold text-white text-sm">{{ auth()->user()->name ?? '-' }}</div>
             <div class="capitalize mt-0.5">{{ auth()->user()->roleModel?->display_name ?? auth()->user()->role ?? '' }}</div>
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf
                 <button type="submit" class="text-red-300 hover:text-red-100 transition">Logout</button>
             </form>
-        </div>
+        </div> --}}
     </aside>
 
     {{-- Main Content --}}
@@ -415,7 +395,7 @@
             </div>
             {{-- User dropdown --}}
             <div class="flex items-center gap-3" x-data="{ userMenuOpen: false }">
-                <span class="hidden md:inline text-sm text-gray-400">{{ now()->format('d M Y') }}</span>
+                <span class="hidden md:inline text-sm text-gray-400">{{ user_now()->format('d M Y') }}</span>
                 <div class="relative">
                     <button @click="userMenuOpen = !userMenuOpen"
                             @keydown.escape="userMenuOpen = false"

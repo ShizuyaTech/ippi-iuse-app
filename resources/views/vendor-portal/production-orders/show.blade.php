@@ -79,6 +79,10 @@
                     <div class="text-xs">{{ $productionOrder->actual_start_date?->format('d/m/Y') ?? '-' }} — {{ $productionOrder->actual_end_date?->format('d/m/Y') ?? '-' }}</div>
                 </div>
                 <div>
+                    <div class="text-gray-500 text-xs">Dibuat Pada</div>
+                    <div class="text-xs font-medium">{{ $productionOrder->created_at->format('d/m/Y H:i') }}</div>
+                </div>
+                <div>
                     <div class="text-gray-500 text-xs">Dibuat Oleh</div>
                     <div class="text-sm">{{ $productionOrder->createdBy?->name ?? '-' }}</div>
                 </div>
@@ -106,7 +110,7 @@
                 @csrf
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Tanggal</label>
-                    <input type="date" name="report_date" value="{{ date('Y-m-d') }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="report_date" value="{{ user_now()->format('Y-m-d') }}" class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Qty OK</label>

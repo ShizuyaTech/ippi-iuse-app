@@ -54,6 +54,8 @@
                     </td>
                     <td class="px-4 py-2 text-center space-x-2">
                         <a href="{{ route('vendor.delivery-notes.show', $dn) }}" class="text-teal-600 hover:underline text-xs">Detail</a>
+                        <a href="{{ route('vendor.delivery-notes.print-pdf', $dn) }}" target="_blank" class="text-red-600 hover:underline text-xs">PDF</a>
+                        <a href="{{ route('vendor.delivery-notes.export-excel', $dn) }}" class="text-green-700 hover:underline text-xs">Excel</a>
                         @if($dn->status === 'pending')
                         <form method="POST" action="{{ route('vendor.delivery-notes.cancel', $dn) }}" class="inline" onsubmit="return confirm('Batalkan surat jalan ini?')">
                             @csrf @method('PATCH')

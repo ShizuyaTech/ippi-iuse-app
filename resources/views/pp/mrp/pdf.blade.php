@@ -107,6 +107,6 @@
         * Stok Tersedia = Stok RM aktual + Stok FP/WIP dikonversi ke RM via BOM. Stok lokasi scrap tidak dihitung.<br>
         Formula: Net = Gross &minus; Stok Tersedia &minus; Sisa PO &nbsp;&rarr;&nbsp; +Safety 20% &nbsp;&rarr;&nbsp; Order = round-up ke Qty/Case
     </div>
-    <div class="footer">Dicetak: {{ now()->format('d M Y H:i') }}</div>
+    <div class="footer">Dicetak: {{ user_now()->format('d M Y H:i') }} {{ user_tz_label() }}</div>
 </body>
 </html>

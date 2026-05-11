@@ -16,7 +16,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Issue *</label>
-                    <input type="date" name="issue_date" value="{{ old('issue_date', date('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="issue_date" value="{{ old('issue_date', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dari Storage Location *</label>
@@ -52,12 +52,15 @@
                         @endforeach
                     </select>
                     {{-- Vendor dropdown (to_vendor) --}}
-                    <select id="vendor-select" name="destination_name" class="w-full border rounded px-3 py-2 text-sm hidden" disabled>
+                    <select id="vendor-select" class="w-full border rounded px-3 py-2 text-sm hidden" disabled>
                         <option value="">-- Pilih Vendor --</option>
                         @foreach($vendors as $v)
-                        <option value="{{ $v->name }}" {{ old('destination_name') == $v->name ? 'selected' : '' }}>{{ $v->code }} - {{ $v->name }}</option>
+                        <option value="{{ $v->id }}" data-name="{{ $v->name }}" {{ old('vendor_id') == $v->id ? 'selected' : '' }}>{{ $v->code }} - {{ $v->name }}</option>
                         @endforeach
                     </select>
+                    {{-- Hidden fields for GI to_vendor --}}
+                    <input type="hidden" id="vendor-id-input" name="vendor_id" value="{{ old('vendor_id') }}">
+                    <input type="hidden" id="vendor-destination-name" name="destination_name" value="{{ old('destination_name') }}">
                     {{-- Customer text input (to_customer) --}}
                     <input id="customer-input" type="text" name="destination_name" value="{{ old('destination_name') }}"
                            placeholder="Nama / ID Customer" class="w-full border rounded px-3 py-2 text-sm hidden" disabled>
@@ -229,6 +232,9 @@
                 el.disabled = true;
                 el.name = '';
             });
+            // clear hidden vendor fields when type changes
+            document.getElementById('vendor-id-input').value = '';
+            document.getElementById('vendor-destination-name').value = '';
 
             if (type === 'internal') {
                 wrap.classList.remove('hidden');
@@ -241,7 +247,18 @@
                 label.textContent = 'Tujuan Vendor *';
                 vendorSel.classList.remove('hidden');
                 vendorSel.disabled = false;
-                vendorSel.name = 'destination_name';
+                // sync hidden inputs when vendor changes
+                vendorSel.onchange = function() {
+                    const opt = this.options[this.selectedIndex];
+                    document.getElementById('vendor-id-input').value = opt.value || '';
+                    document.getElementById('vendor-destination-name').value = opt.dataset.name || '';
+                };
+                // sync immediately in case old value is present
+                if (vendorSel.value) {
+                    const opt = vendorSel.options[vendorSel.selectedIndex];
+                    document.getElementById('vendor-id-input').value = opt.value || '';
+                    document.getElementById('vendor-destination-name').value = opt.dataset.name || '';
+                }
             } else {
                 wrap.classList.remove('hidden');
                 label.textContent = 'Tujuan Customer *';

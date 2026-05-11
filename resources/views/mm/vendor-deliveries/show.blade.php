@@ -37,6 +37,10 @@
                     <div class="text-gray-500 text-xs">Dibuat Oleh</div>
                     <div class="font-medium">{{ $vendorDelivery->createdBy?->name }}</div>
                 </div>
+                <div>
+                    <div class="text-gray-500 text-xs">Dibuat Pada</div>
+                    <div class="font-medium">{{ $vendorDelivery->created_at->format('d/m/Y H:i') }}</div>
+                </div>
                 @if($vendorDelivery->status === 'confirmed')
                 <div>
                     <div class="text-gray-500 text-xs">Dikonfirmasi Oleh</div>

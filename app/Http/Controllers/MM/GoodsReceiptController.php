@@ -8,6 +8,8 @@ use App\Models\PurchaseOrder;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\StorageLocation;
+use App\Models\VendorStock;
+use App\Models\VendorStockMovement;
 use App\Services\ExcelService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -34,6 +36,7 @@ class GoodsReceiptController extends Controller
         $receipts  = $query->latest()->paginate(20)->withQueryString();
         $locations = StorageLocation::orderBy('name')->get();
         $vendors   = \App\Models\Vendor::orderBy('name')->get();
+
         return view('mm.goods-receipts.index', compact('receipts', 'locations', 'vendors'));
     }
 
@@ -221,6 +224,40 @@ class GoodsReceiptController extends Controller
             // Sync SKM status if this PO was generated from a SKM
             if ($po->skm_order_id) {
                 $po->skmOrder->syncReceivingStatus();
+            }
+
+            // Auto-update status Surat Jalan (DeliveryNote) terkait PO ini
+            // Jika GR dibuat tanpa dn_id: update semua SJ pending/confirmed milik PO ini → received
+            // Jika GR dibuat dengan dn_id: pastikan SJ tersebut juga ter-mark received
+            \App\Models\DeliveryNote::where('purchase_order_id', $po->id)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->update(['status' => 'received']);
+
+            // For process vendor POs: decrement vendor stock (GI_OUT) per material received
+            $po->loadMissing('vendor');
+            if ($po->vendor?->isProcessVendor()) {
+                foreach ($qtyPerPoItem as $poItemId => $totalQty) {
+                    $poItem = $po->items->find($poItemId);
+                    if (!$poItem) continue;
+
+                    $vendorStock = VendorStock::firstOrCreate(
+                        ['vendor_id' => $po->vendor_id, 'material_id' => $poItem->material_id],
+                        ['quantity' => 0]
+                    );
+                    $vendorStock->decrement('quantity', $totalQty);
+                    $vendorStock->refresh();
+
+                    VendorStockMovement::create([
+                        'vendor_id'          => $po->vendor_id,
+                        'material_id'        => $poItem->material_id,
+                        'movement_type'      => 'GI_OUT',
+                        'quantity'           => -$totalQty,
+                        'quantity_after'     => $vendorStock->quantity,
+                        'reference_document' => $gr->gr_number,
+                        'movement_date'      => $request->receipt_date,
+                        'created_by'         => Auth::id(),
+                    ]);
+                }
             }
         });
 

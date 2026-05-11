@@ -97,6 +97,8 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'pp.mrp.run',                     'display_name' => 'Jalankan MRP',                  'module' => 'PP'],
             ['name' => 'pp.mrp.demands',                 'display_name' => 'Kelola MRP Demand',             'module' => 'PP'],
             ['name' => 'pp.mrp.delete',                  'display_name' => 'Hapus MRP Run',                 'module' => 'PP'],
+            // Vendor Portal (akses monitoring untuk staff internal IPPI)
+            ['name' => 'vendor.portal.access',           'display_name' => 'Akses Portal Vendor',           'module' => 'VENDOR'],
         ];
 
         foreach ($defs as $def) {

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PurchaseOrderController extends Controller
 {
-    private function vendorId(): int
+    private function vendorScopeId(): ?int
     {
         /** @var User $user */
         $user = Auth::user();
@@ -20,7 +20,7 @@ class PurchaseOrderController extends Controller
     public function index(Request $request)
     {
         $query = PurchaseOrder::with('vendor', 'items')
-            ->where('vendor_id', $this->vendorId())
+            ->when($this->vendorScopeId(), fn($q, $v) => $q->where('vendor_id', $v))
             ->whereIn('status', ['approved', 'partially_received']);
 
         if ($request->search) {
@@ -43,8 +43,10 @@ class PurchaseOrderController extends Controller
 
     public function show(PurchaseOrder $purchaseOrder)
     {
-        // Guard: only own vendor's POs
-        abort_if($purchaseOrder->vendor_id !== $this->vendorId(), 403);
+        // Guard: only own vendor's POs (skip for internal users)
+        if ($this->vendorScopeId() !== null) {
+            abort_if($purchaseOrder->vendor_id !== $this->vendorScopeId(), 403);
+        }
 
         $purchaseOrder->load('vendor', 'items.material', 'storageLocation');
 

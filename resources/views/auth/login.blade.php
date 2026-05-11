@@ -35,7 +35,7 @@
                 <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs text-red-600" />
             </div>
 
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1">
+            {{-- <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1">
                 <label for="remember_me" class="inline-flex items-center text-sm text-slate-600">
                     <input id="remember_me" type="checkbox" name="remember" class="rounded border-slate-300 text-cyan-700 shadow-sm focus:ring-cyan-600">
                     <span class="ms-2">Remember me</span>
@@ -46,16 +46,16 @@
                         Forgot password?
                     </a>
                 @endif
-            </div>
+            </div> --}}
 
             <button type="submit"
                     class="w-full inline-flex items-center justify-center rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:ring-offset-2 transition">
                 Log in
             </button>
 
-            <p class="text-[11px] text-slate-400 text-center pt-1">
+            {{-- <p class="text-[11px] text-slate-400 text-center pt-1">
                 Pastikan perangkat scanner terhubung dengan jaringan internal sebelum login.
-            </p>
+            </p> --}}
         </form>
     </div>
 

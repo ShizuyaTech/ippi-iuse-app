@@ -15,7 +15,24 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'role_id', 'vendor_id'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'role_id', 'vendor_id', 'timezone'];
+
+    /** Indonesia timezone options */
+    public const TIMEZONES = [
+        'Asia/Jakarta'  => 'WIB — Waktu Indonesia Barat (UTC+7)',
+        'Asia/Makassar' => 'WITA — Waktu Indonesia Tengah (UTC+8)',
+        'Asia/Jayapura' => 'WIT — Waktu Indonesia Timur (UTC+9)',
+    ];
+
+    /** Short label: WIB / WITA / WIT */
+    public function tzLabel(): string
+    {
+        return match($this->timezone ?? 'Asia/Jakarta') {
+            'Asia/Makassar' => 'WITA',
+            'Asia/Jayapura' => 'WIT',
+            default         => 'WIB',
+        };
+    }
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -68,6 +85,11 @@ class User extends Authenticatable
     public function isVendor(): bool
     {
         return $this->hasRole('vendor_admin') || $this->hasRole('vendor_user');
+    }
+
+    public function canAccessVendorPortal(): bool
+    {
+        return $this->isVendor() || $this->hasPermission('vendor.portal.access');
     }
 
     // ── Permission helpers ────────────────────────────────────────

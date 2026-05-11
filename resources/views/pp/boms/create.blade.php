@@ -26,7 +26,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Berlaku Mulai *</label>
-                    <input type="date" name="valid_from" value="{{ old('valid_from', date('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="valid_from" value="{{ old('valid_from', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Berlaku Hingga</label>

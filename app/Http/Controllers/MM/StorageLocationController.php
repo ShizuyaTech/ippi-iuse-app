@@ -82,9 +82,9 @@ class StorageLocationController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Storage Locations');
 
-        $headers = ['Kode','Nama','Deskripsi'];
+        $headers = ['Kode','Nama','Deskripsi','Tipe Material'];
         foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'1', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A1:C1');
+        ExcelService::applyHeaderStyle($spreadsheet, 'A1:D1');
         $sheet->getRowDimension(1)->setRowHeight(20);
 
         foreach ($locations as $row => $loc) {
@@ -92,9 +92,10 @@ class StorageLocationController extends Controller
             $sheet->setCellValue("A{$r}", $loc->code);
             $sheet->setCellValue("B{$r}", $loc->name);
             $sheet->setCellValue("C{$r}", $loc->description);
-            ExcelService::applyDataStyle($spreadsheet, "A{$r}:C{$r}", $row % 2 === 0);
+            $sheet->setCellValue("D{$r}", $loc->material_type ?? '');
+            ExcelService::applyDataStyle($spreadsheet, "A{$r}:D{$r}", $row % 2 === 0);
         }
-        foreach (['A','B','C'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (['A','B','C','D'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
         return ExcelService::download($spreadsheet, 'storage_locations_'.date('Ymd').'.xlsx');
     }
 
@@ -106,21 +107,29 @@ class StorageLocationController extends Controller
 
         $sheet->setCellValue('A1', 'TEMPLATE IMPORT STORAGE LOCATION');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
-        $sheet->setCellValue('A2', 'Petunjuk: Isi data mulai baris 4. Jangan ubah header. Kolom bertanda * wajib diisi.');
-        ExcelService::applyNoteStyle($spreadsheet, 'A2:C2');
-        $sheet->mergeCells('A2:C2');
+        $sheet->setCellValue('A2', 'Petunjuk: Isi data mulai baris 5. Jangan ubah header. Kolom bertanda * wajib diisi.');
+        ExcelService::applyNoteStyle($spreadsheet, 'A2:D2');
+        $sheet->mergeCells('A2:D2');
+        $sheet->setCellValue('A3', 'Tipe Material: RM = Raw Material | WIP = Work In Progress | FP = Finished Product | (kosongkan jika gudang umum)');
+        ExcelService::applyNoteStyle($spreadsheet, 'A3:D3');
+        $sheet->mergeCells('A3:D3');
 
-        $headers = ['Kode *','Nama *','Deskripsi'];
-        foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'3', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A3:C3');
+        $headers = ['Kode *','Nama *','Deskripsi','Tipe Material'];
+        foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'4', $h);
+        ExcelService::applyHeaderStyle($spreadsheet, 'A4:D4');
 
-        $samples = [['WH-01','Gudang Bahan Baku','Penyimpanan raw material'],['WH-02','Gudang WIP','Work in progress'],['WH-03','Gudang FG','Finished goods']];
+        $samples = [
+            ['I101','Gudang IRM',     'Penyimpanan Raw Material',   'RM'],
+            ['I100','Gudang WIP',     'Work-in-Process',            'WIP'],
+            ['I107','Gudang Logistik','Penyimpanan Finished Product','FP'],
+            ['I999','Gudang Scrap',   'Area material reject/scrap', ''],
+        ];
         foreach ($samples as $row => $s) {
-            $r = $row + 4;
+            $r = $row + 5;
             foreach ($s as $i => $v) $sheet->setCellValue(chr(65+$i)."{$r}", $v);
-            ExcelService::applyDataStyle($spreadsheet, "A{$r}:C{$r}", $row % 2 === 0);
+            ExcelService::applyDataStyle($spreadsheet, "A{$r}:D{$r}", $row % 2 === 0);
         }
-        foreach (['A','B','C'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (['A','B','C','D'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
         return ExcelService::download($spreadsheet, 'template_import_storage_location.xlsx');
     }
 
@@ -132,14 +141,19 @@ class StorageLocationController extends Controller
         $rows = $spreadsheet->getActiveSheet()->toArray();
 
         $imported = 0; $errors = [];
-        foreach (array_slice($rows, 3) as $idx => $row) {
+        foreach (array_slice($rows, 4) as $idx => $row) {
             if (empty($row[0])) continue;
-            [$code, $name, $desc] = array_pad($row, 3, null);
+            [$code, $name, $desc, $materialType] = array_pad($row, 4, null);
+            $materialType = strtoupper(trim((string) ($materialType ?? '')));
+            $materialType = in_array($materialType, ['RM', 'WIP', 'FP']) ? $materialType : null;
             try {
-                StorageLocation::updateOrCreate(['code' => strtoupper(trim($code))], ['name' => $name, 'description' => $desc ?? null]);
+                StorageLocation::updateOrCreate(
+                    ['code' => strtoupper(trim($code))],
+                    ['name' => $name, 'description' => $desc ?? null, 'material_type' => $materialType]
+                );
                 $imported++;
             } catch (\Exception $e) {
-                $errors[] = "Baris ".($idx+4).": ".$e->getMessage();
+                $errors[] = "Baris ".($idx+5).": ".$e->getMessage();
             }
         }
         \Illuminate\Support\Facades\Storage::delete($path);

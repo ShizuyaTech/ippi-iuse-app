@@ -20,7 +20,7 @@
                 <div class="flex flex-wrap gap-3 items-end mb-6">
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal Order *</label>
-                        <input type="date" name="order_date" value="{{ date('Y-m-d') }}" required
+                        <input type="date" name="order_date" value="{{ user_now()->format('Y-m-d') }}" required
                                class="border rounded px-3 py-1.5 text-sm">
                     </div>
                     <div>

@@ -112,7 +112,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penerimaan *</label>
-                    <input type="date" name="receipt_date" value="{{ date('Y-m-d') }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="receipt_date" value="{{ user_now()->format('Y-m-d') }}" class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Storage Location</label>

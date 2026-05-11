@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Order *</label>
-                    <input type="date" name="order_date" value="{{ old('order_date', date('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
+                    <input type="date" name="order_date" value="{{ old('order_date', user_now()->format('Y-m-d')) }}" class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Est. Pengiriman</label>
@@ -125,13 +125,9 @@
     <script>
         @php
             $materialJson = $materials->map(fn($m) => ['id'=>$m->id,'code'=>$m->code,'name'=>$m->name,'price'=>$m->standard_price,'type'=>$m->type]);
-            // Map: location code → material type
-            $locationMapJson = $locations->mapWithKeys(fn($l) => [$l->code => match($l->code) {
-                'WH-01' => 'RM',
-                'WH-02' => 'WIP',
-                'WH-03' => 'FP',
-                default  => null,
-            }]);
+            // Map: location code → material_type (RM/WIP/FP/null for general)
+            $locationMapJson = $locations->mapWithKeys(fn($l) => [$l->code => $l->material_type]);
+            $vendorJson = $vendors->map(fn($v) => ['id'=>$v->id,'code'=>$v->code,'name'=>$v->name,'vendor_type'=>$v->vendor_type]);
         @endphp
         const allMaterials = @json($materialJson);
         const locationCodeTypeMap = @json($locationMapJson);
@@ -140,7 +136,7 @@
         let importedGroups = null;
 
         // ── Vendor autocomplete ───────────────────────────────────────────
-        const allVendors = @json($vendors->map(fn($v) => ['id'=>$v->id,'code'=>$v->code,'name'=>$v->name]));
+        const allVendors = @json($vendorJson);
 
         function vendorSearch(input) {
             input._activeIdx = -1;
@@ -176,7 +172,17 @@
             document.getElementById('vendor-search').value = item.dataset.label;
             document.getElementById('vendor-id-hidden').value = item.dataset.id;
             this.classList.add('hidden');
+            onVendorSelect(item.dataset.id);
         });
+
+        function onVendorSelect(vendorId) {
+            const vendor = allVendors.find(v => String(v.id) === String(vendorId));
+            const isProcess = vendor && vendor.vendor_type === 'process';
+            window._selectedVendorIsProcess = isProcess;
+            // Re-run location filter with updated vendor context
+            const locSel = document.getElementById('location-select');
+            if (locSel.value) onLocationChange(locSel);
+        }
 
         function vendorKeydown(e) {
             const box = document.getElementById('vendor-suggestions');
@@ -202,6 +208,7 @@
                     inp.value = sel.dataset.label;
                     document.getElementById('vendor-id-hidden').value = sel.dataset.id;
                     box.classList.add('hidden');
+                    onVendorSelect(sel.dataset.id);
                 }
             } else if (e.key === 'Escape') {
                 box.classList.add('hidden');
@@ -221,20 +228,35 @@
 
         function onLocationChange(sel) {
             const code = sel.options[sel.selectedIndex]?.dataset?.code;
-            const materialType = locationCodeTypeMap[code] || null;
+            const materialType = code ? (locationCodeTypeMap[code] ?? null) : null;
+            const isProcess = window._selectedVendorIsProcess === true;
 
-            filteredMaterials = materialType
-                ? allMaterials.filter(m => m.type === materialType)
-                : [];
+            if (!code) {
+                filteredMaterials = [];
+            } else if (materialType && !isProcess) {
+                // Lokasi punya tipe spesifik dan vendor bukan proses → filter ketat
+                filteredMaterials = allMaterials.filter(m => m.type === materialType);
+            } else {
+                // Gudang umum (null) ATAU vendor proses → tampilkan semua material
+                filteredMaterials = allMaterials;
+            }
 
             const hint = document.getElementById('location-hint');
             const btn  = document.getElementById('add-item-btn');
 
-            if (materialType && filteredMaterials.length) {
-                hint.textContent = `Menampilkan material tipe ${materialType} (${filteredMaterials.length} item).`;
+            if (!code) {
+                hint.textContent = 'Pilih lokasi gudang terlebih dahulu untuk menampilkan material yang sesuai.';
+                btn.disabled = true;
+            } else if (filteredMaterials.length) {
+                const label = isProcess
+                    ? `Vendor proses — menampilkan semua material (${filteredMaterials.length} item).`
+                    : (materialType
+                        ? `Menampilkan material tipe ${materialType} (${filteredMaterials.length} item).`
+                        : `Menampilkan semua material (${filteredMaterials.length} item).`);
+                hint.textContent = label;
                 btn.disabled = false;
             } else {
-                hint.textContent = 'Pilih lokasi gudang terlebih dahulu untuk menampilkan material yang sesuai.';
+                hint.textContent = 'Tidak ada material untuk lokasi ini.';
                 btn.disabled = true;
             }
 

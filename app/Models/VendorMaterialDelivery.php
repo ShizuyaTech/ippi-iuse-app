@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class VendorMaterialDelivery extends Model
 {
     protected $fillable = [
-        'vmd_number', 'vendor_id', 'purchase_order_id',
+        'vmd_number', 'goods_issue_id', 'vendor_id', 'purchase_order_id',
         'delivery_date', 'vehicle_number', 'driver_name',
         'notes', 'status', 'confirmed_at', 'confirmed_by', 'created_by',
     ];
@@ -19,6 +19,7 @@ class VendorMaterialDelivery extends Model
 
     public function vendor()        { return $this->belongsTo(Vendor::class); }
     public function purchaseOrder() { return $this->belongsTo(PurchaseOrder::class); }
+    public function goodsIssue()    { return $this->belongsTo(GoodsIssue::class, 'goods_issue_id'); }
     public function items()         { return $this->hasMany(VendorMaterialDeliveryItem::class); }
     public function createdBy()     { return $this->belongsTo(User::class, 'created_by'); }
     public function confirmedBy()   { return $this->belongsTo(User::class, 'confirmed_by'); }

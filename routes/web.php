@@ -19,7 +19,6 @@ use App\Http\Controllers\MM\VendorController;
 use App\Http\Controllers\MM\VendorMaterialDeliveryController;
 use App\Http\Controllers\MM\BusinessEventLogController;
 use App\Http\Controllers\Vendor\MaterialReceiptController;
-use App\Http\Controllers\Vendor\GoodsReceiptController as VendorGoodsReceiptController;
 use App\Http\Controllers\Vendor\StockController as VendorStockController;
 use App\Http\Controllers\PP\BomController;
 use App\Http\Controllers\PP\MrpController;
@@ -41,7 +40,7 @@ Route::get('/', function () {
 });
 
 // ===================== Vendor Portal =====================
-Route::middleware(['auth', 'verified', 'role:vendor_admin,vendor_user', 'vendor.scope'])
+Route::middleware(['auth', 'verified', 'vendor.portal', 'vendor.scope'])
     ->prefix('vendor')
     ->name('vendor.')
     ->group(function () {
@@ -52,12 +51,14 @@ Route::middleware(['auth', 'verified', 'role:vendor_admin,vendor_user', 'vendor.
         Route::get('delivery-notes/create', [VendorDnController::class, 'create'])->name('delivery-notes.create');
         Route::post('delivery-notes', [VendorDnController::class, 'store'])->name('delivery-notes.store');
         Route::get('delivery-notes/{deliveryNote}', [VendorDnController::class, 'show'])->name('delivery-notes.show');
+        Route::get('delivery-notes/{deliveryNote}/print-pdf', [VendorDnController::class, 'printPdf'])->name('delivery-notes.print-pdf');
+        Route::get('delivery-notes/{deliveryNote}/export-excel', [VendorDnController::class, 'exportExcel'])->name('delivery-notes.export-excel');
         Route::patch('delivery-notes/{deliveryNote}/cancel', [VendorDnController::class, 'cancel'])->name('delivery-notes.cancel');
 
         // Material Receipts (Kiriman Bahan dari IPPI)
         Route::get('material-receipts', [MaterialReceiptController::class, 'index'])->name('material-receipts.index');
         Route::get('material-receipts/{materialReceipt}', [MaterialReceiptController::class, 'show'])->name('material-receipts.show');
-        Route::patch('material-receipts/{materialReceipt}/confirm', [MaterialReceiptController::class, 'confirm'])->name('material-receipts.confirm');
+        Route::post('material-receipts/{materialReceipt}/confirm', [MaterialReceiptController::class, 'confirm'])->name('material-receipts.confirm');
 
         // Vendor Production Orders
         Route::get('production-orders', [VendorProductionOrderController::class, 'index'])->name('production-orders.index');
@@ -68,12 +69,6 @@ Route::middleware(['auth', 'verified', 'role:vendor_admin,vendor_user', 'vendor.
         Route::post('production-orders/{productionOrder}/report', [VendorProductionOrderController::class, 'report'])->middleware('throttle:20,1')->name('production-orders.report');
         Route::post('production-orders/{productionOrder}/complete', [VendorProductionOrderController::class, 'complete'])->middleware('throttle:10,1')->name('production-orders.complete');
         Route::post('production-orders/{productionOrder}/cancel', [VendorProductionOrderController::class, 'cancel'])->name('production-orders.cancel');
-
-        // Goods Receipts (vendor submits GR against their PO)
-        Route::get('goods-receipts', [VendorGoodsReceiptController::class, 'index'])->name('goods-receipts.index');
-        Route::get('goods-receipts/create', [VendorGoodsReceiptController::class, 'create'])->name('goods-receipts.create');
-        Route::post('goods-receipts', [VendorGoodsReceiptController::class, 'store'])->name('goods-receipts.store');
-        Route::get('goods-receipts/{goodsReceipt}', [VendorGoodsReceiptController::class, 'show'])->name('goods-receipts.show');
 
         // Stock Overview
         Route::get('stocks', [VendorStockController::class, 'index'])->name('stocks.index');
@@ -151,6 +146,9 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
         Route::get('vendor-deliveries/create', [VendorMaterialDeliveryController::class, 'create'])->name('vendor-deliveries.create');
         Route::post('vendor-deliveries', [VendorMaterialDeliveryController::class, 'store'])->name('vendor-deliveries.store');
         Route::get('vendor-deliveries/{vendorDelivery}', [VendorMaterialDeliveryController::class, 'show'])->name('vendor-deliveries.show');
+
+        // Vendor Result Deliveries (Hasil Proses dari Vendor / Subcon ke IPPI)
+
 
         // Goods Issues
         Route::get('goods-issues/export', [GoodsIssueController::class, 'exportExcel'])->name('goods-issues.export');

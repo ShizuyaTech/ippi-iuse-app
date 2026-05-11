@@ -115,7 +115,7 @@
     </table>
 
     <div class="footer">
-        <span>Dicetak: {{ now()->format('d M Y H:i') }}</span>
+        <span>Dicetak: {{ user_now()->format('d M Y H:i') }} {{ user_tz_label() }}</span>
         <span>{{ $skm->skm_number }} &mdash; CONFIDENTIAL</span>
     </div>
 </body>

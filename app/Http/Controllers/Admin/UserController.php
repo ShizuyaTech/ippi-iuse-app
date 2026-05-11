@@ -41,6 +41,7 @@ class UserController extends Controller
             'email'     => ['required', 'email', 'unique:users,email'],
             'role_id'   => ['nullable', 'exists:roles,id'],
             'vendor_id' => ['nullable', 'exists:vendors,id'],
+            'timezone'  => ['nullable', 'string', 'in:Asia/Jakarta,Asia/Makassar,Asia/Jayapura'],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -49,6 +50,7 @@ class UserController extends Controller
             'email'     => $data['email'],
             'role_id'   => $data['role_id'] ?? null,
             'vendor_id' => $data['vendor_id'] ?? null,
+            'timezone'  => $data['timezone'] ?? 'Asia/Jakarta',
             'password'  => Hash::make($data['password']),
         ]);
 
@@ -71,6 +73,7 @@ class UserController extends Controller
             'email'     => ['required', 'email', 'unique:users,email,' . $user->id],
             'role_id'   => ['nullable', 'exists:roles,id'],
             'vendor_id' => ['nullable', 'exists:vendors,id'],
+            'timezone'  => ['nullable', 'string', 'in:Asia/Jakarta,Asia/Makassar,Asia/Jayapura'],
             'password'  => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -79,6 +82,7 @@ class UserController extends Controller
             'email'     => $data['email'],
             'role_id'   => $data['role_id'] ?? null,
             'vendor_id' => $data['vendor_id'] ?? null,
+            'timezone'  => $data['timezone'] ?? 'Asia/Jakarta',
         ]);
 
         if (! empty($data['password'])) {

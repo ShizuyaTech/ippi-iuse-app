@@ -97,6 +97,10 @@
                     <div class="text-gray-500 text-xs">Dibuat Oleh</div>
                     <div class="font-medium">{{ $deliveryNote->createdBy?->name ?? '-' }}</div>
                 </div>
+                <div>
+                    <div class="text-gray-500 text-xs">Dibuat Pada</div>
+                    <div class="font-medium">{{ $deliveryNote->created_at->format('d/m/Y H:i') }}</div>
+                </div>
                 @if($deliveryNote->notes)
                 <div class="col-span-3">
                     <div class="text-gray-500 text-xs">Catatan Vendor</div>

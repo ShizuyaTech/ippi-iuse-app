@@ -14,6 +14,7 @@
                 <div><span class="text-gray-500">Vendor:</span><br><span class="font-medium">{{ $goodsReceipt->purchaseOrder->vendor->name ?? '-' }}</span></div>
                 <div><span class="text-gray-500">Tgl Terima:</span><br><span class="font-medium">{{ $goodsReceipt->receipt_date->format('d M Y') }}</span></div>
                 <div><span class="text-gray-500">Lokasi:</span><br><span class="font-medium">{{ $goodsReceipt->storageLocation->name ?? '-' }}</span></div>
+                <div><span class="text-gray-500">Dibuat Pada:</span><br><span class="font-medium">{{ $goodsReceipt->created_at->format('d/m/Y H:i') }}</span></div>
             </div>
         </div>
         <div class="bg-white rounded-lg shadow p-6">

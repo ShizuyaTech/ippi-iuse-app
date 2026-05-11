@@ -156,6 +156,12 @@ class SkmController extends Controller
             return back()->with('error', 'PO hanya bisa dibuat dari SKM berstatus Draft, Dikirim, atau Diterima Sebagian.');
         }
 
+        // Guard: cegah duplikasi PO jika sudah pernah di-generate
+        $skm->loadMissing('purchaseOrders');
+        if ($skm->purchaseOrders->isNotEmpty()) {
+            return back()->with('error', 'Purchase Order sudah dibuat dari SKM ini. Tidak bisa generate PO duplikat.');
+        }
+
         $skm->load('items.material', 'items.storageLocation');
 
         DB::transaction(function () use ($skm) {

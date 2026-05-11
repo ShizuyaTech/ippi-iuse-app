@@ -88,23 +88,24 @@ class VendorController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Vendors');
 
-        $headers = ['Kode','Nama','Contact Person','Email','Telepon','Alamat','Aktif'];
+        $headers = ['Kode','Nama','Tipe Vendor','Contact Person','Email','Telepon','Alamat','Aktif'];
         foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'1', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A1:G1');
+        ExcelService::applyHeaderStyle($spreadsheet, 'A1:H1');
         $sheet->getRowDimension(1)->setRowHeight(20);
 
         foreach ($vendors as $row => $v) {
             $r = $row + 2;
             $sheet->setCellValue("A{$r}", $v->code);
             $sheet->setCellValue("B{$r}", $v->name);
-            $sheet->setCellValue("C{$r}", $v->contact_person);
-            $sheet->setCellValue("D{$r}", $v->email);
-            $sheet->setCellValue("E{$r}", $v->phone);
-            $sheet->setCellValue("F{$r}", $v->address);
-            $sheet->setCellValue("G{$r}", $v->is_active ? 'Ya' : 'Tidak');
-            ExcelService::applyDataStyle($spreadsheet, "A{$r}:G{$r}", $row % 2 === 0);
+            $sheet->setCellValue("C{$r}", $v->vendor_type ?? 'general');
+            $sheet->setCellValue("D{$r}", $v->contact_person);
+            $sheet->setCellValue("E{$r}", $v->email);
+            $sheet->setCellValue("F{$r}", $v->phone);
+            $sheet->setCellValue("G{$r}", $v->address);
+            $sheet->setCellValue("H{$r}", $v->is_active ? 'Ya' : 'Tidak');
+            ExcelService::applyDataStyle($spreadsheet, "A{$r}:H{$r}", $row % 2 === 0);
         }
-        foreach (range('A','G') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (range('A','H') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
         return ExcelService::download($spreadsheet, 'vendors_'.date('Ymd').'.xlsx');
     }
 
@@ -117,26 +118,27 @@ class VendorController extends Controller
         $sheet->setCellValue('A1', 'TEMPLATE IMPORT VENDOR');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
         $sheet->setCellValue('A2', 'Petunjuk: Isi data mulai baris 5. Jangan ubah header. Kolom bertanda * wajib diisi.');
-        ExcelService::applyNoteStyle($spreadsheet, 'A2:G2');
-        $sheet->mergeCells('A2:G2');
-        $sheet->setCellValue('A3', 'Aktif: Ya atau Tidak');
-        ExcelService::applyNoteStyle($spreadsheet, 'A3:G3');
-        $sheet->mergeCells('A3:G3');
+        ExcelService::applyNoteStyle($spreadsheet, 'A2:H2');
+        $sheet->mergeCells('A2:H2');
+        $sheet->setCellValue('A3', 'Tipe Vendor: coil_center | process | general  |  Aktif: Ya atau Tidak');
+        ExcelService::applyNoteStyle($spreadsheet, 'A3:H3');
+        $sheet->mergeCells('A3:H3');
 
-        $headers = ['Kode *','Nama *','Contact Person','Email','Telepon','Alamat','Aktif *'];
+        $headers = ['Kode *','Nama *','Tipe Vendor *','Contact Person','Email','Telepon','Alamat','Aktif *'];
         foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'4', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A4:G4');
+        ExcelService::applyHeaderStyle($spreadsheet, 'A4:H4');
 
         $samples = [
-            ['VND-001','PT Sumber Makmur','Budi Santoso','budi@sumber.com','021-5551234','Jl. Industri No.1, Jakarta','Ya'],
-            ['VND-002','CV Bahan Jaya','','','','','Ya'],
+            ['VND-001','PT Sumber Makmur','coil_center','Budi Santoso','budi@sumber.com','021-5551234','Jl. Industri No.1, Jakarta','Ya'],
+            ['VND-002','CV Proses Jaya','process','','','','','Ya'],
+            ['VND-003','UD Umum Sejahtera','general','','','','','Ya'],
         ];
         foreach ($samples as $row => $s) {
             $r = $row + 5;
             foreach ($s as $i => $v) $sheet->setCellValue(chr(65+$i)."{$r}", $v);
-            ExcelService::applyDataStyle($spreadsheet, "A{$r}:G{$r}", $row % 2 === 0);
+            ExcelService::applyDataStyle($spreadsheet, "A{$r}:H{$r}", $row % 2 === 0);
         }
-        foreach (range('A','G') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (range('A','H') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
         return ExcelService::download($spreadsheet, 'template_import_vendor.xlsx');
     }
 
@@ -152,12 +154,16 @@ class VendorController extends Controller
         $imported = 0; $errors = [];
         foreach (array_slice($rows, 4) as $idx => $row) {
             if (empty($row[0])) continue;
-            [$code, $name, $contact, $email, $phone, $address, $active] = array_pad($row, 7, null);
+            [$code, $name, $vendorType, $contact, $email, $phone, $address, $active] = array_pad($row, 8, null);
+            $vendorType = in_array(trim((string) ($vendorType ?? '')), ['coil_center', 'process', 'general'])
+                ? trim($vendorType)
+                : 'general';
             try {
                 Vendor::updateOrCreate(
                     ['code' => strtoupper(trim($code))],
                     [
                         'name'           => $name,
+                        'vendor_type'    => $vendorType,
                         'contact_person' => $contact ?? null,
                         'email'          => $email ?? null,
                         'phone'          => $phone ?? null,

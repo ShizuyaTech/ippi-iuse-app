@@ -2,7 +2,7 @@
     <x-slot name="title">Goods Receipt</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-            <h2 class="text-lg font-semibold text-gray-700">Daftar Goods Receipt</h2>
+            <h2 class="text-lg font-semibold text-gray-700">Goods Receipt</h2>
             <div class="flex flex-wrap gap-2 items-center print:hidden">
                 <a href="{{ route('mm.goods-receipts.export', request()->query()) }}" class="inline-flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -15,6 +15,7 @@
                 <a href="{{ route('mm.goods-receipts.create') }}" class="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800">+ Buat GR</a>
             </div>
         </div>
+
         <form method="GET" class="flex flex-wrap gap-2 mb-4 print:hidden">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="No. GR / No. PO..." class="border rounded px-3 py-2 text-sm flex-1 min-w-48">
             <input type="date" name="date_from" value="{{ request('date_from') }}" title="Dari tanggal terima" class="border rounded px-3 py-2 text-sm">
@@ -34,7 +35,7 @@
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('mm.goods-receipts.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
-        {{-- Action Toolbar removed - merged into header above --}}
+
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>

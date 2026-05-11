@@ -65,7 +65,7 @@
         </div>
         <div class="header-right">
             <div class="doc-title">DAFTAR PURCHASE ORDER</div>
-            <div class="doc-sub">Dicetak: {{ now()->format('d M Y, H:i') }} WIB &nbsp;|&nbsp; Oleh: {{ auth()->user()->name ?? '-' }}</div>
+            <div class="doc-sub">Dicetak: {{ user_now()->format('d M Y, H:i') }} {{ user_tz_label() }} &nbsp;|&nbsp; Oleh: {{ auth()->user()->name ?? '-' }}</div>
         </div>
     </div>
 
@@ -127,7 +127,7 @@
 
     {{-- Footer --}}
     <div class="footer">
-        Dokumen ini dihasilkan secara otomatis oleh sistem IPPI &mdash; {{ now()->format('d M Y H:i') }}
+        Dokumen ini dihasilkan secara otomatis oleh sistem IPPI &mdash; {{ user_now()->format('d M Y H:i') }} {{ user_tz_label() }}
     </div>
 
 </div>

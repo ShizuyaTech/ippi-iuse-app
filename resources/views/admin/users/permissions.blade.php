@@ -43,6 +43,7 @@
                 'routings'            => 'Routing',
                 'production_orders'   => 'Production Order',
                 'mrp'                 => 'MRP',
+                'portal'              => 'Portal Vendor (Monitor)',
             ];
             @endphp
 

@@ -9,6 +9,7 @@ use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\StorageLocation;
 use App\Models\Vendor;
+use App\Models\VendorMaterialDelivery;
 use App\Services\ExcelService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -44,6 +45,7 @@ class GoodsIssueController extends Controller
         $request->validate([
             'issue_date'                       => 'required|date',
             'issue_type'                       => 'required|in:internal,to_vendor,to_customer',
+            'vendor_id'                        => 'nullable|exists:vendors,id',
             'destination_name'                 => 'nullable|string|max:255',
             'destination_storage_location_id'  => 'nullable|exists:storage_locations,id',
             'storage_location_id'              => 'required|exists:storage_locations,id',
@@ -72,6 +74,7 @@ class GoodsIssueController extends Controller
                 'reference_type'      => 'manual',
                 'issue_date'          => $request->issue_date,
                 'issue_type'          => $request->issue_type,
+                'vendor_id'           => $request->issue_type === 'to_vendor' ? $request->vendor_id : null,
                 'destination_name'                => in_array($request->issue_type, ['to_vendor', 'to_customer']) ? $request->destination_name : null,
                 'destination_storage_location_id' => $request->issue_type === 'internal' ? $request->destination_storage_location_id : null,
                 'storage_location_id' => $request->storage_location_id,
@@ -126,6 +129,28 @@ class GoodsIssueController extends Controller
                         'reference_document'  => $gi->gi_number,
                         'movement_date'       => $request->issue_date,
                         'created_by'          => auth()->id(),
+                    ]);
+                }
+            }
+
+            // Auto-create VMD so vendor can confirm receipt in the vendor portal
+            if ($request->issue_type === 'to_vendor' && $request->vendor_id) {
+                $vmd = VendorMaterialDelivery::create([
+                    'vmd_number'       => VendorMaterialDelivery::generateNumber(),
+                    'goods_issue_id'   => $gi->id,
+                    'vendor_id'        => $request->vendor_id,
+                    'delivery_date'    => $request->issue_date,
+                    'notes'            => $gi->notes,
+                    'status'           => 'sent',
+                    'created_by'       => auth()->id(),
+                ]);
+
+                foreach ($gi->items as $giItem) {
+                    $vmd->items()->create([
+                        'material_id'         => $giItem->material_id,
+                        'storage_location_id' => $gi->storage_location_id,
+                        'quantity'            => $giItem->quantity_issued,
+                        'notes'               => $giItem->note,
                     ]);
                 }
             }

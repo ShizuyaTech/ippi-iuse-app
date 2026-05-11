@@ -27,6 +27,10 @@ class EnsureVendorScope
             // Share vendor_id to all views so Blade can use $currentVendorId
             view()->share('currentVendorId', $user->vendor_id);
             view()->share('currentVendor',   $user->vendor);
+        } elseif ($user) {
+            // Internal IPPI staff accessing vendor portal as monitor — no vendor scoping
+            view()->share('currentVendorId', null);
+            view()->share('currentVendor',   null);
         }
 
         return $next($request);

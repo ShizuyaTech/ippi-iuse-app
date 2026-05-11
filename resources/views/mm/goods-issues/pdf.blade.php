@@ -223,7 +223,7 @@
 
     {{-- ===== FOOTER ===== --}}
     <div class="footer">
-        Dicetak pada: {{ now()->format('d M Y H:i') }} &nbsp;|&nbsp; {{ $goodsIssue->gi_number }} &nbsp;|&nbsp; IPPI - Integrated Production &amp; Inventory System
+        Dicetak pada: {{ user_now()->format('d M Y H:i') }} {{ user_tz_label() }} &nbsp;|&nbsp; {{ $goodsIssue->gi_number }} &nbsp;|&nbsp; IPPI - Integrated Production &amp; Inventory System
     </div>
 
 </div>

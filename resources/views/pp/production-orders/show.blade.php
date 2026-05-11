@@ -83,6 +83,7 @@
                 </div>
                 <div><span class="text-gray-500">Tgl Mulai:</span><br><span class="font-medium">{{ $productionOrder->planned_start_date?->format('d/m/Y') ?? '-' }}</span></div>
                 <div><span class="text-gray-500">Tgl Selesai:</span><br><span class="font-medium">{{ $productionOrder->planned_end_date?->format('d/m/Y') ?? '-' }}</span></div>
+                <div><span class="text-gray-500">Dibuat Pada:</span><br><span class="font-medium">{{ $productionOrder->created_at->format('d/m/Y H:i') }}</span></div>
             </div>
         </div>
 

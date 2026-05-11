@@ -32,6 +32,10 @@
                 <div class="text-gray-500">Catatan</div>
                 <div>{{ $purchaseOrder->notes ?? '-' }}</div>
             </div>
+            <div>
+                <div class="text-gray-500">Dibuat Pada</div>
+                <div class="font-medium">{{ $purchaseOrder->created_at->format('d/m/Y H:i') }}</div>
+            </div>
         </div>
 
         <h3 class="font-semibold text-gray-600 mb-2 text-sm">Item Purchase Order</h3>
@@ -47,13 +51,13 @@
             </thead>
             <tbody>
                 @foreach($purchaseOrder->items as $item)
-                @php $sisa = $item->quantity_ordered - ($item->quantity_received ?? 0); @endphp
+                @php $sisa = $item->quantity - ($item->quantity_received ?? 0); @endphp
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-4 py-2">
                         <div class="font-mono text-xs text-gray-500">{{ $item->material?->code }}</div>
                         <div>{{ $item->material?->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right">{{ number_format($item->quantity_ordered, 3) }}</td>
+                    <td class="px-4 py-2 text-right">{{ number_format($item->quantity, 3) }}</td>
                     <td class="px-4 py-2 text-right">{{ number_format($item->quantity_received ?? 0, 3) }}</td>
                     <td class="px-4 py-2 text-right {{ $sisa > 0 ? 'text-orange-600 font-medium' : 'text-green-600' }}">
                         {{ number_format($sisa, 3) }}

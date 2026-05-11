@@ -45,6 +45,7 @@
                     <th class="px-4 py-2 text-left">Tipe</th>
                     <th class="px-4 py-2 text-left">Lokasi</th>
                     <th class="px-4 py-2 text-right">Qty Stok</th>
+                    <th class="px-4 py-2 text-right">Stok di Vendor</th>
                     <th class="px-4 py-2 text-left">UoM</th>
                     <th class="px-4 py-2 text-right">Min. Stok</th>
                     <th class="px-4 py-2 text-center">Status</th>
@@ -65,6 +66,10 @@
                     <td class="px-4 py-2 text-right font-medium {{ $stockStatus === 'habis' ? 'text-red-500' : ($stockStatus === 'rendah' ? 'text-yellow-600' : 'text-green-700') }}">
                         {{ number_format($qty, 3) }}
                     </td>
+                    @php $vendorQty = (float)($vendorStockMap[$s->material_id] ?? 0); @endphp
+                    <td class="px-4 py-2 text-right {{ $vendorQty > 0 ? 'text-indigo-700 font-medium' : 'text-gray-300' }}">
+                        {{ $vendorQty > 0 ? number_format($vendorQty, 3) : '—' }}
+                    </td>
                     <td class="px-4 py-2 text-gray-500">{{ $s->material->unit_of_measure ?? '-' }}</td>
                     <td class="px-4 py-2 text-right text-gray-500">{{ $minStock > 0 ? number_format($minStock, 3) : '-' }}</td>
                     <td class="px-4 py-2 text-center">
@@ -78,10 +83,50 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" class="px-4 py-4 text-center text-gray-400">Tidak ada data stok.</td></tr>
+                <tr><td colspan="9" class="px-4 py-4 text-center text-gray-400">Tidak ada data stok.</td></tr>
                 @endforelse
             </tbody>
         </table>
         <div class="mt-4 print:hidden">{{ $stocks->links() }}</div>
+
+        {{-- Stok WIP/FP yang ada di vendor (belum diterima IPPI) --}}
+        @if($vendorOnlyStocks->isNotEmpty())
+        <div class="mt-8">
+            <h3 class="text-base font-semibold text-indigo-700 mb-2">Stok di Vendor (Belum Diterima IPPI)</h3>
+            <p class="text-xs text-gray-500 mb-3">Material WIP/FP yang sudah diproduksi vendor namun belum ada di gudang IPPI.</p>
+            <table class="w-full text-sm border-collapse">
+                <thead class="bg-indigo-700 text-white">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Tipe</th>
+                        <th class="px-4 py-2 text-left">Kode Material</th>
+                        <th class="px-4 py-2 text-left">Nama Material</th>
+                        <th class="px-4 py-2 text-left">Vendor</th>
+                        <th class="px-4 py-2 text-right">Qty di Vendor</th>
+                        <th class="px-4 py-2 text-left">UoM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($vendorOnlyStocks as $materialId => $entries)
+                    @php $material = $entries->first()->material; @endphp
+                    @foreach($entries as $vs)
+                    <tr class="border-b hover:bg-indigo-50">
+                        <td class="px-4 py-2">
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold
+                                {{ $material?->type==='WIP' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
+                                {{ $material?->type ?? '—' }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-2 font-mono text-indigo-700">{{ $material?->code }}</td>
+                        <td class="px-4 py-2">{{ $material?->name }}</td>
+                        <td class="px-4 py-2 text-gray-600">{{ $vs->vendor?->name ?? '—' }}</td>
+                        <td class="px-4 py-2 text-right font-bold text-indigo-700">{{ number_format($vs->quantity, 3) }}</td>
+                        <td class="px-4 py-2 text-gray-500">{{ $material?->unit_of_measure }}</td>
+                    </tr>
+                    @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
     </div>
 </x-app-layout>

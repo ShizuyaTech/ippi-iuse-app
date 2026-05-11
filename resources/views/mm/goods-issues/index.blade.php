@@ -2,7 +2,7 @@
     <x-slot name="title">Goods Issue</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-            <h2 class="text-lg font-semibold text-gray-700">Daftar Goods Issue</h2>
+            <h2 class="text-lg font-semibold text-gray-700">Goods Issue</h2>
             <div class="flex flex-wrap gap-2 items-center print:hidden">
                 <a href="{{ route('mm.goods-issues.export', request()->query()) }}" class="inline-flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -28,7 +28,6 @@
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('mm.goods-issues.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
-        {{-- Action Toolbar removed - merged into header above --}}
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
@@ -65,3 +64,5 @@
         <div class="mt-4 print:hidden">{{ $issues->links() }}</div>
     </div>
 </x-app-layout>
+
+

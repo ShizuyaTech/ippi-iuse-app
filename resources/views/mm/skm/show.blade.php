@@ -18,6 +18,7 @@
                         <span>Lokasi Gudang: <b class="text-blue-700">{{ $firstItem->storageLocation->code }} — {{ $firstItem->storageLocation->name }}</b></span>
                         @endif
                         <span>Dibuat oleh: <b>{{ $skm->createdBy->name ?? '-' }}</b></span>
+                        <span>Dibuat pada: <b>{{ $skm->created_at->format('d/m/Y H:i') }}</b></span>
                         <span>
                             Status:
                             <span class="px-2 py-0.5 rounded text-xs font-semibold {{ $skm->status_color }}">
@@ -42,8 +43,8 @@
                         PDF
                     </a>
 
-                    {{-- Generate PO --}}
-                    @if(in_array($skm->status, ['draft','sent','partial_received']))
+                    {{-- Generate PO: hanya tampil jika belum ada PO yang dibuat dari SKM ini --}}
+                    @if(in_array($skm->status, ['draft','sent']) && $skm->purchaseOrders->isEmpty())
                     <form method="POST" action="{{ route('mm.skm.generate-po', $skm) }}"
                           onsubmit="return confirm('Buat Purchase Order dari SKM ini? PO akan dibuat per vendor.')">
                         @csrf
@@ -55,8 +56,8 @@
                     </form>
                     @endif
 
-                    {{-- Status Update --}}
-                    @if($skm->status === 'draft')
+                    {{-- Status Update: Tandai Dikirim hanya jika draft DAN belum ada PO --}}
+                    @if($skm->status === 'draft' && $skm->purchaseOrders->isEmpty())
                     <form method="POST" action="{{ route('mm.skm.status', $skm) }}">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="sent">

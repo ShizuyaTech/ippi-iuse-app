@@ -90,6 +90,7 @@
                 <div><span class="text-gray-500">Est. Terima:</span><br><span class="font-medium">{{ $purchaseOrder->expected_delivery_date?->format('d M Y') ?? '-' }}</span></div>
                 <div><span class="text-gray-500">Lokasi Gudang:</span><br><span class="font-medium">{{ $purchaseOrder->storageLocation?->code }} - {{ $purchaseOrder->storageLocation?->name ?? '-' }}</span></div>
                 <div><span class="text-gray-500">Dibuat oleh:</span><br><span class="font-medium">{{ $purchaseOrder->createdBy->name ?? '-' }}</span></div>
+                <div><span class="text-gray-500">Dibuat Pada:</span><br><span class="font-medium">{{ $purchaseOrder->created_at->format('d/m/Y H:i') }}</span></div>
             </div>
             <div class="mt-2 text-sm"><span class="text-gray-500">Total Amount:</span> <span class="font-bold text-blue-700 text-lg">{{ number_format($purchaseOrder->total_amount,0) }}</span></div>
             @if($purchaseOrder->notes)

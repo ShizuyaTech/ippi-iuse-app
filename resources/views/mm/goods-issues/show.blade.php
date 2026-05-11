@@ -27,6 +27,10 @@
                     <span class="font-medium">{{ $goodsIssue->issue_date->format('d M Y') }}</span>
                 </div>
                 <div>
+                    <span class="text-gray-500">Dibuat Pada:</span><br>
+                    <span class="font-medium">{{ $goodsIssue->created_at->format('d/m/Y H:i') }}</span>
+                </div>
+                <div>
                     <span class="text-gray-500">Dari Lokasi:</span><br>
                     <span class="font-medium">{{ $goodsIssue->storageLocation->name ?? '-' }}</span>
                 </div>

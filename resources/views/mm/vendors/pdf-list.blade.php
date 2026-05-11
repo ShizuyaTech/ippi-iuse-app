@@ -40,7 +40,7 @@
         </div>
         <div class="header-right">
             <div class="doc-title">DAFTAR VENDOR</div>
-            <div class="doc-sub">Dicetak: {{ now()->format('d M Y, H:i') }} WIB &nbsp;|&nbsp; Oleh: {{ auth()->user()->name ?? '-' }}</div>
+            <div class="doc-sub">Dicetak: {{ user_now()->format('d M Y, H:i') }} {{ user_tz_label() }} &nbsp;|&nbsp; Oleh: {{ auth()->user()->name ?? '-' }}</div>
         </div>
     </div>
 
@@ -57,6 +57,7 @@
                 <th style="width:4%">No</th>
                 <th style="width:12%">Kode</th>
                 <th>Nama Vendor</th>
+                <th style="width:14%">Tipe</th>
                 <th>Contact Person</th>
                 <th>Email</th>
                 <th>Telepon</th>
@@ -65,10 +66,15 @@
         </thead>
         <tbody>
             @forelse($vendors as $i => $v)
+            @php
+                $typeLabels = ['coil_center'=>'Coil Center','process'=>'Process','general'=>'Umum'];
+                $typeLabel  = $typeLabels[$v->vendor_type ?? 'general'] ?? 'Umum';
+            @endphp
             <tr>
                 <td class="center">{{ $i + 1 }}</td>
                 <td style="font-family: monospace; color: #1d4ed8;">{{ $v->code }}</td>
                 <td style="font-weight: bold;">{{ $v->name }}</td>
+                <td>{{ $typeLabel }}</td>
                 <td>{{ $v->contact_person ?? '-' }}</td>
                 <td>{{ $v->email ?? '-' }}</td>
                 <td>{{ $v->phone ?? '-' }}</td>
@@ -77,13 +83,13 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="7" style="text-align:center; color:#9ca3af; padding:16px;">Tidak ada data.</td></tr>
+            <tr><td colspan="8" style="text-align:center; color:#9ca3af; padding:16px;">Tidak ada data.</td></tr>
             @endforelse
         </tbody>
     </table>
 
     <div style="font-size:8px; color:#6b7280;">Total {{ count($vendors) }} vendor ditampilkan.</div>
-    <div class="footer">Dokumen ini dihasilkan secara otomatis oleh sistem IPPI &mdash; {{ now()->format('d M Y H:i') }}</div>
+    <div class="footer">Dokumen ini dihasilkan secara otomatis oleh sistem IPPI &mdash; {{ user_now()->format('d M Y H:i') }} {{ user_tz_label() }}</div>
 </div>
 </body>
 </html>

@@ -8,10 +8,13 @@ class VendorMaterialDeliveryItem extends Model
 {
     protected $fillable = [
         'vendor_material_delivery_id', 'material_id',
-        'storage_location_id', 'quantity', 'notes',
+        'storage_location_id', 'quantity', 'quantity_confirmed', 'notes',
     ];
 
-    protected $casts = ['quantity' => 'decimal:3'];
+    protected $casts = [
+        'quantity'           => 'decimal:3',
+        'quantity_confirmed' => 'decimal:3',
+    ];
 
     public function delivery()         { return $this->belongsTo(VendorMaterialDelivery::class, 'vendor_material_delivery_id'); }
     public function material()         { return $this->belongsTo(Material::class); }

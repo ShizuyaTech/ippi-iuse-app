@@ -10,6 +10,7 @@ class VendorProductionOrder extends Model
         'order_number',
         'vendor_id',
         'material_id',
+        'bom_id',
         'purchase_order_item_id',
         'delivery_note_id',
         'quantity_planned',
@@ -36,6 +37,7 @@ class VendorProductionOrder extends Model
 
     public function vendor() { return $this->belongsTo(Vendor::class); }
     public function material() { return $this->belongsTo(Material::class); }
+    public function bom() { return $this->belongsTo(Bom::class); }
     public function purchaseOrderItem() { return $this->belongsTo(PurchaseOrderItem::class); }
     public function deliveryNote() { return $this->belongsTo(DeliveryNote::class); }
     public function reports() { return $this->hasMany(VendorProductionOrderReport::class); }
@@ -52,7 +54,8 @@ class VendorProductionOrder extends Model
 
     public function remainingQty(): float
     {
-        return max(0, (float) $this->quantity_planned - (float) $this->quantity_ok - (float) $this->quantity_ng);
+        // Hanya qty OK yang dihitung sebagai pemenuhan plan (NG tidak dikirim ke IPPI)
+        return max(0, (float) $this->quantity_planned - (float) $this->quantity_ok);
     }
 
     public function statusLabel(): string

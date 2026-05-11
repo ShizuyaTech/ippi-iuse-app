@@ -54,9 +54,9 @@ class DatabaseSeeder extends Seeder
         // Vendor::firstOrCreate(['code' => 'VND-003'], ['name' => 'UD Cat Warna Indah', 'contact_person' => 'Ahmad Fauzi', 'email' => 'order@catwarnaindah.com', 'phone' => '022-3456789', 'address' => 'Jl. Merdeka No.10, Bandung', 'is_active' => true]);
 
         // Work Centers
-        WorkCenter::firstOrCreate(['code' => 'WC-CUT'], ['name' => 'Mesin Cutting', 'description' => 'Pemotongan material', 'capacity_per_hour' => 50, 'cost_per_hour' => 75000, 'is_active' => true]);
-        WorkCenter::firstOrCreate(['code' => 'WC-WLD'], ['name' => 'Stasiun Pengelasan', 'description' => 'Welding & assembly', 'capacity_per_hour' => 20, 'cost_per_hour' => 100000, 'is_active' => true]);
-        WorkCenter::firstOrCreate(['code' => 'WC-GRND'], ['name' => 'Mesin Gerinda', 'description' => 'Finishing permukaan', 'capacity_per_hour' => 30, 'cost_per_hour' => 60000, 'is_active' => true]);
-        WorkCenter::firstOrCreate(['code' => 'WC-COAT'], ['name' => 'Powder Coating Line', 'description' => 'Pengecatan powder coating', 'capacity_per_hour' => 40, 'cost_per_hour' => 80000, 'is_active' => true]);
+        // WorkCenter::firstOrCreate(['code' => 'WC-CUT'], ['name' => 'Mesin Cutting', 'description' => 'Pemotongan material', 'capacity_per_hour' => 50, 'cost_per_hour' => 75000, 'is_active' => true]);
+        // WorkCenter::firstOrCreate(['code' => 'WC-WLD'], ['name' => 'Stasiun Pengelasan', 'description' => 'Welding & assembly', 'capacity_per_hour' => 20, 'cost_per_hour' => 100000, 'is_active' => true]);
+        // WorkCenter::firstOrCreate(['code' => 'WC-GRND'], ['name' => 'Mesin Gerinda', 'description' => 'Finishing permukaan', 'capacity_per_hour' => 30, 'cost_per_hour' => 60000, 'is_active' => true]);
+        // WorkCenter::firstOrCreate(['code' => 'WC-COAT'], ['name' => 'Powder Coating Line', 'description' => 'Pengecatan powder coating', 'capacity_per_hour' => 40, 'cost_per_hour' => 80000, 'is_active' => true]);
     }
 }

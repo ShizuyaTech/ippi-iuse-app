@@ -64,6 +64,15 @@
                     <input type="password" name="password_confirmation"
                         class="w-full border rounded px-3 py-2 text-sm">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Zona Waktu</label>
+                    <select name="timezone" class="w-full border rounded px-3 py-2 text-sm">
+                        @foreach(App\Models\User::TIMEZONES as $tz => $label)
+                            <option value="{{ $tz }}" {{ old('timezone', $user->timezone ?? 'Asia/Jakarta') === $tz ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Digunakan untuk menampilkan tanggal &amp; jam yang sesuai lokasi user.</p>
+                </div>
             </div>
 
             <div class="mt-6 flex gap-3">

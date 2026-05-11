@@ -7,6 +7,18 @@
                 Surat Jalan: <span class="font-mono text-teal-700">{{ $deliveryNote->dn_number }}</span>
             </h2>
             <span class="px-2 py-0.5 rounded text-xs {{ $deliveryNote->statusColor() }}">{{ $deliveryNote->statusLabel() }}</span>
+            <div class="ml-auto flex gap-2">
+                <a href="{{ route('vendor.delivery-notes.print-pdf', $deliveryNote) }}" target="_blank"
+                   class="inline-flex items-center gap-1.5 bg-red-700 text-white px-3 py-1.5 rounded text-xs hover:bg-red-800">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    Print PDF
+                </a>
+                <a href="{{ route('vendor.delivery-notes.export-excel', $deliveryNote) }}"
+                   class="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Export Excel
+                </a>
+            </div>
         </div>
 
         @if(session('success'))
@@ -51,6 +63,10 @@
             <div>
                 <div class="text-gray-500">Nama Driver</div>
                 <div class="font-medium">{{ $deliveryNote->driver_name ?? '-' }}</div>
+            </div>
+            <div>
+                <div class="text-gray-500">Dibuat Pada</div>
+                <div class="font-medium">{{ $deliveryNote->created_at->format('d/m/Y H:i') }}</div>
             </div>
             @if($deliveryNote->notes)
             <div class="col-span-2">

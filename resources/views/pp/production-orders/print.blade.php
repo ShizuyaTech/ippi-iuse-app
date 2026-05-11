@@ -155,7 +155,7 @@
     @endif
 
     <hr class="divider">
-    <div class="center footer">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
+    <div class="center footer">Dicetak: {{ user_now()->format('d/m/Y H:i') }} {{ user_tz_label() }}</div>
 
     <script>
         window.onload = function () { window.print(); };

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bom;
 use App\Models\BusinessEventLog;
 use App\Models\DeliveryNote;
 use App\Models\Material;
 use App\Models\PurchaseOrderItem;
 use App\Models\VendorProductionOrder;
+use App\Models\VendorStock;
+use App\Models\VendorStockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +24,7 @@ class ProductionOrderController extends Controller
         $user = Auth::user();
 
         $query = VendorProductionOrder::with('material', 'purchaseOrderItem.purchaseOrder', 'deliveryNote')
-            ->where('vendor_id', $user->vendor_id);
+            ->when($user->vendor_id, fn($q, $v) => $q->where('vendor_id', $v));
 
         if ($request->status) {
             $query->where('status', $request->status);
@@ -43,6 +46,8 @@ class ProductionOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        // Only actual vendors can create production orders
+        abort_unless($user->isVendor(), 403, 'Hanya vendor yang dapat membuat Order Produksi.');
 
         $poItems = PurchaseOrderItem::with('purchaseOrder', 'material')
             ->whereHas('purchaseOrder', function ($q) use ($user) {
@@ -54,8 +59,26 @@ class ProductionOrderController extends Controller
                 ->where('process_vendor_id', $user->vendor_id))
             ->orderBy('id', 'desc')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($user) {
                 $item->available_qty = $this->remainingPlannableForPoItem($item);
+
+                // Cari active BOM untuk material ini
+                $bom = Bom::with('items.material')
+                    ->where('material_id', $item->material_id)
+                    ->where('status', 'active')
+                    ->orderByDesc('valid_from')
+                    ->first();
+                $item->bom = $bom;
+
+                // Stok vendor saat ini untuk setiap komponen BOM
+                if ($bom) {
+                    foreach ($bom->items as $bomItem) {
+                        $bomItem->vendor_stock_qty = (float) VendorStock::where('vendor_id', $user->vendor_id)
+                            ->where('material_id', $bomItem->material_id)
+                            ->value('quantity') ?? 0;
+                    }
+                }
+
                 return $item;
             })
             ->filter(fn($i) => (float) $i->available_qty > 0.001)
@@ -68,6 +91,7 @@ class ProductionOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        abort_unless($user->isVendor(), 403, 'Hanya vendor yang dapat membuat Order Produksi.');
 
         $request->validate([
             'purchase_order_item_id' => 'required|exists:purchase_order_items,id',
@@ -104,10 +128,18 @@ class ProductionOrderController extends Controller
                     throw new \RuntimeException('Qty planned melebihi sisa qty PO item yang masih bisa dialokasikan.');
                 }
 
+                // Cari active BOM untuk material ini
+                $bom = Bom::with('items')
+                    ->where('material_id', $poItem->material_id)
+                    ->where('status', 'active')
+                    ->orderByDesc('valid_from')
+                    ->first();
+
                 $order = VendorProductionOrder::create([
                     'order_number' => VendorProductionOrder::generateNumber(),
                     'vendor_id' => $user->vendor_id,
                     'material_id' => $poItem->material_id,
+                    'bom_id' => $bom?->id,
                     'purchase_order_item_id' => $poItem->id,
                     'quantity_planned' => $request->quantity_planned,
                     'quantity_ok' => 0,
@@ -139,7 +171,10 @@ class ProductionOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
+        // Vendor users: only own orders; internal users: any order
+        if ($user->vendor_id !== null) {
+            abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
+        }
 
         $productionOrder->load('material', 'purchaseOrderItem.purchaseOrder', 'deliveryNote', 'reports.createdBy', 'createdBy');
 
@@ -150,6 +185,7 @@ class ProductionOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        abort_unless($user->isVendor(), 403, 'Hanya vendor yang dapat me-release Order Produksi.');
         abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
         abort_if($productionOrder->status !== 'draft', 422, 'Hanya order draft yang dapat di-release.');
 
@@ -169,6 +205,7 @@ class ProductionOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        abort_unless($user->isVendor(), 403, 'Hanya vendor yang dapat melapor output.');
         abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
         abort_if(!in_array($productionOrder->status, ['released', 'in_progress']), 422, 'Order harus Released atau In Progress.');
 
@@ -190,8 +227,9 @@ class ProductionOrderController extends Controller
             return back()->withErrors(['quantity_ok' => 'Isi qty OK atau qty NG lebih dari 0.'])->withInput();
         }
 
-        if ($delta > $productionOrder->remainingQty() + 0.001) {
-            return back()->withErrors(['quantity_ok' => 'Total qty melebihi sisa quantity planned.'])->withInput();
+        // Hanya qty OK yang dihitung sebagai pemenuhan plan
+        if ((float) $request->quantity_ok > $productionOrder->remainingQty() + 0.001) {
+            return back()->withErrors(['quantity_ok' => 'Qty OK melebihi sisa quantity planned yang dibutuhkan.'])->withInput();
         }
 
         DB::transaction(function () use ($request, $productionOrder, $user) {
@@ -203,17 +241,78 @@ class ProductionOrderController extends Controller
                 'created_by' => $user->id,
             ]);
 
-            $productionOrder->increment('quantity_ok', (float) $request->quantity_ok);
-            $productionOrder->increment('quantity_ng', (float) $request->quantity_ng);
+            $qtyOk = (float) $request->quantity_ok;
+            $qtyNg = (float) $request->quantity_ng;
+
+            $productionOrder->increment('quantity_ok', $qtyOk);
+            $productionOrder->increment('quantity_ng', $qtyNg);
 
             if ($productionOrder->status === 'released') {
                 $productionOrder->update(['status' => 'in_progress']);
             }
 
+            // === Stock Movements untuk vendor process ===
+            $vendorId = $productionOrder->vendor_id;
+            $now = now();
+            $refDoc = $productionOrder->order_number;
+
+            // Load BOM jika ada
+            $bom = $productionOrder->bom_id
+                ? Bom::with('items')->find($productionOrder->bom_id)
+                : null;
+
+            // 1. Kurangi stok RM berdasarkan BOM (qty OK + NG = total yang diproses)
+            $totalProcessed = $qtyOk + $qtyNg;
+            if ($bom && $totalProcessed > 0) {
+                foreach ($bom->items as $bomItem) {
+                    $rmQty = ($bomItem->quantity / max((float) $bom->base_quantity, 0.001)) * $totalProcessed;
+                    if ($rmQty <= 0) continue;
+
+                    $rmStock = VendorStock::firstOrCreate(
+                        ['vendor_id' => $vendorId, 'material_id' => $bomItem->material_id],
+                        ['quantity' => 0]
+                    );
+                    $newRmQty = max(0, $rmStock->quantity - $rmQty);
+                    $rmStock->update(['quantity' => $newRmQty]);
+
+                    VendorStockMovement::create([
+                        'vendor_id'          => $vendorId,
+                        'material_id'        => $bomItem->material_id,
+                        'movement_type'      => 'PROD_CONSUME',
+                        'quantity'           => $rmQty,
+                        'quantity_after'     => $newRmQty,
+                        'reference_document' => $refDoc,
+                        'movement_date'      => $now,
+                        'created_by'         => $user->id,
+                    ]);
+                }
+            }
+
+            // 2. Tambah stok WIP/FP sebesar qty OK saja
+            if ($qtyOk > 0) {
+                $fpStock = VendorStock::firstOrCreate(
+                    ['vendor_id' => $vendorId, 'material_id' => $productionOrder->material_id],
+                    ['quantity' => 0]
+                );
+                $newFpQty = $fpStock->quantity + $qtyOk;
+                $fpStock->update(['quantity' => $newFpQty]);
+
+                VendorStockMovement::create([
+                    'vendor_id'          => $vendorId,
+                    'material_id'        => $productionOrder->material_id,
+                    'movement_type'      => 'PROD_OUTPUT',
+                    'quantity'           => $qtyOk,
+                    'quantity_after'     => $newFpQty,
+                    'reference_document' => $refDoc,
+                    'movement_date'      => $now,
+                    'created_by'         => $user->id,
+                ]);
+            }
+
             $this->logEvent('vendor_production_order.reported', 'VendorProductionOrder', $productionOrder->id, $user->id, [
                 'report_date' => $request->report_date,
-                'quantity_ok' => (float) $request->quantity_ok,
-                'quantity_ng' => (float) $request->quantity_ng,
+                'quantity_ok' => $qtyOk,
+                'quantity_ng' => $qtyNg,
             ]);
 
             $productionOrder->refresh();
@@ -222,8 +321,6 @@ class ProductionOrderController extends Controller
                     'status' => 'completed',
                     'actual_end_date' => now()->toDateString(),
                 ]);
-
-                $this->ensureDeliveryNoteForCompletedOrder($productionOrder, $user->id);
             }
         });
 
@@ -234,6 +331,7 @@ class ProductionOrderController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        abort_unless($user->isVendor(), 403, 'Hanya vendor yang dapat menyelesaikan Order Produksi.');
         abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
         abort_if(!in_array($productionOrder->status, ['released', 'in_progress']), 422, 'Order tidak dapat diselesaikan.');
 
@@ -252,15 +350,14 @@ class ProductionOrderController extends Controller
             'quantity_ng' => (float) $productionOrder->quantity_ng,
         ]);
 
-        $this->ensureDeliveryNoteForCompletedOrder($productionOrder, $user->id);
-
-        return back()->with('success', 'Order selesai.');
+        return back()->with('success', 'Order selesai. Silakan buat Surat Jalan dari menu Surat Jalan.');
     }
 
     public function cancel(VendorProductionOrder $productionOrder)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        abort_unless($user->isVendor(), 403, 'Hanya vendor yang dapat membatalkan Order Produksi.');
         abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
         abort_if($productionOrder->status === 'completed', 422, 'Order completed tidak bisa dibatalkan.');
 
@@ -271,58 +368,6 @@ class ProductionOrderController extends Controller
         ]);
 
         return redirect()->route('vendor.production-orders.index')->with('success', 'Order dibatalkan.');
-    }
-
-    private function ensureDeliveryNoteForCompletedOrder(VendorProductionOrder $productionOrder, int $userId): void
-    {
-        $productionOrder->refresh();
-
-        if ($productionOrder->delivery_note_id || (float) $productionOrder->quantity_ok <= 0.001) {
-            return;
-        }
-
-        $existingDeliveryNote = DeliveryNote::where('source_type', 'vendor_production_order')
-            ->where('source_id', $productionOrder->id)
-            ->first();
-
-        if ($existingDeliveryNote) {
-            $productionOrder->update(['delivery_note_id' => $existingDeliveryNote->id]);
-            return;
-        }
-
-        $productionOrder->loadMissing('purchaseOrderItem.purchaseOrder');
-        $poItem = $productionOrder->purchaseOrderItem;
-
-        if (! $poItem || ! $poItem->purchaseOrder) {
-            return;
-        }
-
-        $deliveryNote = DeliveryNote::create([
-            'dn_number' => DeliveryNote::generateNumber(),
-            'purchase_order_id' => $poItem->purchase_order_id,
-            'vendor_id' => $productionOrder->vendor_id,
-            'estimated_delivery_date' => now()->toDateString(),
-            'notes' => 'Auto-generated from Vendor Production Order ' . $productionOrder->order_number,
-            'status' => 'pending',
-            'source_type' => 'vendor_production_order',
-            'source_id' => $productionOrder->id,
-            'created_by' => $userId,
-        ]);
-
-        $deliveryNote->items()->create([
-            'purchase_order_item_id' => $poItem->id,
-            'quantity' => $productionOrder->quantity_ok,
-            'notes' => 'Generated from completed vendor production order',
-        ]);
-
-        $productionOrder->update(['delivery_note_id' => $deliveryNote->id]);
-
-        $this->logEvent('delivery_note.auto_generated_from_vpo', 'DeliveryNote', $deliveryNote->id, $userId, [
-            'dn_number' => $deliveryNote->dn_number,
-            'vendor_production_order_id' => $productionOrder->id,
-            'purchase_order_item_id' => $poItem->id,
-            'quantity' => (float) $productionOrder->quantity_ok,
-        ]);
     }
 
     private function remainingPlannableForPoItem(PurchaseOrderItem $poItem, ?int $excludeOrderId = null): float

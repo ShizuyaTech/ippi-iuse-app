@@ -104,39 +104,69 @@
             </div>
 
             <h3 class="font-semibold text-gray-700 mb-2">Item yang Akan Dikirim</h3>
-            <p class="text-xs text-gray-500 mb-3">Isi qty yang akan dikirim. Boleh sebagian (partial shipment).</p>
+            <p class="text-xs text-gray-500 mb-3">Centang item yang ingin dikirim, lalu isi jumlah qty-nya. Item yang tidak dicentang tidak akan diproses.</p>
 
             @foreach($selectedPo->items as $idx => $item)
             @php
-                $remaining = $item->quantity - ($item->quantity_received ?? 0);
+                $remaining = (float)$item->quantity - (float)($item->quantity_received ?? 0);
+                $canSend = $remaining > 0.001;
             @endphp
-            <div class="border rounded p-3 {{ $remaining <= 0 ? 'opacity-50 bg-gray-50' : '' }}">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <span class="font-mono text-xs text-teal-700">{{ $item->material->code }}</span>
-                        <span class="ml-2 text-sm font-medium">{{ $item->material->name }}</span>
+            <div class="border rounded p-3 {{ !$canSend ? 'opacity-50 bg-gray-50' : 'bg-white' }}">
+                <div class="flex items-start gap-3">
+                    {{-- Checkbox --}}
+                    <div class="pt-1">
+                        <input type="checkbox"
+                            id="check_{{ $idx }}"
+                            {{ $canSend ? 'checked' : 'disabled' }}
+                            onchange="toggleItem(this, {{ $idx }})"
+                            class="w-4 h-4 accent-teal-600 cursor-pointer">
                     </div>
-                    <div class="text-xs text-gray-500 text-right">
-                        <div>Qty PO: <strong>{{ number_format($item->quantity, 3) }}</strong></div>
-                        <div>Sudah diterima: {{ number_format($item->quantity_received ?? 0, 3) }}</div>
-                        <div>Sisa: <strong class="text-teal-700">{{ number_format($remaining, 3) }}</strong> {{ $item->material->unit_of_measure }}</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <label for="check_{{ $idx }}" class="{{ $canSend ? 'cursor-pointer' : '' }}">
+                                    <span class="font-mono text-xs text-teal-700">{{ $item->material->code }}</span>
+                                    <span class="ml-2 text-sm font-medium">{{ $item->material->name }}</span>
+                                </label>
+                            </div>
+                            <div class="text-xs text-gray-500 text-right">
+                                <div>Qty PO: <strong>{{ number_format($item->quantity, 3) }}</strong></div>
+                                <div>Sudah diterima: {{ number_format($item->quantity_received ?? 0, 3) }}</div>
+                                <div>Sisa: <strong class="{{ $canSend ? 'text-teal-700' : 'text-gray-400' }}">{{ number_format($remaining, 3) }}</strong> {{ $item->material->unit_of_measure }}</div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="items[{{ $idx }}][po_item_id]" id="po_item_{{ $idx }}" value="{{ $item->id }}" {{ !$canSend ? 'disabled' : '' }}>
+                        <div class="flex gap-3 items-center">
+                            <label class="text-sm text-gray-600 w-32">Qty Dikirim</label>
+                            <input type="number" name="items[{{ $idx }}][quantity]"
+                                id="qty_{{ $idx }}"
+                                step="0.001" min="0.001" max="{{ $remaining }}"
+                                value="{{ old("items.{$idx}.quantity", $canSend ? number_format($remaining, 3, '.', '') : '') }}"
+                                class="border rounded px-3 py-1.5 text-sm w-36 {{ !$canSend ? 'bg-gray-100' : '' }}"
+                                {{ !$canSend ? 'disabled' : '' }}>
+                            <span class="text-sm text-gray-500">{{ $item->material->unit_of_measure }}</span>
+                            @if(!$canSend)
+                                <span class="text-xs text-green-600 italic">Sudah selesai</span>
+                            @endif
+                        </div>
                     </div>
-                </div>
-                <input type="hidden" name="items[{{ $idx }}][po_item_id]" value="{{ $item->id }}">
-                <div class="flex gap-3 items-center">
-                    <label class="text-sm text-gray-600 w-32">Qty Dikirim</label>
-                    <input type="number" name="items[{{ $idx }}][quantity]"
-                        step="0.001" min="0" max="{{ $remaining }}"
-                        value="{{ old("items.{$idx}.quantity", max(0, $remaining)) }}"
-                        class="border rounded px-3 py-1.5 text-sm w-36 {{ $remaining <= 0 ? 'bg-gray-100' : '' }}"
-                        {{ $remaining <= 0 ? 'disabled' : '' }}>
-                    <span class="text-sm text-gray-500">{{ $item->material->unit_of_measure }}</span>
-                    @if($remaining <= 0)
-                        <span class="text-xs text-green-600 italic">Sudah selesai</span>
-                    @endif
                 </div>
             </div>
             @endforeach
+
+            <script>
+                function toggleItem(checkbox, idx) {
+                    const poItemInput = document.getElementById('po_item_' + idx);
+                    const qtyInput    = document.getElementById('qty_' + idx);
+                    if (checkbox.checked) {
+                        poItemInput.disabled = false;
+                        qtyInput.disabled    = false;
+                    } else {
+                        poItemInput.disabled = true;
+                        qtyInput.disabled    = true;
+                    }
+                }
+            </script>
 
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800 text-sm">Kirim Surat Jalan</button>

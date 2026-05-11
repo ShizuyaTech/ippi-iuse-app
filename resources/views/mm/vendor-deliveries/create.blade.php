@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kirim *</label>
-                    <input type="date" name="delivery_date" value="{{ old('delivery_date', date('Y-m-d')) }}"
+                    <input type="date" name="delivery_date" value="{{ old('delivery_date', user_now()->format('Y-m-d')) }}"
                         class="w-full border rounded px-3 py-2 text-sm" required>
                 </div>
                 <div>

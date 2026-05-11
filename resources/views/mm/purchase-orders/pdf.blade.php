@@ -207,7 +207,7 @@
             </div>
             @endif
             <div style="margin-top: {{ $purchaseOrder->notes ? '10px' : '0' }}; font-size: 9px; color: #6b7280;">
-                Dokumen ini dicetak pada {{ now()->format('d M Y, H:i') }} WIB
+                Dokumen ini dicetak pada {{ user_now()->format('d M Y, H:i') }} {{ user_tz_label() }}
             </div>
         </div>
         <div class="summary-right">

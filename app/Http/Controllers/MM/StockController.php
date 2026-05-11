@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\StorageLocation;
+use App\Models\VendorStock;
 use App\Services\ExcelService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -20,7 +21,22 @@ class StockController extends Controller
         $this->applyStockFilters($query, $request);
         $stocks    = $query->paginate(25)->withQueryString();
         $locations = StorageLocation::all();
-        return view('mm.stocks.index', compact('stocks', 'locations'));
+
+        // Total vendor stock per material_id (sum across all vendors)
+        $vendorStockMap = VendorStock::selectRaw('material_id, SUM(quantity) as total_qty')
+            ->groupBy('material_id')
+            ->pluck('total_qty', 'material_id')
+            ->toArray();
+
+        // Material yang ada di vendor tapi belum punya Stock record di IPPI (WIP/FP belum diterima)
+        $ippiMaterialIds = Stock::pluck('material_id')->unique()->toArray();
+        $vendorOnlyStocks = VendorStock::with(['material', 'vendor'])
+            ->where('quantity', '>', 0)
+            ->whereNotIn('material_id', $ippiMaterialIds)
+            ->get()
+            ->groupBy('material_id');
+
+        return view('mm.stocks.index', compact('stocks', 'locations', 'vendorStockMap', 'vendorOnlyStocks'));
     }
 
     public function movements(Request $request)
