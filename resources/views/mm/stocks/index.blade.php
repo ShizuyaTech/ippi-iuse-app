@@ -37,43 +37,43 @@
             <a href="{{ route('mm.stocks.movements') }}" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Riwayat Mutasi</a>
         </form>
         {{-- Action Toolbar removed - merged into header above --}}
-        <div class="mobile-cards overflow-x-auto">
+        <div class="no-mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
-                    <th class="px-4 py-2 text-left">Kode Material</th>
-                    <th class="px-4 py-2 text-left">Nama Material</th>
-                    <th class="px-4 py-2 text-left">Tipe</th>
-                    <th class="px-4 py-2 text-left">Lokasi</th>
-                    <th class="px-4 py-2 text-right">Qty Stok</th>
-                    <th class="px-4 py-2 text-right">Stok di Vendor</th>
-                    <th class="px-4 py-2 text-left">UoM</th>
-                    <th class="px-4 py-2 text-right">Min. Stok</th>
-                    <th class="px-4 py-2 text-center">Status</th>
+                    <th class="px-3 py-2 text-left hidden sm:table-cell">Kode</th>
+                    <th class="px-3 py-2 text-left">Nama Material</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Tipe</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Lokasi</th>
+                    <th class="px-3 py-2 text-right">Qty Stok</th>
+                    <th class="px-3 py-2 text-right hidden md:table-cell">Stok di Vendor</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">UoM</th>
+                    <th class="px-3 py-2 text-right hidden md:table-cell">Min. Stok</th>
+                    <th class="px-3 py-2 text-center">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($stocks as $s)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700" data-label="Kode Material">{{ $s->material->code }}</td>
-                    <td class="px-4 py-2" data-label="Nama Material">{{ $s->material->name }}</td>
-                    <td class="px-4 py-2 text-xs" data-label="Tipe"><span class="px-2 py-0.5 rounded bg-gray-100">{{ $s->material->type }}</span></td>
-                    <td class="px-4 py-2" data-label="Lokasi">{{ $s->storageLocation->name }}</td>
+                    <td class="px-3 py-2 font-mono text-blue-700 text-xs hidden sm:table-cell">{{ $s->material->code }}</td>
+                    <td class="px-3 py-2 max-w-[160px] truncate">{{ $s->material->name }}</td>
+                    <td class="px-3 py-2 text-xs hidden md:table-cell"><span class="px-2 py-0.5 rounded bg-gray-100">{{ $s->material->type }}</span></td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $s->storageLocation->name }}</td>
                     @php
                         $minStock = (float)($s->material->min_stock ?? 0);
                         $qty      = (float)$s->quantity;
                         $stockStatus = $qty <= 0 ? 'habis' : ($minStock > 0 && $qty <= $minStock ? 'rendah' : 'normal');
                     @endphp
-                    <td class="px-4 py-2 text-right font-medium {{ $stockStatus === 'habis' ? 'text-red-500' : ($stockStatus === 'rendah' ? 'text-yellow-600' : 'text-green-700') }}" data-label="Qty Stok">
+                    <td class="px-3 py-2 text-right font-medium {{ $stockStatus === 'habis' ? 'text-red-500' : ($stockStatus === 'rendah' ? 'text-yellow-600' : 'text-green-700') }}">
                         {{ number_format($qty, 3) }}
                     </td>
                     @php $vendorQty = (float)($vendorStockMap[$s->material_id] ?? 0); @endphp
-                    <td class="px-4 py-2 text-right {{ $vendorQty > 0 ? 'text-indigo-700 font-medium' : 'text-gray-300' }}" data-label="Stok di Vendor">
+                    <td class="px-3 py-2 text-right hidden md:table-cell {{ $vendorQty > 0 ? 'text-indigo-700 font-medium' : 'text-gray-300' }}">
                         {{ $vendorQty > 0 ? number_format($vendorQty, 3) : '—' }}
                     </td>
-                    <td class="px-4 py-2 text-gray-500" data-label="UoM">{{ $s->material->unit_of_measure ?? '-' }}</td>
-                    <td class="px-4 py-2 text-right text-gray-500" data-label="Min. Stok">{{ $minStock > 0 ? number_format($minStock, 3) : '-' }}</td>
-                    <td class="px-4 py-2 text-center" data-label="Status">
+                    <td class="px-3 py-2 text-gray-500 hidden md:table-cell">{{ $s->material->unit_of_measure ?? '-' }}</td>
+                    <td class="px-3 py-2 text-right text-gray-500 hidden md:table-cell">{{ $minStock > 0 ? number_format($minStock, 3) : '-' }}</td>
+                    <td class="px-3 py-2 text-center">
                         @if($stockStatus === 'habis')
                         <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">Habis</span>
                         @elseif($stockStatus === 'rendah')

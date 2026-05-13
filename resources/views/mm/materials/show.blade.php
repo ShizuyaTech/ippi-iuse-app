@@ -32,6 +32,10 @@
             </div>
             <div class="mt-4 flex gap-2">
                 <a href="{{ route('mm.materials.edit', $material) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm hover:bg-yellow-600">Edit</a>
+                <form method="POST" action="{{ route('mm.materials.destroy', $material) }}" onsubmit="return confirm('Hapus material ini?')">
+                    @csrf @method('DELETE')
+                    <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Hapus</button>
+                </form>
                 <a href="{{ route('mm.materials.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
             </div>
         </div>

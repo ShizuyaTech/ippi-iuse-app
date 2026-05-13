@@ -36,35 +36,35 @@
             <a href="{{ route('mm.goods-receipts.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
 
-        <div class="mobile-cards overflow-x-auto">
+        <div class="no-mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
-                    <th class="px-4 py-2 text-left">No. GR</th>
-                    <th class="px-4 py-2 text-left">No. PO</th>
-                    <th class="px-4 py-2 text-left">Vendor</th>
-                    <th class="px-4 py-2 text-left">Tgl Terima</th>
-                    <th class="px-4 py-2 text-left">Lokasi</th>
-                    <th class="px-4 py-2 text-center">Status</th>
-                    <th class="px-4 py-2 text-center print:hidden">Aksi</th>
+                    <th class="px-3 py-2 text-left">No. GR</th>
+                    <th class="px-3 py-2 text-left hidden sm:table-cell">No. PO</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Vendor</th>
+                    <th class="px-3 py-2 text-left hidden sm:table-cell">Tgl Terima</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Lokasi</th>
+                    <th class="px-3 py-2 text-center hidden md:table-cell">Status</th>
+                    <th class="px-3 py-2 text-center print:hidden">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($receipts as $gr)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. GR">{{ $gr->gr_number }}</td>
-                    <td class="px-4 py-2 font-mono" data-label="No. PO">{{ $gr->purchaseOrder->po_number ?? '-' }}</td>
-                    <td class="px-4 py-2" data-label="Vendor">{{ $gr->purchaseOrder->vendor->name ?? '-' }}</td>
-                    <td class="px-4 py-2" data-label="Tgl Terima">{{ $gr->receipt_date->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2" data-label="Lokasi">{{ $gr->storageLocation->name ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center" data-label="Status"><span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">{{ $gr->status }}</span></td>
-                    <td class="px-4 py-2 text-center print:hidden">
+                    <td class="px-3 py-2 font-mono text-blue-700 font-medium text-xs whitespace-nowrap">{{ $gr->gr_number }}</td>
+                    <td class="px-3 py-2 font-mono text-xs hidden sm:table-cell">{{ $gr->purchaseOrder->po_number ?? '-' }}</td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $gr->purchaseOrder->vendor->name ?? '-' }}</td>
+                    <td class="px-3 py-2 hidden sm:table-cell">{{ $gr->receipt_date->format('d/m/Y') }}</td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $gr->storageLocation->name ?? '-' }}</td>
+                    <td class="px-3 py-2 text-center hidden md:table-cell"><span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">{{ $gr->status }}</span></td>
+                    <td class="px-3 py-2 text-center print:hidden">
                         <div class="flex justify-center gap-2">
                             <a href="{{ route('mm.goods-receipts.show', $gr) }}" class="text-blue-600 hover:underline">Detail</a>
-                            <a href="{{ route('mm.goods-receipts.edit', $gr) }}" class="text-yellow-600 hover:underline">Edit</a>
+                            <a href="{{ route('mm.goods-receipts.edit', $gr) }}" class="text-yellow-600 hover:underline hidden sm:inline">Edit</a>
                             <form method="POST" action="{{ route('mm.goods-receipts.destroy', $gr) }}" onsubmit="return confirm('Hapus GR {{ $gr->gr_number }}? Stok akan dibalik.')">
                                 @csrf @method('DELETE')
-                                <button class="text-red-600 hover:underline">Hapus</button>
+                                <button class="text-red-600 hover:underline hidden sm:inline">Hapus</button>
                             </form>
                         </div>
                     </td>

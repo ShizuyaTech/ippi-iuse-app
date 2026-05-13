@@ -61,6 +61,10 @@
                         <a href="{{ route('mm.purchase-orders.edit', $purchaseOrder) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm">Edit</a>
                         @endif
 
+                        @if($purchaseOrder->status === 'approved' && $purchaseOrder->skm_order_id)
+                        <a href="{{ route('mm.purchase-orders.edit', $purchaseOrder) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm">Edit</a>
+                        @endif
+
                         @if($purchaseOrder->status === 'approved')
                         <a href="{{ route('mm.goods-receipts.create', ['po_id'=>$purchaseOrder->id]) }}" class="bg-green-600 text-white px-4 py-2 rounded text-sm">Buat GR</a>
                         @endif

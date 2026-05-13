@@ -8,6 +8,11 @@
                     <div class="text-2xl font-bold text-orange-600 font-mono">{{ $goodsIssue->gi_number }}</div>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
+                    <a href="{{ route('mm.goods-issues.edit', $goodsIssue) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm hover:bg-yellow-600">Edit</a>
+                    <form method="POST" action="{{ route('mm.goods-issues.destroy', $goodsIssue) }}" onsubmit="return confirm('Hapus GI {{ $goodsIssue->gi_number }}? Stok akan dibalik.')">
+                        @csrf @method('DELETE')
+                        <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Hapus</button>
+                    </form>
                     <a href="{{ route('mm.goods-issues.excel', $goodsIssue) }}"
                        class="inline-flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>

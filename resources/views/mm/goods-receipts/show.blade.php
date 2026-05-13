@@ -7,7 +7,14 @@
                     <div class="text-xs text-gray-400">Nomor GR</div>
                     <div class="text-2xl font-bold text-green-700 font-mono">{{ $goodsReceipt->gr_number }}</div>
                 </div>
-                <a href="{{ route('mm.goods-receipts.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('mm.goods-receipts.edit', $goodsReceipt) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm hover:bg-yellow-600">Edit</a>
+                    <form method="POST" action="{{ route('mm.goods-receipts.destroy', $goodsReceipt) }}" onsubmit="return confirm('Hapus GR {{ $goodsReceipt->gr_number }}? Stok akan dibalik.')">
+                        @csrf @method('DELETE')
+                        <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Hapus</button>
+                    </form>
+                    <a href="{{ route('mm.goods-receipts.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
                 <div><span class="text-gray-500">No. PO:</span><br><a href="{{ route('mm.purchase-orders.show', $goodsReceipt->purchaseOrder) }}" class="font-mono text-blue-700 hover:underline">{{ $goodsReceipt->purchaseOrder->po_number }}</a></div>

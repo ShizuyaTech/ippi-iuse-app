@@ -3,7 +3,7 @@
     <div class="space-y-6">
 
         {{-- Stats Cards --}}
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+        <div class="skm-stats-grid">
             <div class="bg-white rounded-lg shadow p-3 md:p-4 text-center">
                 <div class="text-xl md:text-2xl font-bold text-blue-700">{{ $stats['total'] }}</div>
                 <div class="text-xs text-gray-500 mt-1">Total SKM</div>
@@ -55,38 +55,38 @@
         {{-- SKM Orders Table --}}
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Riwayat SKM</h3>
-            <div class="mobile-cards overflow-x-auto">
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-blue-900 text-white">
                     <tr>
-                        <th class="px-4 py-2 text-left">Nomor SKM</th>
-                        <th class="px-4 py-2 text-left">Tanggal Order</th>
-                        <th class="px-4 py-2 text-right">Jml Item</th>
-                        <th class="px-4 py-2 text-center">Status</th>
-                        <th class="px-4 py-2 text-left">Dibuat oleh</th>
-                        <th class="px-4 py-2 text-center">Aksi</th>
+                        <th class="px-3 py-2 text-left">Nomor SKM</th>
+                        <th class="px-3 py-2 text-left">Tanggal</th>
+                        <th class="px-3 py-2 text-right hidden sm:table-cell">Jml Item</th>
+                        <th class="px-3 py-2 text-center hidden sm:table-cell">Status</th>
+                        <th class="px-3 py-2 text-left hidden md:table-cell">Dibuat oleh</th>
+                        <th class="px-3 py-2 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($orders as $order)
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2 font-mono font-semibold text-blue-700" data-label="Nomor SKM">{{ $order->skm_number }}</td>
-                        <td class="px-4 py-2" data-label="Tanggal">{{ $order->order_date->format('d M Y') }}</td>
-                        <td class="px-4 py-2 text-right font-medium" data-label="Jml Item">{{ $order->items_count }}</td>
-                        <td class="px-4 py-2 text-center" data-label="Status">
+                        <td class="px-3 py-2 font-mono font-semibold text-blue-700 text-xs whitespace-nowrap">{{ $order->skm_number }}</td>
+                        <td class="px-3 py-2 text-xs">{{ $order->order_date->format('d/m/Y') }}</td>
+                        <td class="px-3 py-2 text-right font-medium hidden sm:table-cell">{{ $order->items_count }}</td>
+                        <td class="px-3 py-2 text-center hidden sm:table-cell">
                             <span class="px-2 py-0.5 rounded text-xs font-semibold {{ $order->status_color }}">
                                 {{ $order->status_label }}
                             </span>
                         </td>
-                        <td class="px-4 py-2 text-gray-600" data-label="Dibuat oleh">{{ $order->createdBy->name ?? '-' }}</td>
-                        <td class="px-4 py-2 text-center" data-label="Aksi">
+                        <td class="px-3 py-2 text-gray-600 hidden md:table-cell">{{ $order->createdBy->name ?? '-' }}</td>
+                        <td class="px-3 py-2 text-center">
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('mm.skm.show', $order) }}" class="text-blue-600 hover:underline text-sm">Detail</a>
                                 @if($order->status === 'draft')
                                 <form method="POST" action="{{ route('mm.skm.destroy', $order) }}"
                                       onsubmit="return confirm('Hapus SKM {{ $order->skm_number }}?')">
                                     @csrf @method('DELETE')
-                                    <button class="text-red-500 hover:text-red-700 text-sm">Hapus</button>
+                                    <button class="text-red-500 hover:text-red-700 text-sm hidden sm:inline">Hapus</button>
                                 </form>
                                 @endif
                             </div>
@@ -106,18 +106,18 @@
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-1">Preview Item Perlu Dipesan</h3>
             <p class="text-xs text-gray-400 mb-3">Kalkulasi kanban beredar: LT 3 hari + SS 2 hari + Proses 1 hari = 6 hari × kanban/hari. Klik "Buat SKM Sekarang" untuk memprosesnya.</p>
-            <div class="overflow-x-auto">
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-orange-100 text-orange-800 text-xs">
                     <tr>
                         <th class="px-3 py-2 text-left">Material</th>
-                        <th class="px-3 py-2 text-left">Vendor</th>
-                        <th class="px-3 py-2 text-right">Stok Saat Ini</th>
-                        <th class="px-3 py-2 text-right">Total Kanban</th>
-                        <th class="px-3 py-2 text-right">Stok (kanban)</th>
-                        <th class="px-3 py-2 text-right">Outstanding</th>
-                        <th class="px-3 py-2 text-right">Qty/Kartu</th>
-                        <th class="px-3 py-2 text-right">Saran Kartu</th>
+                        <th class="px-3 py-2 text-left hidden sm:table-cell">Vendor</th>
+                        <th class="px-3 py-2 text-right hidden md:table-cell">Stok Saat Ini</th>
+                        <th class="px-3 py-2 text-right hidden md:table-cell">Total Kanban</th>
+                        <th class="px-3 py-2 text-right hidden md:table-cell">Stok (kanban)</th>
+                        <th class="px-3 py-2 text-right hidden md:table-cell">Outstanding</th>
+                        <th class="px-3 py-2 text-right hidden sm:table-cell">Qty/Kartu</th>
+                        <th class="px-3 py-2 text-right hidden sm:table-cell">Saran Kartu</th>
                         <th class="px-3 py-2 text-right">Total Order</th>
                     </tr>
                 </thead>
@@ -125,16 +125,16 @@
                     @foreach($pending as $p)
                     <tr class="border-b hover:bg-orange-50">
                         <td class="px-3 py-2">
-                            <div class="font-mono text-blue-700 text-xs font-semibold">{{ $p['material']->code }}</div>
-                            <div class="text-gray-700">{{ $p['material']->name }}</div>
+                            <div class="font-mono text-blue-700 text-xs font-semibold hidden sm:block">{{ $p['material']->code }}</div>
+                            <div class="text-gray-700 text-xs">{{ $p['material']->name }}</div>
                         </td>
-                        <td class="px-3 py-2 text-gray-600 text-xs">{{ $p['material']->vendor->name ?? '-' }}</td>
-                        <td class="px-3 py-2 text-right text-red-600 font-medium">{{ number_format($p['current_stock'], 0) }}</td>
-                        <td class="px-3 py-2 text-right font-semibold text-blue-900">{{ $p['total_kanban'] }}</td>
-                        <td class="px-3 py-2 text-right text-gray-600">{{ $p['stock_kanban'] }}</td>
-                        <td class="px-3 py-2 text-right text-orange-600">{{ $p['outstanding_kanban'] }}</td>
-                        <td class="px-3 py-2 text-right">{{ number_format($p['kanban_qty'], 0) }}</td>
-                        <td class="px-3 py-2 text-right font-semibold text-blue-700">{{ $p['num_cards_suggest'] }}</td>
+                        <td class="px-3 py-2 text-gray-600 text-xs hidden sm:table-cell">{{ $p['material']->vendor->name ?? '-' }}</td>
+                        <td class="px-3 py-2 text-right text-red-600 font-medium hidden md:table-cell">{{ number_format($p['current_stock'], 0) }}</td>
+                        <td class="px-3 py-2 text-right font-semibold text-blue-900 hidden md:table-cell">{{ $p['total_kanban'] }}</td>
+                        <td class="px-3 py-2 text-right text-gray-600 hidden md:table-cell">{{ $p['stock_kanban'] }}</td>
+                        <td class="px-3 py-2 text-right text-orange-600 hidden md:table-cell">{{ $p['outstanding_kanban'] }}</td>
+                        <td class="px-3 py-2 text-right hidden sm:table-cell">{{ number_format($p['kanban_qty'], 0) }}</td>
+                        <td class="px-3 py-2 text-right font-semibold text-blue-700 hidden sm:table-cell">{{ $p['num_cards_suggest'] }}</td>
                         <td class="px-3 py-2 text-right font-bold text-blue-900">{{ number_format($p['order_qty_suggest'], 0) }}</td>
                     </tr>
                     @endforeach
@@ -188,28 +188,28 @@
             </form>
 
             @if($demands->isNotEmpty())
-            <div class="overflow-x-auto">
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-xs border-collapse">
                 <thead class="bg-gray-100 text-gray-600">
                     <tr>
                         <th class="px-3 py-1.5 text-left">Material FP/WIP</th>
                         <th class="px-3 py-1.5 text-right">Demand (pcs)</th>
-                        <th class="px-3 py-1.5 text-right">Hari Kerja</th>
-                        <th class="px-3 py-1.5 text-left">Periode</th>
-                        <th class="px-3 py-1.5 text-left">Catatan</th>
+                        <th class="px-3 py-1.5 text-right hidden sm:table-cell">Hari Kerja</th>
+                        <th class="px-3 py-1.5 text-left hidden sm:table-cell">Periode</th>
+                        <th class="px-3 py-1.5 text-left hidden md:table-cell">Catatan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($demands as $d)
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-3 py-1.5">
-                            <span class="font-mono text-blue-700 font-semibold">{{ $d->material->code ?? '-' }}</span>
-                            <span class="text-gray-600 ml-1">{{ $d->material->name ?? '-' }}</span>
+                            <span class="font-mono text-blue-700 font-semibold hidden sm:inline">{{ $d->material->code ?? '-' }} </span>
+                            <span class="text-gray-600">{{ $d->material->name ?? '-' }}</span>
                         </td>
                         <td class="px-3 py-1.5 text-right font-semibold">{{ number_format($d->demand_qty, 0) }}</td>
-                        <td class="px-3 py-1.5 text-right">{{ $d->working_days }}</td>
-                        <td class="px-3 py-1.5">{{ $d->period ?? '-' }}</td>
-                        <td class="px-3 py-1.5 text-gray-500">{{ $d->notes ?? '-' }}</td>
+                        <td class="px-3 py-1.5 text-right hidden sm:table-cell">{{ $d->working_days }}</td>
+                        <td class="px-3 py-1.5 hidden sm:table-cell">{{ $d->period ?? '-' }}</td>
+                        <td class="px-3 py-1.5 text-gray-500 hidden md:table-cell">{{ $d->notes ?? '-' }}</td>
                     </tr>
                     @endforeach
                 </tbody>

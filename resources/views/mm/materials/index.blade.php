@@ -37,18 +37,18 @@
             <a href="{{ route('mm.materials.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
         {{-- Action Toolbar removed - merged into header above --}}
-        <div class="mobile-cards overflow-x-auto">
+        <div class="no-mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
-                    <th class="px-4 py-2 text-left">Kode</th>
-                    <th class="px-4 py-2 text-left">Nama</th>
-                    <th class="px-4 py-2 text-left">Tipe</th>
-                    <th class="px-4 py-2 text-left">UoM</th>
-                    <th class="px-4 py-2 text-right">Qty/Case</th>
-                    <th class="px-4 py-2 text-right">Stok Total</th>
-                    <th class="px-4 py-2 text-center">Status</th>
-                    <th class="px-4 py-2 text-center print:hidden">Aksi</th>
+                    <th class="px-3 py-2 text-left hidden sm:table-cell">Kode</th>
+                    <th class="px-3 py-2 text-left">Nama</th>
+                    <th class="px-3 py-2 text-left">Tipe</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">UoM</th>
+                    <th class="px-3 py-2 text-right hidden md:table-cell">Qty/Case</th>
+                    <th class="px-3 py-2 text-right hidden sm:table-cell">Stok</th>
+                    <th class="px-3 py-2 text-center hidden md:table-cell">Status</th>
+                    <th class="px-3 py-2 text-center print:hidden">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,24 +57,26 @@
                     $totalStock = (float) $m->stocks_sum_quantity;
                 @endphp
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700" data-label="Kode">{{ $m->code }}</td>
-                    <td class="px-4 py-2" data-label="Nama">{{ $m->name }}</td>
-                    <td class="px-4 py-2" data-label="Tipe"><span class="px-2 py-0.5 rounded text-xs {{ $m->type==='RM'?'bg-gray-100 text-gray-700':''.($m->type==='WIP'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700') }}">{{ $m->type }}</span></td>
-                    <td class="px-4 py-2" data-label="UoM">{{ $m->unit_of_measure }}</td>
-                    <td class="px-4 py-2 text-right" data-label="Qty/Case">{{ $m->qty_per_case > 0 ? number_format($m->qty_per_case, 0) : '-' }}</td>
-                    <td class="px-4 py-2 text-right font-medium {{ $totalStock > 0 ? 'text-green-700' : 'text-gray-400' }}" data-label="Stok Total">
+                    <td class="px-3 py-2 font-mono text-blue-700 text-xs whitespace-nowrap hidden sm:table-cell">{{ $m->code }}</td>
+                    <td class="px-3 py-2 max-w-[180px] truncate">{{ $m->name }}</td>
+                    <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-xs {{ $m->type==='RM'?'bg-gray-100 text-gray-700':($m->type==='WIP'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700') }}">{{ $m->type }}</span></td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $m->unit_of_measure }}</td>
+                    <td class="px-3 py-2 text-right hidden md:table-cell">{{ $m->qty_per_case > 0 ? number_format($m->qty_per_case, 0) : '-' }}</td>
+                    <td class="px-3 py-2 text-right font-medium hidden sm:table-cell {{ $totalStock > 0 ? 'text-green-700' : 'text-gray-400' }}">
                         {{ number_format($totalStock, 3) }}
                     </td>
-                    <td class="px-4 py-2 text-center" data-label="Status">
+                    <td class="px-3 py-2 text-center hidden md:table-cell">
                         <span class="px-2 py-0.5 rounded text-xs {{ $m->is_active?'bg-green-100 text-green-700':'bg-red-100 text-red-700' }}">{{ $m->is_active?'Aktif':'Nonaktif' }}</span>
                     </td>
-                    <td class="px-4 py-2 text-center flex justify-center gap-2 print:hidden">
-                        <a href="{{ route('mm.materials.show', $m) }}" class="text-blue-600 hover:underline">Detail</a>
-                        <a href="{{ route('mm.materials.edit', $m) }}" class="text-yellow-600 hover:underline">Edit</a>
-                        <form method="POST" action="{{ route('mm.materials.destroy', $m) }}" onsubmit="return confirm('Hapus material ini?')">
-                            @csrf @method('DELETE')
-                            <button class="text-red-600 hover:underline">Hapus</button>
-                        </form>
+                    <td class="px-3 py-2 text-center print:hidden">
+                        <div class="flex justify-center gap-2">
+                            <a href="{{ route('mm.materials.show', $m) }}" class="text-blue-600 hover:underline">Detail</a>
+                            <a href="{{ route('mm.materials.edit', $m) }}" class="text-yellow-600 hover:underline hidden sm:inline">Edit</a>
+                            <form method="POST" action="{{ route('mm.materials.destroy', $m) }}" onsubmit="return confirm('Hapus material ini?')">
+                                @csrf @method('DELETE')
+                                <button class="text-red-600 hover:underline hidden sm:inline">Hapus</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty

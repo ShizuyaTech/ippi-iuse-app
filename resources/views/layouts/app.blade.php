@@ -65,7 +65,28 @@
             }
             .mobile-cards .overflow-x-auto { overflow-x: visible; }
             .mobile-cards table { table-layout: auto; }
+
+            /* Opt-out: wrapper .no-mobile-cards tetap tampil sebagai tabel normal */
+            .mobile-cards .no-mobile-cards table,
+            .mobile-cards .no-mobile-cards thead,
+            .mobile-cards .no-mobile-cards tbody,
+            .mobile-cards .no-mobile-cards tfoot { display: table; width: 100% !important; }
+            .mobile-cards .no-mobile-cards tr { display: table-row; width: auto !important; }
+            .mobile-cards .no-mobile-cards th,
+            .mobile-cards .no-mobile-cards td { display: table-cell; width: auto !important; }
+            .mobile-cards .no-mobile-cards thead tr { display: table-row; }
+            .mobile-cards .no-mobile-cards tbody tr { background: none; border-radius: 0; border: none; border-bottom: 1px solid #e5e7eb; box-shadow: none; margin-bottom: 0; overflow: visible; }
+            .mobile-cards .no-mobile-cards tbody td { display: table-cell; justify-content: initial; align-items: initial; border-bottom: none; }
+            .mobile-cards .no-mobile-cards tbody td::before { display: none; }
+            .mobile-cards .no-mobile-cards .overflow-x-auto { overflow-x: auto; }
+            /* Tetap sembunyikan elemen .hidden di dalam .no-mobile-cards */
+            .mobile-cards .no-mobile-cards .hidden { display: none !important; }
         }
+
+        /* SKM stats grid: 2 kolom mobile, 3 tablet, 6 desktop */
+        .skm-stats-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(2, minmax(0,1fr)); }
+        @media (min-width: 640px) { .skm-stats-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+        @media (min-width: 768px) { .skm-stats-grid { grid-template-columns: repeat(6, minmax(0,1fr)); } }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-100">

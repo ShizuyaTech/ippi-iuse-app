@@ -65,9 +65,14 @@ class GoodsReceiptController extends Controller
         $pos = PurchaseOrder::with('vendor')
             ->whereIn('status', ['approved', 'partially_received'])
             ->get();
+        $recentPos = PurchaseOrder::with('vendor')
+            ->whereIn('status', ['approved', 'partially_received'])
+            ->orderByDesc('updated_at')
+            ->limit(10)
+            ->get();
         $locations  = StorageLocation::all();
         $selectedPo = $request->po_id ? PurchaseOrder::with('items.material', 'storageLocation')->find($request->po_id) : null;
-        return view('mm.goods-receipts.create', compact('pos', 'locations', 'selectedPo', 'deliveryNote', 'dnQtyMap'));
+        return view('mm.goods-receipts.create', compact('pos', 'recentPos', 'locations', 'selectedPo', 'deliveryNote', 'dnQtyMap'));
     }
 
     public function store(Request $request)

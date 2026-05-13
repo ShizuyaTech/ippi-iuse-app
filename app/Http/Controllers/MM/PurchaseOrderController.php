@@ -121,8 +121,10 @@ class PurchaseOrderController extends Controller
 
     public function edit(PurchaseOrder $purchaseOrder)
     {
-        if ($purchaseOrder->status !== 'draft') {
-            return back()->with('error', 'Hanya PO dengan status Draft yang dapat diedit.');
+        $canEdit = $purchaseOrder->status === 'draft'
+            || ($purchaseOrder->status === 'approved' && $purchaseOrder->skm_order_id !== null);
+        if (!$canEdit) {
+            return back()->with('error', 'Hanya PO Draft atau PO dari SKM yang berstatus Approved yang dapat diedit.');
         }
         $vendors   = Vendor::where('is_active', true)->get();
         $materials = Material::where('is_active', true)->orderBy('type')->orderBy('code')->get();
@@ -133,8 +135,10 @@ class PurchaseOrderController extends Controller
 
     public function update(Request $request, PurchaseOrder $purchaseOrder)
     {
-        if ($purchaseOrder->status !== 'draft') {
-            return back()->with('error', 'Hanya PO Draft yang dapat diedit.');
+        $canEdit = $purchaseOrder->status === 'draft'
+            || ($purchaseOrder->status === 'approved' && $purchaseOrder->skm_order_id !== null);
+        if (!$canEdit) {
+            return back()->with('error', 'Hanya PO Draft atau PO dari SKM yang berstatus Approved yang dapat diedit.');
         }
         $request->validate([
             'vendor_id'              => 'required|exists:vendors,id',

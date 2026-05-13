@@ -36,28 +36,28 @@
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
             <a href="{{ route('mm.purchase-orders.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm border hover:bg-gray-200">Reset</a>
         </form>
-        <div class="mobile-cards overflow-x-auto">
+        <div class="no-mobile-cards overflow-x-auto">
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
-                    <th class="px-4 py-2 text-left">No. PO</th>
-                    <th class="px-4 py-2 text-left">Vendor</th>
-                    <th class="px-4 py-2 text-left">Tgl Order</th>
-                    <th class="px-4 py-2 text-left">Est. Terima</th>
-                    <th class="px-4 py-2 text-right">Total</th>
-                    <th class="px-4 py-2 text-center">Status</th>
-                    <th class="px-4 py-2 text-center print:hidden">Aksi</th>
+                    <th class="px-3 py-2 text-left">No. PO</th>
+                    <th class="px-3 py-2 text-left hidden sm:table-cell">Vendor</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Tgl Order</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Est. Terima</th>
+                    <th class="px-3 py-2 text-left">Catatan</th>
+                    <th class="px-3 py-2 text-center hidden sm:table-cell">Status</th>
+                    <th class="px-3 py-2 text-center print:hidden">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($pos as $po)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-4 py-2 font-mono text-blue-700 font-medium" data-label="No. PO">{{ $po->po_number }}</td>
-                    <td class="px-4 py-2" data-label="Vendor">{{ $po->vendor->name ?? '-' }}</td>
-                    <td class="px-4 py-2" data-label="Tgl Order">{{ $po->order_date->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2" data-label="Est. Terima">{{ $po->expected_delivery_date?->format('d/m/Y') ?? '-' }}</td>
-                    <td class="px-4 py-2 text-right" data-label="Total">{{ number_format($po->total_amount,0) }}</td>
-                    <td class="px-4 py-2 text-center" data-label="Status">
+                    <td class="px-3 py-2 font-mono text-blue-700 font-medium text-xs whitespace-nowrap">{{ $po->po_number }}</td>
+                    <td class="px-3 py-2 hidden sm:table-cell">{{ $po->vendor->name ?? '-' }}</td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $po->order_date->format('d/m/Y') }}</td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $po->expected_delivery_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td class="px-3 py-2 text-gray-500 text-xs">{{ Str::limit($po->notes ?? '-', 30) }}</td>
+                    <td class="px-3 py-2 text-center hidden sm:table-cell">
                         <span class="px-2 py-0.5 rounded text-xs
                             {{ $po->status==='draft'?'bg-gray-100 text-gray-600':'' }}
                             {{ $po->status==='approved'?'bg-blue-100 text-blue-700':'' }}
@@ -66,7 +66,7 @@
                             {{ $po->status==='partially_received'?'bg-yellow-100 text-yellow-700':'' }}
                         ">{{ ucfirst(str_replace('_',' ',$po->status)) }}</span>
                     </td>
-                    <td class="px-4 py-2 text-center print:hidden">
+                    <td class="px-3 py-2 text-center print:hidden">
                         <a href="{{ route('mm.purchase-orders.show', $po) }}" class="text-blue-600 hover:underline">Detail</a>
                     </td>
                 </tr>

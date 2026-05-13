@@ -16,7 +16,7 @@
             $posJson = $pos->map(fn($p) => ['id' => $p->id, 'label' => $p->po_number.' - '.$p->vendor->name]);
             $selectedPoLabel = request('po_id') ? ($pos->firstWhere('id', request('po_id'))?->po_number.' - '.$pos->firstWhere('id', request('po_id'))?->vendor?->name) : '';
         @endphp
-        <form method="GET" id="po-select-form" class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <form method="GET" id="po-select-form" class="mb-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
             @isset($deliveryNote)
             <input type="hidden" name="dn_id" value="{{ $deliveryNote->id }}">
             @endisset
@@ -36,6 +36,31 @@
                 </div>
             </div>
         </form>
+
+        {{-- 10 PO Terbaru (Open / Partial) --}}
+        @if($recentPos->isNotEmpty() && !$selectedPo)
+        <div class="mb-6">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">10 PO Terbaru yang Belum Selesai</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                @foreach($recentPos as $rpo)
+                @php
+                    $statusColor = $rpo->status === 'partially_received'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-blue-100 text-blue-700';
+                    $statusLabel = $rpo->status === 'partially_received' ? 'Partial' : 'Approved';
+                @endphp
+                <a href="{{ request()->fullUrlWithQuery(['po_id' => $rpo->id]) }}"
+                   class="flex items-center justify-between gap-2 px-3 py-2 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group">
+                    <div class="min-w-0">
+                        <div class="font-mono text-blue-700 text-xs font-bold truncate">{{ $rpo->po_number }}</div>
+                        <div class="text-gray-600 text-xs truncate">{{ $rpo->vendor->name ?? '-' }}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap {{ $statusColor }}">{{ $statusLabel }}</span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         <script>
             const allPos = @json($posJson);
