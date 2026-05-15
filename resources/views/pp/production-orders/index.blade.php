@@ -57,7 +57,7 @@
                         <div class="font-mono text-xs text-gray-500">{{ $prd->material->code }}</div>
                         <div>{{ $prd->material->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right" data-label="Qty Plan">{{ number_format($prd->quantity_planned, 3) }}</td>
+                    <td class="px-4 py-2 text-right" data-label="Qty Plan">{{ fmt_qty($prd->quantity_planned) }}</td>
                     <td class="px-4 py-2" data-label="Tgl Mulai">{{ $prd->planned_start_date?->format('d/m/Y') ?? '-' }}</td>
                     <td class="px-4 py-2" data-label="Tgl Selesai">{{ $prd->planned_end_date?->format('d/m/Y') ?? '-' }}</td>
                     <td class="px-4 py-2 text-center" data-label="Status">

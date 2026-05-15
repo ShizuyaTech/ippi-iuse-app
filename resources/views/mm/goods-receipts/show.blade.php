@@ -26,29 +26,31 @@
         </div>
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Item Diterima</h3>
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 text-left">Material</th>
                         <th class="px-4 py-2 text-right">Qty Diterima</th>
-                        <th class="px-4 py-2 text-left">UoM</th>
-                        <th class="px-4 py-2 text-left">ID Packing / Keterangan</th>
+                        <th class="px-4 py-2 text-left hidden sm:table-cell">UoM</th>
+                        <th class="px-4 py-2 text-left hidden sm:table-cell">ID Packing / Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($goodsReceipt->items as $item)
                     <tr class="border-b">
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 min-w-[140px]">
                             <div class="font-mono text-blue-700 text-xs">{{ $item->material->code }}</div>
-                            <div>{{ $item->material->name }}</div>
+                            <div class="font-medium">{{ $item->material->name }}</div>
                         </td>
-                        <td class="px-4 py-2 text-right font-medium text-green-700">{{ number_format($item->quantity_received, 3) }}</td>
-                        <td class="px-4 py-2">{{ $item->material->unit_of_measure ?? '-' }}</td>
-                        <td class="px-4 py-2 font-mono text-xs text-gray-600">{{ $item->packing_note ?? '—' }}</td>
+                        <td class="px-4 py-2 text-right font-medium text-green-700 whitespace-nowrap">{{ fmt_qty($item->quantity_received) }}</td>
+                        <td class="px-4 py-2 text-gray-500 hidden sm:table-cell">{{ $item->material->unit_of_measure ?? '-' }}</td>
+                        <td class="px-4 py-2 font-mono text-xs text-gray-600 hidden sm:table-cell">{{ $item->packing_note ?? '—' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </x-app-layout>

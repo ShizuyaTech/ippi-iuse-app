@@ -145,9 +145,9 @@
                             {{ $item->vendor->name ?? '-' }}
                         </td>
                         <td class="px-3 py-2 text-right {{ (float)$item->current_stock < (float)$item->min_stock ? 'text-red-600' : 'text-green-700' }} font-medium">
-                            {{ number_format($item->current_stock, 3) }}
+                            {{ fmt_qty($item->current_stock) }}
                         </td>
-                        <td class="px-3 py-2 text-right text-gray-600">{{ number_format($item->min_stock, 3) }}</td>
+                        <td class="px-3 py-2 text-right text-gray-600">{{ fmt_qty($item->min_stock) }}</td>
                         <td class="px-3 py-2 text-right">{{ number_format($item->kanban_qty, 0) }}</td>
                         <td class="px-3 py-2 text-right font-semibold text-blue-700">{{ $item->num_cards }}</td>
                         <td class="px-3 py-2 text-right font-bold text-blue-900 text-base">{{ number_format($item->order_qty, 0) }}</td>

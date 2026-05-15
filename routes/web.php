@@ -46,25 +46,36 @@ Route::middleware(['auth', 'verified', 'vendor.portal', 'vendor.scope'])
     ->group(function () {
         Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
         Route::get('purchase-orders', [VendorPoController::class, 'index'])->name('purchase-orders.index');
+        Route::get('purchase-orders/export-excel', [VendorPoController::class, 'exportExcel'])->name('purchase-orders.export-excel');
+        Route::get('purchase-orders/export-pdf', [VendorPoController::class, 'exportPdf'])->name('purchase-orders.export-pdf');
         Route::get('purchase-orders/{purchaseOrder}', [VendorPoController::class, 'show'])->name('purchase-orders.show');
+        Route::get('purchase-orders/{purchaseOrder}/print-pdf', [VendorPoController::class, 'printPdf'])->name('purchase-orders.print-pdf');
         Route::get('delivery-notes', [VendorDnController::class, 'index'])->name('delivery-notes.index');
+        Route::get('delivery-notes/export-excel', [VendorDnController::class, 'exportListExcel'])->name('delivery-notes.export-excel');
+        Route::get('delivery-notes/export-pdf', [VendorDnController::class, 'exportListPdf'])->name('delivery-notes.export-pdf');
         Route::get('delivery-notes/create', [VendorDnController::class, 'create'])->name('delivery-notes.create');
         Route::post('delivery-notes', [VendorDnController::class, 'store'])->name('delivery-notes.store');
         Route::get('delivery-notes/{deliveryNote}', [VendorDnController::class, 'show'])->name('delivery-notes.show');
         Route::get('delivery-notes/{deliveryNote}/print-pdf', [VendorDnController::class, 'printPdf'])->name('delivery-notes.print-pdf');
-        Route::get('delivery-notes/{deliveryNote}/export-excel', [VendorDnController::class, 'exportExcel'])->name('delivery-notes.export-excel');
+        Route::get('delivery-notes/{deliveryNote}/export-excel', [VendorDnController::class, 'exportExcel'])->name('delivery-notes.export-excel-single');
         Route::patch('delivery-notes/{deliveryNote}/cancel', [VendorDnController::class, 'cancel'])->name('delivery-notes.cancel');
 
         // Material Receipts (Kiriman Bahan dari IPPI)
         Route::get('material-receipts', [MaterialReceiptController::class, 'index'])->name('material-receipts.index');
+        Route::get('material-receipts/export-excel', [MaterialReceiptController::class, 'exportExcel'])->name('material-receipts.export-excel');
+        Route::get('material-receipts/export-pdf', [MaterialReceiptController::class, 'exportPdf'])->name('material-receipts.export-pdf');
         Route::get('material-receipts/{materialReceipt}', [MaterialReceiptController::class, 'show'])->name('material-receipts.show');
+        Route::get('material-receipts/{materialReceipt}/print-pdf', [MaterialReceiptController::class, 'printPdf'])->name('material-receipts.print-pdf');
         Route::post('material-receipts/{materialReceipt}/confirm', [MaterialReceiptController::class, 'confirm'])->name('material-receipts.confirm');
 
         // Vendor Production Orders
         Route::get('production-orders', [VendorProductionOrderController::class, 'index'])->name('production-orders.index');
+        Route::get('production-orders/export-excel', [VendorProductionOrderController::class, 'exportExcel'])->name('production-orders.export-excel');
+        Route::get('production-orders/export-pdf', [VendorProductionOrderController::class, 'exportPdf'])->name('production-orders.export-pdf');
         Route::get('production-orders/create', [VendorProductionOrderController::class, 'create'])->name('production-orders.create');
         Route::post('production-orders', [VendorProductionOrderController::class, 'store'])->name('production-orders.store');
         Route::get('production-orders/{productionOrder}', [VendorProductionOrderController::class, 'show'])->name('production-orders.show');
+        Route::get('production-orders/{productionOrder}/print-pdf', [VendorProductionOrderController::class, 'printPdf'])->name('production-orders.print-pdf');
         Route::post('production-orders/{productionOrder}/release', [VendorProductionOrderController::class, 'release'])->name('production-orders.release');
         Route::post('production-orders/{productionOrder}/report', [VendorProductionOrderController::class, 'report'])->middleware('throttle:20,1')->name('production-orders.report');
         Route::post('production-orders/{productionOrder}/complete', [VendorProductionOrderController::class, 'complete'])->middleware('throttle:10,1')->name('production-orders.complete');
@@ -72,6 +83,8 @@ Route::middleware(['auth', 'verified', 'vendor.portal', 'vendor.scope'])
 
         // Stock Overview
         Route::get('stocks', [VendorStockController::class, 'index'])->name('stocks.index');
+        Route::get('stocks/print-pdf', [VendorStockController::class, 'printPdf'])->name('stocks.print-pdf');
+        Route::get('stocks/export-excel', [VendorStockController::class, 'exportExcel'])->name('stocks.export-excel');
     });
 
 // Profile routes – accessible to all authenticated users (incl. vendors)

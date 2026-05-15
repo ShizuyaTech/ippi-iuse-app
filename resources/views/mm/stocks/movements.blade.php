@@ -53,7 +53,7 @@
                     </td>
                     <td class="px-4 py-2 text-right font-medium
                         {{ in_array($m->movement_type, ['GR','PP_GR']) ? 'text-green-700' : 'text-orange-600' }}">
-                        {{ in_array($m->movement_type, ['GR','PP_GR']) ? '+' : '-' }}{{ number_format(abs($m->quantity), 3) }}
+                        {{ in_array($m->movement_type, ['GR','PP_GR']) ? '+' : '-' }}{{ fmt_qty(abs($m->quantity)) }}
                     </td>
                     <td class="px-4 py-2 text-xs text-gray-500">{{ $m->reference ?? '-' }}</td>
                     <td class="px-4 py-2 text-xs">{{ $m->createdBy->name ?? '-' }}</td>

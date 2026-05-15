@@ -2,12 +2,21 @@
     <x-slot name="title">Detail Kiriman: {{ $materialReceipt->vmd_number }}</x-slot>
     <div class="max-w-3xl space-y-4">
         <div class="bg-white rounded-lg shadow p-5">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="{{ route('vendor.material-receipts.index') }}" class="text-teal-600 hover:underline text-sm">← Kembali</a>
-                <h2 class="text-lg font-semibold text-gray-700">
-                    Kiriman: <span class="font-mono text-teal-700">{{ $materialReceipt->vmd_number }}</span>
-                </h2>
-                <span class="px-2 py-0.5 rounded text-xs {{ $materialReceipt->statusColor() }}">{{ $materialReceipt->statusLabel() }}</span>
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <a href="{{ route('vendor.material-receipts.index') }}" class="text-teal-600 hover:underline text-sm">← Kembali</a>
+                    <h2 class="text-lg font-semibold text-gray-700 mt-1">
+                        Kiriman: <span class="font-mono text-teal-700">{{ $materialReceipt->vmd_number }}</span>
+                    </h2>
+                    <span class="mt-1 inline-block px-2 py-0.5 rounded text-xs {{ $materialReceipt->statusColor() }}">{{ $materialReceipt->statusLabel() }}</span>
+                </div>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <a href="{{ route('vendor.material-receipts.print-pdf', $materialReceipt) }}" target="_blank"
+                       class="inline-flex items-center gap-1.5 bg-red-700 text-white px-4 py-2 rounded text-sm hover:bg-red-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        Print PDF
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))
@@ -55,7 +64,7 @@
                                 <div class="text-xs text-gray-400">{{ $item->material?->unit_of_measure }}</div>
                             </td>
                             <td class="px-4 py-2 text-right font-medium text-gray-600">
-                                {{ number_format($item->quantity, 3) }}
+                                {{ fmt_qty($item->quantity) }}
                             </td>
                             <td class="px-4 py-2 text-right">
                                 <input type="number" step="0.001" min="0" max="{{ $item->quantity }}"
@@ -100,10 +109,10 @@
                             <div class="font-mono text-xs text-teal-700">{{ $item->material?->code }}</div>
                             <div>{{ $item->material?->name }}</div>
                         </td>
-                        <td class="px-4 py-2 text-right text-gray-500">{{ number_format($item->quantity, 3) }}</td>
-                        <td class="px-4 py-2 text-right font-medium text-teal-700">{{ number_format($item->quantity_confirmed ?? $item->quantity, 3) }} {{ $item->material?->unit_of_measure }}</td>
+                        <td class="px-4 py-2 text-right text-gray-500">{{ fmt_qty($item->quantity) }}</td>
+                        <td class="px-4 py-2 text-right font-medium text-teal-700">{{ fmt_qty($item->quantity_confirmed ?? $item->quantity) }} {{ $item->material?->unit_of_measure }}</td>
                         <td class="px-4 py-2 text-right {{ $selisih > 0 ? 'text-orange-600 font-medium' : 'text-gray-400' }}">
-                            {{ $selisih > 0 ? '-'.number_format($selisih, 3) : '&ndash;' }}
+                            {{ $selisih > 0 ? '-'.fmt_qty($selisih) : '&ndash;' }}
                         </td>
                     </tr>
                     @endforeach

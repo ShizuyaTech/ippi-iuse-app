@@ -67,10 +67,10 @@
                 </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
-                <div><span class="text-gray-500">Qty Planned:</span><br><span class="font-medium">{{ number_format($productionOrder->quantity_planned, 3) }}</span></div>
-                <div><span class="text-gray-500">Qty Produced:</span><br><span class="font-medium">{{ number_format($productionOrder->quantity_produced ?? 0, 3) }}</span></div>
-                <div><span class="text-gray-500">Qty OK:</span><br><span class="font-medium text-green-700">{{ number_format($productionOrder->quantity_ok ?? 0, 3) }}</span></div>
-                <div><span class="text-gray-500">Qty NG:</span><br><span class="font-medium text-red-600">{{ number_format($productionOrder->quantity_ng ?? 0, 3) }}</span></div>
+                <div><span class="text-gray-500">Qty Planned:</span><br><span class="font-medium">{{ fmt_qty($productionOrder->quantity_planned) }}</span></div>
+                <div><span class="text-gray-500">Qty Produced:</span><br><span class="font-medium">{{ fmt_qty($productionOrder->quantity_produced ?? 0) }}</span></div>
+                <div><span class="text-gray-500">Qty OK:</span><br><span class="font-medium text-green-700">{{ fmt_qty($productionOrder->quantity_ok ?? 0) }}</span></div>
+                <div><span class="text-gray-500">Qty NG:</span><br><span class="font-medium text-red-600">{{ fmt_qty($productionOrder->quantity_ng ?? 0) }}</span></div>
                 <div><span class="text-gray-500">BOM:</span><br>
                     @if($productionOrder->bom)
                     <a href="{{ route('pp.boms.show', $productionOrder->bom) }}" class="font-mono text-blue-600 hover:underline">{{ $productionOrder->bom->bom_number }}</a>
@@ -142,13 +142,13 @@
                             <div class="font-mono text-blue-700 text-xs">{{ $comp->material->code }}</div>
                             <div>{{ $comp->material->name }}</div>
                         </td>
-                        <td class="px-4 py-2 text-right">{{ number_format($comp->quantity_required, 3) }}</td>
+                        <td class="px-4 py-2 text-right">{{ fmt_qty($comp->quantity_required) }}</td>
                         <td class="px-4 py-2 text-right {{ !$isPending ? 'text-green-700 font-medium' : 'text-gray-500' }}">
-                            {{ number_format($comp->quantity_issued ?? 0, 3) }}
+                            {{ fmt_qty($comp->quantity_issued ?? 0) }}
                         </td>
                         @if(in_array($productionOrder->status, ['released', 'in_progress']))
                         <td class="px-4 py-2 text-right {{ $stockInfo['available'] < $remaining ? 'text-red-600' : 'text-gray-600' }}">
-                            {{ number_format($stockInfo['available'], 3) }}
+                            {{ fmt_qty($stockInfo['available']) }}
                             <div class="text-xs text-gray-400">{{ $stockInfo['location_code'] }}</div>
                         </td>
                         <td class="px-4 py-2 text-right">

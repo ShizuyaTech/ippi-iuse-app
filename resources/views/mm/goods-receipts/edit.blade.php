@@ -58,7 +58,7 @@
                                 <div class="text-gray-700">{{ $item->purchaseOrderItem->material->name }}</div>
                             </td>
                             <td class="px-3 py-2 text-right font-medium">
-                                {{ number_format($item->quantity_received, 3) }}
+                                {{ fmt_qty($item->quantity_received) }}
                                 <span class="text-gray-400 text-xs">{{ $item->purchaseOrderItem->material->unit_of_measure }}</span>
                             </td>
                             <td class="px-3 py-2">

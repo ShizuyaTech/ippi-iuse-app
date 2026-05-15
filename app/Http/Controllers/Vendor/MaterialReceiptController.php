@@ -8,23 +8,90 @@ use App\Models\StockMovement;
 use App\Models\VendorMaterialDelivery;
 use App\Models\VendorStock;
 use App\Models\VendorStockMovement;
+use App\Services\ExcelService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class MaterialReceiptController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $receipts = VendorMaterialDelivery::with('items.material')
-            ->when($user->vendor_id, fn($q, $v) => $q->where('vendor_id', $v))
+        $receipts = $this->buildQuery($request)
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return view('vendor-portal.material-receipts.index', compact('receipts'));
+    }
+
+    private function buildQuery(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $query = VendorMaterialDelivery::with('items.material')
+            ->when($user->vendor_id, fn($q, $v) => $q->where('vendor_id', $v));
+        if ($request->search) {
+            $query->where('vmd_number', 'like', "%{$request->search}%");
+        }
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->date_from) {
+            $query->whereDate('delivery_date', '>=', $request->date_from);
+        }
+        if ($request->date_to) {
+            $query->whereDate('delivery_date', '<=', $request->date_to);
+        }
+        return $query;
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $receipts = $this->buildQuery($request)->latest()->get();
+        $filters = $request->only(['search', 'status', 'date_from', 'date_to']);
+        $pdf = Pdf::loadView('vendor-portal.material-receipts.pdf-list', compact('receipts', 'filters'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('material-receipts-list.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $receipts = $this->buildQuery($request)->latest()->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Material Receipts');
+
+        $sheet->setCellValue('A1', 'DAFTAR KIRIMAN BAHAN DARI IPPI');
+        $sheet->setCellValue('A2', 'Dicetak: ' . now()->format('d/m/Y H:i'));
+        $sheet->mergeCells('A1:F1');
+        $sheet->mergeCells('A2:F2');
+
+        $headers = ['No. VMD', 'Tanggal Kirim', 'No. Kendaraan', 'Driver', 'Jumlah Item', 'Status'];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue(chr(65 + $i) . '4', $h);
+        }
+        ExcelService::applyHeaderStyle($spreadsheet, 'A4:F4');
+
+        $row = 5;
+        foreach ($receipts as $r) {
+            $sheet->setCellValue("A{$row}", $r->vmd_number);
+            $sheet->setCellValue("B{$row}", $r->delivery_date?->format('d/m/Y') ?? '-');
+            $sheet->setCellValue("C{$row}", $r->vehicle_number ?? '-');
+            $sheet->setCellValue("D{$row}", $r->driver_name ?? '-');
+            $sheet->setCellValue("E{$row}", $r->items->count());
+            $sheet->setCellValue("F{$row}", $r->statusLabel());
+            $row++;
+        }
+        ExcelService::applyDataStyle($spreadsheet, "A5:F" . ($row - 1));
+
+        return ExcelService::download($spreadsheet, 'material-receipts-list.xlsx');
     }
 
     public function show(VendorMaterialDelivery $materialReceipt)
@@ -39,6 +106,19 @@ class MaterialReceiptController extends Controller
         $materialReceipt->load('items.material', 'items.storageLocation', 'createdBy');
 
         return view('vendor-portal.material-receipts.show', compact('materialReceipt'));
+    }
+
+    public function printPdf(VendorMaterialDelivery $materialReceipt)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->vendor_id !== null) {
+            abort_if($materialReceipt->vendor_id !== $user->vendor_id, 403);
+        }
+        $materialReceipt->load('items.material', 'items.storageLocation', 'createdBy');
+        $pdf = Pdf::loadView('vendor-portal.material-receipts.pdf', compact('materialReceipt'))
+            ->setPaper('a4', 'portrait');
+        return $pdf->stream("VMD-{$materialReceipt->vmd_number}.pdf");
     }
 
     public function confirm(Request $request, VendorMaterialDelivery $materialReceipt)

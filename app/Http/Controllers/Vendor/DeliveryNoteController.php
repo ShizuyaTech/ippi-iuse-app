@@ -296,4 +296,69 @@ class DeliveryNoteController extends Controller
 
         return back()->with('success', 'Dokumen berhasil dibatalkan. Stok vendor telah dikembalikan.');
     }
+
+    private function buildListQuery(Request $request)
+    {
+        $query = DeliveryNote::with('purchaseOrder')
+            ->when($this->vendorScopeId(), fn($q, $v) => $q->where('vendor_id', $v));
+        if ($request->search) {
+            $query->where(fn($q) => $q
+                ->where('dn_number', 'like', "%{$request->search}%")
+                ->orWhereHas('purchaseOrder', fn($p) => $p->where('po_number', 'like', "%{$request->search}%")));
+        }
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->date_from) {
+            $query->whereDate('estimated_delivery_date', '>=', $request->date_from);
+        }
+        if ($request->date_to) {
+            $query->whereDate('estimated_delivery_date', '<=', $request->date_to);
+        }
+        return $query;
+    }
+
+    public function exportListPdf(Request $request)
+    {
+        $deliveryNotes = $this->buildListQuery($request)->latest()->get();
+        $filters = $request->only(['search', 'status', 'date_from', 'date_to']);
+        $pdf = Pdf::loadView('vendor-portal.delivery-notes.pdf-list', compact('deliveryNotes', 'filters'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('delivery-notes-list.pdf');
+    }
+
+    public function exportListExcel(Request $request)
+    {
+        $deliveryNotes = $this->buildListQuery($request)->latest()->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Surat Jalan');
+
+        $sheet->setCellValue('A1', 'DAFTAR SURAT JALAN – VENDOR');
+        $sheet->setCellValue('A2', 'Dicetak: ' . now()->format('d/m/Y H:i'));
+        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A2:G2');
+
+        $headers = ['No. SJ', 'No. PO', 'Est. Pengiriman', 'No. Kendaraan', 'Driver', 'Status', 'Dibuat'];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue(chr(65 + $i) . '4', $h);
+        }
+        ExcelService::applyHeaderStyle($spreadsheet, 'A4:G4');
+
+        $row = 5;
+        foreach ($deliveryNotes as $dn) {
+            $sheet->setCellValue("A{$row}", $dn->dn_number);
+            $sheet->setCellValue("B{$row}", $dn->purchaseOrder?->po_number ?? '-');
+            $sheet->setCellValue("C{$row}", $dn->estimated_delivery_date?->format('d/m/Y') ?? '-');
+            $sheet->setCellValue("D{$row}", $dn->vehicle_number ?? '-');
+            $sheet->setCellValue("E{$row}", $dn->driver_name ?? '-');
+            $sheet->setCellValue("F{$row}", $dn->statusLabel());
+            $sheet->setCellValue("G{$row}", $dn->created_at?->format('d/m/Y') ?? '-');
+            $row++;
+        }
+        ExcelService::applyDataStyle($spreadsheet, "A5:G" . ($row - 1));
+
+        return ExcelService::download($spreadsheet, 'delivery-notes-list.xlsx');
+    }
 }

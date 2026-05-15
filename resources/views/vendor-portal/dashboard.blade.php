@@ -121,7 +121,7 @@
                                 {{ $row['type']==='FP'?'bg-green-100 text-green-700':'' }}
                             ">{{ $row['type'] }}</span>
                         </td>
-                        <td class="px-3 py-1.5 text-right font-medium">{{ number_format($row['total'], 3) }}</td>
+                        <td class="px-3 py-1.5 text-right font-medium">{{ fmt_qty($row['total']) }}</td>
                         <td class="px-3 py-1.5 text-xs text-gray-500">{{ $row['uom'] }}</td>
                     </tr>
                     @endforeach

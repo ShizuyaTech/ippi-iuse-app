@@ -81,7 +81,7 @@
                                 {{ $d->material->type }}
                             </span>
                         </td>
-                        <td class="px-3 py-1.5 text-right font-medium" data-label="Qty Order">{{ number_format($d->order_quantity, 3) }}</td>
+                        <td class="px-3 py-1.5 text-right font-medium" data-label="Qty Order">{{ fmt_qty($d->order_quantity) }}</td>
                         <td class="px-3 py-1.5 text-gray-600 text-xs" data-label="Customer">{{ $d->customer_name ?? '-' }}</td>
                         <td class="px-3 py-1.5 text-gray-400 text-xs" data-label="Catatan">{{ $d->notes ?? '-' }}</td>
                         <td class="px-3 py-1.5 text-center">

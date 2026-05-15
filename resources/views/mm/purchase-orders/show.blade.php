@@ -105,29 +105,30 @@
         {{-- Items --}}
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Item Purchase Order</h3>
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 text-left">Material</th>
                         <th class="px-4 py-2 text-right">Qty Order</th>
                         <th class="px-4 py-2 text-right">Qty Terima</th>
-                        <th class="px-4 py-2 text-right">Harga Satuan</th>
-                        <th class="px-4 py-2 text-right">Total</th>
-                        <th class="px-4 py-2 text-center">Progress</th>
+                        <th class="px-4 py-2 text-right hidden sm:table-cell">Harga Satuan</th>
+                        <th class="px-4 py-2 text-right hidden sm:table-cell">Total</th>
+                        <th class="px-4 py-2 text-center hidden sm:table-cell">Progress</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($purchaseOrder->items as $item)
                     <tr class="border-b">
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 min-w-[140px]">
                             <div class="font-mono text-blue-700 text-xs">{{ $item->material->code }}</div>
-                            <div>{{ $item->material->name }}</div>
+                            <div class="break-words">{{ $item->material->name }}</div>
                         </td>
-                        <td class="px-4 py-2 text-right">{{ number_format($item->quantity, 3) }}</td>
-                        <td class="px-4 py-2 text-right">{{ number_format($item->quantity_received, 3) }}</td>
-                        <td class="px-4 py-2 text-right">{{ number_format($item->unit_price, 2) }}</td>
-                        <td class="px-4 py-2 text-right font-medium">{{ number_format($item->total_price, 0) }}</td>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 text-right whitespace-nowrap">{{ fmt_qty($item->quantity) }}</td>
+                        <td class="px-4 py-2 text-right whitespace-nowrap">{{ fmt_qty($item->quantity_received) }}</td>
+                        <td class="px-4 py-2 text-right whitespace-nowrap hidden sm:table-cell">{{ number_format($item->unit_price, 2) }}</td>
+                        <td class="px-4 py-2 text-right font-medium whitespace-nowrap hidden sm:table-cell">{{ number_format($item->total_price, 0) }}</td>
+                        <td class="px-4 py-2 hidden sm:table-cell">
                             @php $pct = $item->quantity > 0 ? min(100, ($item->quantity_received / $item->quantity) * 100) : 0; @endphp
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="bg-green-500 h-2 rounded-full" style="width:{{ $pct }}%"></div>
@@ -138,18 +139,20 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
 
         {{-- GR History --}}
         @if($purchaseOrder->goodsReceipts->count())
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Riwayat Goods Receipt</h3>
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 text-left">No. GR</th>
                         <th class="px-4 py-2 text-left">Tanggal</th>
-                        <th class="px-4 py-2 text-left">Lokasi</th>
+                        <th class="px-4 py-2 text-left hidden sm:table-cell">Lokasi</th>
                         <th class="px-4 py-2 text-center">Status</th>
                     </tr>
                 </thead>
@@ -157,13 +160,14 @@
                     @foreach($purchaseOrder->goodsReceipts as $gr)
                     <tr class="border-b">
                         <td class="px-4 py-2"><a href="{{ route('mm.goods-receipts.show', $gr) }}" class="text-blue-600 font-mono hover:underline">{{ $gr->gr_number }}</a></td>
-                        <td class="px-4 py-2">{{ $gr->receipt_date->format('d/m/Y') }}</td>
-                        <td class="px-4 py-2">{{ $gr->storageLocation->name ?? '-' }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $gr->receipt_date->format('d/m/Y') }}</td>
+                        <td class="px-4 py-2 hidden sm:table-cell">{{ $gr->storageLocation->name ?? '-' }}</td>
                         <td class="px-4 py-2 text-center"><span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">{{ $gr->status }}</span></td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
         @endif
     </div>

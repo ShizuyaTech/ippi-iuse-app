@@ -16,7 +16,7 @@
                     <a href="{{ route('pp.boms.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
                 </div>
             </div>
-            <div class="mt-3 text-sm"><span class="text-gray-500">Qty Base:</span> <span class="font-medium">{{ number_format($bom->base_quantity, 3) }} {{ $bom->material->unit_of_measure }}</span></div>
+            <div class="mt-3 text-sm"><span class="text-gray-500">Qty Base:</span> <span class="font-medium">{{ fmt_qty($bom->base_quantity) }} {{ $bom->material->unit_of_measure }}</span></div>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Komponen BOM</h3>
@@ -38,7 +38,7 @@
                         <td class="px-4 py-2 font-mono text-blue-700 text-xs">{{ $item->material->code }}</td>
                         <td class="px-4 py-2">{{ $item->material->name }}</td>
                         <td class="px-4 py-2 text-xs"><span class="px-2 py-0.5 rounded bg-gray-100">{{ $item->material->type }}</span></td>
-                        <td class="px-4 py-2 text-right font-medium">{{ number_format($item->quantity, 3) }}</td>
+                        <td class="px-4 py-2 text-right font-medium">{{ fmt_qty($item->quantity) }}</td>
                         <td class="px-4 py-2">{{ $item->unit ?? $item->material->unit_of_measure }}</td>
                     </tr>
                     @endforeach

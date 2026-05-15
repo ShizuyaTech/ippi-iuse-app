@@ -13,14 +13,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-gray-900 antialiased min-h-screen bg-slate-100">
-    <div class="relative min-h-screen overflow-hidden">
+    <div class="relative min-h-screen">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#e2e8f0,_#f8fafc_45%,_#e0f2fe)]"></div>
-        <div class="absolute -top-16 -left-16 w-72 h-72 rounded-full bg-cyan-200/35 blur-3xl"></div>
-        <div class="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-sky-300/25 blur-3xl"></div>
+        <div class="absolute -top-16 -left-16 w-72 h-72 rounded-full bg-cyan-200/35 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-sky-300/25 blur-3xl pointer-events-none"></div>
 
-        <div class="relative min-h-screen flex items-center justify-center p-4 md:p-8">
-            <div class="w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200/70 bg-white/90 backdrop-blur-sm overflow-hidden">
-                <div class="grid md:grid-cols-2 min-h-[640px]">
+        <div class="relative min-h-screen flex items-center justify-center p-3 sm:p-6 md:p-8">
+            <div class="w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200/70 bg-white/90 backdrop-blur-sm overflow-hidden my-auto">
+                <div class="grid md:grid-cols-2 md:min-h-[640px]">
                     <section class="hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-teal-900 via-cyan-900 to-slate-900 text-white">
                         <div>
                             <a href="/" class="inline-flex items-center gap-2">
@@ -39,7 +39,7 @@
                         </div>
                     </section>
 
-                    <section class="p-6 sm:p-8 md:p-10 bg-white">
+                    <section class="p-5 sm:p-8 md:p-10 bg-white">
                         {{ $slot }}
                     </section>
                 </div>

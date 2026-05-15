@@ -2,11 +2,22 @@
     <x-slot name="title">Vendor Production Orders</x-slot>
 
     <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
             <h2 class="text-lg font-semibold text-gray-700">Vendor Production Orders</h2>
-            <a href="{{ route('vendor.production-orders.create') }}" class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800">
-                + Buat Order
-            </a>
+            <div class="flex flex-wrap gap-2 items-center">
+                <a href="{{ route('vendor.production-orders.create') }}"
+                   class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800">
+                    + Buat Order
+                </a>
+                <a href="{{ route('vendor.production-orders.export-excel', request()->query()) }}"
+                   class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
+                    Export Excel
+                </a>
+                <a href="{{ route('vendor.production-orders.export-pdf', request()->query()) }}" target="_blank"
+                   class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
+                    Print PDF
+                </a>
+            </div>
         </div>
 
         <form method="GET" class="flex flex-wrap md:flex-nowrap gap-2 mb-4">
@@ -45,9 +56,9 @@
                         <div class="font-mono text-xs text-gray-500">{{ $order->material?->code }}</div>
                         <div>{{ $order->material?->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right">{{ number_format($order->quantity_planned, 3) }}</td>
-                    <td class="px-4 py-2 text-right">{{ number_format($order->quantity_ok, 3) }}</td>
-                    <td class="px-4 py-2 text-right">{{ number_format($order->quantity_ng, 3) }}</td>
+                    <td class="px-4 py-2 text-right">{{ fmt_qty($order->quantity_planned) }}</td>
+                    <td class="px-4 py-2 text-right">{{ fmt_qty($order->quantity_ok) }}</td>
+                    <td class="px-4 py-2 text-right">{{ fmt_qty($order->quantity_ng) }}</td>
                     <td class="px-4 py-2 font-mono text-xs text-teal-700">{{ $order->deliveryNote?->dn_number ?? '-' }}</td>
                     <td class="px-4 py-2 text-center">
                         <span class="px-2 py-0.5 rounded text-xs {{ $order->statusColor() }}">{{ $order->statusLabel() }}</span>

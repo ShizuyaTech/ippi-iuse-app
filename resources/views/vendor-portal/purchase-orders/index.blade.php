@@ -1,8 +1,18 @@
 ﻿<x-vendor-layout>
-    <x-slot name="title">Purchase Order Saya</x-slot>
+    <x-slot name="title">Purchase Order</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
             <h2 class="text-lg font-semibold text-gray-700">Daftar Purchase Order</h2>
+            <div class="flex flex-wrap gap-2 items-center">
+                <a href="{{ route('vendor.purchase-orders.export-excel', request()->query()) }}"
+                   class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
+                    Export Excel
+                </a>
+                <a href="{{ route('vendor.purchase-orders.export-pdf', request()->query()) }}" target="_blank"
+                   class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
+                    Print PDF
+                </a>
+            </div>
         </div>
 
         <form method="GET" class="flex flex-wrap gap-2 mb-4">

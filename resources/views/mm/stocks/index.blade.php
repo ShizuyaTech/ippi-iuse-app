@@ -65,14 +65,14 @@
                         $stockStatus = $qty <= 0 ? 'habis' : ($minStock > 0 && $qty <= $minStock ? 'rendah' : 'normal');
                     @endphp
                     <td class="px-3 py-2 text-right font-medium {{ $stockStatus === 'habis' ? 'text-red-500' : ($stockStatus === 'rendah' ? 'text-yellow-600' : 'text-green-700') }}">
-                        {{ number_format($qty, 3) }}
+                        {{ fmt_qty($qty) }}
                     </td>
                     @php $vendorQty = (float)($vendorStockMap[$s->material_id] ?? 0); @endphp
                     <td class="px-3 py-2 text-right hidden md:table-cell {{ $vendorQty > 0 ? 'text-indigo-700 font-medium' : 'text-gray-300' }}">
-                        {{ $vendorQty > 0 ? number_format($vendorQty, 3) : '—' }}
+                        {{ $vendorQty > 0 ? fmt_qty($vendorQty) : '—' }}
                     </td>
                     <td class="px-3 py-2 text-gray-500 hidden md:table-cell">{{ $s->material->unit_of_measure ?? '-' }}</td>
-                    <td class="px-3 py-2 text-right text-gray-500 hidden md:table-cell">{{ $minStock > 0 ? number_format($minStock, 3) : '-' }}</td>
+                    <td class="px-3 py-2 text-right text-gray-500 hidden md:table-cell">{{ $minStock > 0 ? fmt_qty($minStock) : '-' }}</td>
                     <td class="px-3 py-2 text-center">
                         @if($stockStatus === 'habis')
                         <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">Habis</span>
@@ -120,7 +120,7 @@
                         <td class="px-4 py-2 font-mono text-indigo-700" data-label="Kode Material">{{ $material?->code }}</td>
                         <td class="px-4 py-2" data-label="Nama Material">{{ $material?->name }}</td>
                         <td class="px-4 py-2 text-gray-600" data-label="Vendor">{{ $vs->vendor?->name ?? '—' }}</td>
-                        <td class="px-4 py-2 text-right font-bold text-indigo-700" data-label="Qty di Vendor">{{ number_format($vs->quantity, 3) }}</td>
+                        <td class="px-4 py-2 text-right font-bold text-indigo-700" data-label="Qty di Vendor">{{ fmt_qty($vs->quantity) }}</td>
                         <td class="px-4 py-2 text-gray-500" data-label="UoM">{{ $material?->unit_of_measure }}</td>
                     </tr>
                     @endforeach

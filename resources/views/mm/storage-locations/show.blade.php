@@ -30,7 +30,7 @@
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-4 py-2 font-mono text-blue-700">{{ $stock->material->code ?? '-' }}</td>
                     <td class="px-4 py-2">{{ $stock->material->name ?? '-' }}</td>
-                    <td class="px-4 py-2 text-right font-medium {{ $stock->quantity <= 0 ? 'text-red-600' : 'text-green-700' }}">{{ number_format($stock->quantity, 3) }}</td>
+                    <td class="px-4 py-2 text-right font-medium {{ $stock->quantity <= 0 ? 'text-red-600' : 'text-green-700' }}">{{ fmt_qty($stock->quantity) }}</td>
                     <td class="px-4 py-2">{{ $stock->material->unit_of_measure ?? '-' }}</td>
                 </tr>
                 @empty

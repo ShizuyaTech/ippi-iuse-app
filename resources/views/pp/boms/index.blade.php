@@ -70,7 +70,7 @@
                         <div class="font-mono text-xs text-gray-500">{{ $bom->material->code }}</div>
                         <div>{{ $bom->material->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right" data-label="Qty Base">{{ number_format($bom->base_quantity, 3) }}</td>
+                    <td class="px-4 py-2 text-right" data-label="Qty Base">{{ fmt_qty($bom->base_quantity) }}</td>
                     <td class="px-4 py-2 text-right" data-label="Jml Komponen">{{ $bom->items->count() }}</td>
                     <td class="px-4 py-2 text-center" data-label="Status">
                         <span class="px-2 py-0.5 rounded text-xs {{ $bom->status==='active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">

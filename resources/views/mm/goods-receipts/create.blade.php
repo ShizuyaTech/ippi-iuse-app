@@ -211,9 +211,9 @@
                         @endif
                     </div>
                     <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                        <span>Order: <b class="text-gray-700">{{ number_format($item->quantity, 3) }}</b> {{ $item->material->unit_of_measure }}</span>
-                        <span>Diterima: <b class="text-gray-700">{{ number_format($item->quantity_received, 3) }}</b></span>
-                        <span class="text-blue-700 font-semibold">Sisa: {{ number_format($remaining, 3) }}</span>
+                        <span>Order: <b class="text-gray-700">{{ fmt_qty($item->quantity) }}</b> {{ $item->material->unit_of_measure }}</span>
+                        <span>Diterima: <b class="text-gray-700">{{ fmt_qty($item->quantity_received) }}</b></span>
+                        <span class="text-blue-700 font-semibold">Sisa: {{ fmt_qty($remaining) }}</span>
                         <label class="flex items-center gap-1 cursor-pointer ml-1 text-green-700 font-semibold border border-green-300 rounded px-2 py-0.5 bg-white">
                             <input type="checkbox" class="accent-green-600" onchange="toggleAllInItem(this)">
                             Pilih Semua

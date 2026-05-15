@@ -74,13 +74,13 @@
                             <div class="text-gray-700">{{ $result->material->name }}</div>
                             <div class="text-gray-400 text-xs">{{ $result->material->unit_of_measure }}</div>
                         </td>
-                        <td class="px-3 py-2 text-right">{{ number_format($result->gross_requirement, 3) }}</td>
+                        <td class="px-3 py-2 text-right">{{ fmt_qty($result->gross_requirement) }}</td>
                         <td class="px-3 py-2 text-right text-green-700">
-                            {{ (float)$result->open_po_qty > 0 ? number_format($result->open_po_qty, 3) : '-' }}
+                            {{ (float)$result->open_po_qty > 0 ? fmt_qty($result->open_po_qty) : '-' }}
                         </td>
-                        <td class="px-3 py-2 text-right font-medium">{{ number_format($result->net_requirement, 3) }}</td>
-                        <td class="px-3 py-2 text-right text-amber-600">+{{ number_format($result->safety_stock_qty, 3) }}</td>
-                        <td class="px-3 py-2 text-right font-medium text-blue-700">{{ number_format($withSafety, 3) }}</td>
+                        <td class="px-3 py-2 text-right font-medium">{{ fmt_qty($result->net_requirement) }}</td>
+                        <td class="px-3 py-2 text-right text-amber-600">+{{ fmt_qty($result->safety_stock_qty) }}</td>
+                        <td class="px-3 py-2 text-right font-medium text-blue-700">{{ fmt_qty($withSafety) }}</td>
                         <td class="px-3 py-2 text-right text-gray-500">
                             {{ (float)$result->qty_per_case > 0 ? number_format($result->qty_per_case, 0) : '-' }}
                         </td>
@@ -88,7 +88,7 @@
                             {{ number_format($result->recommended_quantity, 0) }}
                         </td>
                         <td class="px-3 py-2 text-right {{ (float)$result->current_stock < (float)$result->gross_requirement ? 'text-red-500' : 'text-green-700' }}">
-                            {{ number_format($result->current_stock, 3) }}
+                            {{ fmt_qty($result->current_stock) }}
                         </td>
                         <td class="px-3 py-2 text-center">
                             @if($result->recommendation_type === 'purchase')

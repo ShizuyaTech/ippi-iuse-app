@@ -63,7 +63,7 @@
                     <td class="px-3 py-2 hidden md:table-cell">{{ $m->unit_of_measure }}</td>
                     <td class="px-3 py-2 text-right hidden md:table-cell">{{ $m->qty_per_case > 0 ? number_format($m->qty_per_case, 0) : '-' }}</td>
                     <td class="px-3 py-2 text-right font-medium hidden sm:table-cell {{ $totalStock > 0 ? 'text-green-700' : 'text-gray-400' }}">
-                        {{ number_format($totalStock, 3) }}
+                        {{ fmt_qty($totalStock) }}
                     </td>
                     <td class="px-3 py-2 text-center hidden md:table-cell">
                         <span class="px-2 py-0.5 rounded text-xs {{ $m->is_active?'bg-green-100 text-green-700':'bg-red-100 text-red-700' }}">{{ $m->is_active?'Aktif':'Nonaktif' }}</span>

@@ -140,7 +140,7 @@
                                 <div class="font-mono text-xs text-gray-400">{{ $item->purchaseOrderItem?->material?->code }}</div>
                                 <div class="font-medium">{{ $item->purchaseOrderItem?->material?->name }}</div>
                             </td>
-                            <td class="px-4 py-2 text-right text-gray-500">{{ number_format($item->quantity, 3) }}</td>
+                            <td class="px-4 py-2 text-right text-gray-500">{{ fmt_qty($item->quantity) }}</td>
                             <td class="px-4 py-2 text-right">
                                 <input type="number"
                                     name="items[{{ $idx }}][quantity]"
@@ -174,7 +174,7 @@
                             <div class="font-mono text-xs text-gray-400">{{ $item->purchaseOrderItem?->material?->code }}</div>
                             <div class="font-medium">{{ $item->purchaseOrderItem?->material?->name }}</div>
                         </td>
-                        <td class="px-4 py-2 text-right font-medium">{{ number_format($item->quantity, 3) }}</td>
+                        <td class="px-4 py-2 text-right font-medium">{{ fmt_qty($item->quantity) }}</td>
                         <td class="px-4 py-2 text-gray-500">{{ $item->purchaseOrderItem?->material?->unit_of_measure ?? '-' }}</td>
                     </tr>
                     @endforeach

@@ -1,18 +1,31 @@
 ﻿<x-vendor-layout>
-    <x-slot name="title">Surat Jalan Saya</x-slot>
+    <x-slot name="title">Delivery Notes</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
             <h2 class="text-lg font-semibold text-gray-700">Daftar Surat Jalan</h2>
-            <a href="{{ route('vendor.delivery-notes.create') }}" class="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800">+ Buat Surat Jalan</a>
+            <div class="flex flex-wrap gap-2 items-center">
+                <a href="{{ route('vendor.delivery-notes.create') }}"
+                   class="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800">
+                    + Buat Surat Jalan
+                </a>
+                <a href="{{ route('vendor.delivery-notes.export-excel', request()->query()) }}"
+                   class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
+                    Export Excel
+                </a>
+                <a href="{{ route('vendor.delivery-notes.export-pdf', request()->query()) }}" target="_blank"
+                   class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
+                    Print PDF
+                </a>
+            </div>
         </div>
 
         @if(session('success'))
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-2 rounded text-sm">{{ session('success') }}</div>
+        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-2 rounded text-sm">{{ session('success') }}</div>
         @endif
-
+        
         <form method="GET" class="flex flex-wrap gap-2 mb-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="No. SJ / No. PO..."
-                class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48">
             <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Status</option>
                 <option value="pending"   {{ request('status')=='pending'   ? 'selected' : '' }}>Menunggu Konfirmasi</option>
@@ -55,7 +68,7 @@
                     <td class="px-4 py-2 text-center space-x-2">
                         <a href="{{ route('vendor.delivery-notes.show', $dn) }}" class="text-teal-600 hover:underline text-xs">Detail</a>
                         <a href="{{ route('vendor.delivery-notes.print-pdf', $dn) }}" target="_blank" class="text-red-600 hover:underline text-xs">PDF</a>
-                        <a href="{{ route('vendor.delivery-notes.export-excel', $dn) }}" class="text-green-700 hover:underline text-xs">Excel</a>
+                        <a href="{{ route('vendor.delivery-notes.export-excel-single', $dn) }}" class="text-green-700 hover:underline text-xs">Excel</a>
                         @if($dn->status === 'pending')
                         <form method="POST" action="{{ route('vendor.delivery-notes.cancel', $dn) }}" class="inline" onsubmit="return confirm('Batalkan surat jalan ini?')">
                             @csrf @method('PATCH')

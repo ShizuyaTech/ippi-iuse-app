@@ -74,28 +74,26 @@
 
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="font-semibold text-gray-700 mb-3">Item Dikeluarkan</h3>
-            <div class="overflow-x-auto">
+            <div class="no-mobile-cards overflow-x-auto">
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 text-left">Material</th>
                         <th class="px-4 py-2 text-right">Qty Keluar</th>
-                        <th class="px-4 py-2 text-left">UoM</th>
-                        <th class="px-4 py-2 text-left">Note / ID Packing</th>
+                        <th class="px-4 py-2 text-left hidden sm:table-cell">UoM</th>
+                        <th class="px-4 py-2 text-left hidden sm:table-cell">Note / ID Packing</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($goodsIssue->items as $item)
                     <tr class="border-b">
-                        <td class="px-4 py-2" data-label="Material">
-                            <div>
-                                <div class="font-mono text-blue-700 text-xs">{{ $item->material->code }}</div>
-                                <div class="font-medium">{{ $item->material->name }}</div>
-                            </div>
+                        <td class="px-4 py-2 min-w-[140px]">
+                            <div class="font-mono text-blue-700 text-xs">{{ $item->material->code }}</div>
+                            <div class="font-medium">{{ $item->material->name }}</div>
                         </td>
-                        <td class="px-4 py-2 text-right font-medium text-orange-600" data-label="Qty Keluar">{{ number_format($item->quantity_issued, 3) }}</td>
-                        <td class="px-4 py-2 text-gray-500" data-label="UoM">{{ $item->material->unit_of_measure ?? '-' }}</td>
-                        <td class="px-4 py-2" data-label="Note / ID Packing">
+                        <td class="px-4 py-2 text-right font-medium text-orange-600 whitespace-nowrap">{{ fmt_qty($item->quantity_issued) }}</td>
+                        <td class="px-4 py-2 text-gray-500 hidden sm:table-cell">{{ $item->material->unit_of_measure ?? '-' }}</td>
+                        <td class="px-4 py-2 hidden sm:table-cell">
                             @if($item->note)
                             <span class="font-mono text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 px-2 py-0.5 rounded">{{ $item->note }}</span>
                             @else

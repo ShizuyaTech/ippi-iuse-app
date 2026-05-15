@@ -75,7 +75,7 @@
                             <div>{{ $item->material?->name }}</div>
                         </td>
                         <td class="px-4 py-2">{{ $item->storageLocation?->code }} - {{ $item->storageLocation?->name }}</td>
-                        <td class="px-4 py-2 text-right font-medium">{{ number_format($item->quantity, 3) }} {{ $item->material?->unit_of_measure }}</td>
+                        <td class="px-4 py-2 text-right font-medium">{{ fmt_qty($item->quantity) }} {{ $item->material?->unit_of_measure }}</td>
                         <td class="px-4 py-2 text-gray-500 text-xs">{{ $item->notes ?? '-' }}</td>
                     </tr>
                     @endforeach

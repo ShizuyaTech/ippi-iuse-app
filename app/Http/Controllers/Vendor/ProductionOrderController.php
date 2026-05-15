@@ -11,10 +11,13 @@ use App\Models\PurchaseOrderItem;
 use App\Models\VendorProductionOrder;
 use App\Models\VendorStock;
 use App\Models\VendorStockMovement;
+use App\Services\ExcelService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ProductionOrderController extends Controller
 {
@@ -40,6 +43,68 @@ class ProductionOrderController extends Controller
         $orders = $query->latest()->paginate(20)->withQueryString();
 
         return view('vendor-portal.production-orders.index', compact('orders'));
+    }
+
+    private function buildQuery(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $query = VendorProductionOrder::with('material', 'purchaseOrderItem.purchaseOrder', 'deliveryNote')
+            ->when($user->vendor_id, fn($q, $v) => $q->where('vendor_id', $v));
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->search) {
+            $query->where(fn($q) => $q
+                ->where('order_number', 'like', "%{$request->search}%")
+                ->orWhereHas('material', fn($m) => $m->where('name', 'like', "%{$request->search}%")));
+        }
+        return $query;
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $orders = $this->buildQuery($request)->latest()->get();
+        $filters = $request->only(['search', 'status']);
+        $pdf = Pdf::loadView('vendor-portal.production-orders.pdf-list', compact('orders', 'filters'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('production-orders-list.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $orders = $this->buildQuery($request)->latest()->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Production Orders');
+
+        $sheet->setCellValue('A1', 'DAFTAR VENDOR PRODUCTION ORDER');
+        $sheet->setCellValue('A2', 'Dicetak: ' . now()->format('d/m/Y H:i'));
+        $sheet->mergeCells('A1:H1');
+        $sheet->mergeCells('A2:H2');
+
+        $headers = ['No. Order', 'Referensi PO', 'Material', 'Kode Material', 'Qty Planned', 'Qty OK', 'Qty NG', 'Status'];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue(chr(65 + $i) . '4', $h);
+        }
+        ExcelService::applyHeaderStyle($spreadsheet, 'A4:H4');
+
+        $row = 5;
+        foreach ($orders as $o) {
+            $sheet->setCellValue("A{$row}", $o->order_number);
+            $sheet->setCellValue("B{$row}", $o->purchaseOrderItem?->purchaseOrder?->po_number ?? '-');
+            $sheet->setCellValue("C{$row}", $o->material?->name ?? '-');
+            $sheet->setCellValue("D{$row}", $o->material?->code ?? '-');
+            $sheet->setCellValue("E{$row}", $o->quantity);
+            $sheet->setCellValue("F{$row}", $o->qty_ok ?? 0);
+            $sheet->setCellValue("G{$row}", $o->qty_ng ?? 0);
+            $sheet->setCellValue("H{$row}", ucfirst(str_replace('_', ' ', $o->status)));
+            $row++;
+        }
+        ExcelService::applyDataStyle($spreadsheet, "A5:H" . ($row - 1));
+
+        return ExcelService::download($spreadsheet, 'production-orders-list.xlsx');
     }
 
     public function create()
@@ -179,6 +244,19 @@ class ProductionOrderController extends Controller
         $productionOrder->load('material', 'purchaseOrderItem.purchaseOrder', 'deliveryNote', 'reports.createdBy', 'createdBy');
 
         return view('vendor-portal.production-orders.show', compact('productionOrder'));
+    }
+
+    public function printPdf(VendorProductionOrder $productionOrder)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->vendor_id !== null) {
+            abort_if($productionOrder->vendor_id !== $user->vendor_id, 403);
+        }
+        $productionOrder->load('material', 'purchaseOrderItem.purchaseOrder', 'deliveryNote', 'reports.createdBy', 'createdBy');
+        $pdf = Pdf::loadView('vendor-portal.production-orders.pdf', compact('productionOrder'))
+            ->setPaper('a4', 'portrait');
+        return $pdf->stream("VPO-{$productionOrder->order_number}.pdf");
     }
 
     public function release(VendorProductionOrder $productionOrder)
