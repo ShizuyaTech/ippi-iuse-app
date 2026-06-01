@@ -528,6 +528,12 @@
                     {{ session('error') }}
                 </div>
             @endif
+            @if(session('warning'))
+                <div class="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded">
+                    <p class="font-semibold mb-1">Peringatan:</p>
+                    <pre class="text-sm whitespace-pre-wrap">{{ session('warning') }}</pre>
+                </div>
+            @endif
             @if($errors->any())
                 <div class="mb-4 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded">
                     <ul class="list-disc list-inside text-sm">

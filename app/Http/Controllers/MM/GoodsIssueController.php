@@ -57,19 +57,32 @@ class GoodsIssueController extends Controller
             'items.*.note'                     => 'nullable|string|max:500',
         ]);
 
-        // Validate stock availability
+        // Pisahkan item: cukup stok vs tidak cukup stok
+        $processableItems = [];
+        $skippedItems     = [];
+
         foreach ($request->items as $item) {
-            $stock = Stock::where('material_id', $item['material_id'])
+            $stock     = Stock::where('material_id', $item['material_id'])
                 ->where('storage_location_id', $request->storage_location_id)
                 ->first();
-            $available = $stock ? $stock->quantity : 0;
-            if ($available < $item['quantity']) {
-                $material = Material::find($item['material_id']);
-                return back()->withErrors(['items' => "Stok tidak cukup untuk material {$material->code} - {$material->name}. Tersedia: {$available}"])->withInput();
+            $available = $stock ? (float) $stock->quantity : 0;
+
+            if ($available < (float) $item['quantity']) {
+                $material       = Material::find($item['material_id']);
+                $skippedItems[] = "- {$material->code} ({$material->name}): butuh {$item['quantity']}, tersedia {$available}";
+            } else {
+                $processableItems[] = $item;
             }
         }
 
-        DB::transaction(function () use ($request) {
+        // Jika semua item stok tidak cukup, kembalikan ke form
+        if (empty($processableItems)) {
+            $msg = implode("\n", $skippedItems);
+            return back()->withErrors(['items' => "Semua item tidak dapat diproses karena stok tidak mencukupi:\n{$msg}"])->withInput();
+        }
+
+        $giNumber = null;
+        DB::transaction(function () use ($request, $processableItems, &$giNumber) {
             $gi = GoodsIssue::create([
                 'gi_number'           => GoodsIssue::generateNumber(),
                 'reference_type'      => 'manual',
@@ -84,7 +97,9 @@ class GoodsIssueController extends Controller
                 'created_by'          => auth()->id(),
             ]);
 
-            foreach ($request->items as $item) {
+            $giNumber = $gi->gi_number;
+
+            foreach ($processableItems as $item) {
                 $gi->items()->create([
                     'material_id'     => $item['material_id'],
                     'quantity_issued' => $item['quantity'],
@@ -92,7 +107,7 @@ class GoodsIssueController extends Controller
                 ]);
 
                 // Deduct from source
-                $stock = Stock::where('material_id', $item['material_id'])
+                $stock  = Stock::where('material_id', $item['material_id'])
                     ->where('storage_location_id', $request->storage_location_id)
                     ->first();
                 $newQty = $stock->quantity - $item['quantity'];
@@ -156,6 +171,11 @@ class GoodsIssueController extends Controller
                 }
             }
         });
+
+        if (!empty($skippedItems)) {
+            $warning = "Goods Issue {$giNumber} berhasil diposting, namun item berikut dilewati karena stok tidak mencukupi:\n" . implode("\n", $skippedItems);
+            return redirect()->route('mm.goods-issues.index')->with('warning', $warning);
+        }
 
         return redirect()->route('mm.goods-issues.index')->with('success', 'Goods Issue berhasil diposting.');
     }
