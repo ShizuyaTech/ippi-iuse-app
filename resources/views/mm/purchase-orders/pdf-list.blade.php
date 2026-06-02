@@ -72,11 +72,11 @@
     {{-- Active Filters --}}
     <div class="filter-bar">
         Filter aktif:
-        @if($filters['search']) <span>Pencarian:</span> "{{ $filters['search'] }}" &nbsp; @endif
-        @if($filters['status']) <span>Status:</span> {{ ucfirst(str_replace('_',' ',$filters['status'])) }} &nbsp; @endif
-        @if($filters['date_from']) <span>Dari:</span> {{ \Carbon\Carbon::parse($filters['date_from'])->format('d M Y') }} &nbsp; @endif
-        @if($filters['date_to']) <span>Sampai:</span> {{ \Carbon\Carbon::parse($filters['date_to'])->format('d M Y') }} &nbsp; @endif
-        @if(!$filters['search'] && !$filters['status'] && !$filters['date_from'] && !$filters['date_to']) Semua data @endif
+        @if($filters['search'] ?? null) <span>Pencarian:</span> "{{ $filters['search'] }}" &nbsp; @endif
+        @if($filters['status'] ?? null) <span>Status:</span> {{ ucfirst(str_replace('_',' ',$filters['status'])) }} &nbsp; @endif
+        @if($filters['date_from'] ?? null) <span>Dari:</span> {{ \Carbon\Carbon::parse($filters['date_from'])->format('d M Y') }} &nbsp; @endif
+        @if($filters['date_to'] ?? null) <span>Sampai:</span> {{ \Carbon\Carbon::parse($filters['date_to'])->format('d M Y') }} &nbsp; @endif
+        @if(!($filters['search'] ?? null) && !($filters['status'] ?? null) && !($filters['date_from'] ?? null) && !($filters['date_to'] ?? null)) Semua data @endif
         &nbsp;|&nbsp; <span>Total data:</span> {{ count($pos) }} PO
     </div>
 

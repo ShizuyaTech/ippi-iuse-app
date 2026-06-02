@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\Routing;
 use App\Models\WorkCenter;
 use App\Services\ExcelService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -324,5 +325,25 @@ class RoutingController extends Controller
         return redirect()->route('pp.routings.index')
             ->with('success', $msg)
             ->with('import_errors', $errors);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = Routing::with('material')->withCount('operations');
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('routing_number', 'like', "%{$request->search}%")
+                  ->orWhereHas('material', fn($m) => $m->where('name', 'like', "%{$request->search}%"));
+            });
+        }
+        if ($request->date_from) $query->whereDate('created_at', '>=', $request->date_from);
+        if ($request->date_to)   $query->whereDate('created_at', '<=', $request->date_to);
+        $routings = $query->orderBy('routing_number')->get();
+
+        $filters = $request->only(['search', 'date_from', 'date_to']);
+
+        $pdf = Pdf::loadView('pp.routings.pdf-list', compact('routings', 'filters'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('routings_' . date('Ymd') . '.pdf');
     }
 }

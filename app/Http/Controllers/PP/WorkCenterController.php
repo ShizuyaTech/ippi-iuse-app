@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PP;
 use App\Http\Controllers\Controller;
 use App\Models\WorkCenter;
 use App\Services\ExcelService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -177,5 +178,20 @@ class WorkCenterController extends Controller
         return redirect()->route('pp.work-centers.index')
             ->with('success', $msg)
             ->with('import_errors', $errors);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = WorkCenter::query();
+        if ($request->search)    $query->where(fn($q) => $q->where('code', 'like', "%{$request->search}%")->orWhere('name', 'like', "%{$request->search}%"));
+        if ($request->date_from) $query->whereDate('created_at', '>=', $request->date_from);
+        if ($request->date_to)   $query->whereDate('created_at', '<=', $request->date_to);
+        $workCenters = $query->orderBy('code')->get();
+
+        $filters = $request->only(['search', 'date_from', 'date_to']);
+
+        $pdf = Pdf::loadView('pp.work-centers.pdf-list', compact('workCenters', 'filters'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('work_centers_' . date('Ymd') . '.pdf');
     }
 }

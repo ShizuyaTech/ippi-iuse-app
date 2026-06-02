@@ -200,23 +200,27 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
 
         // Work Centers
         Route::get('work-centers/export', [WorkCenterController::class, 'exportExcel'])->name('work-centers.export');
+        Route::get('work-centers/export-pdf', [WorkCenterController::class, 'exportPdf'])->name('work-centers.export-pdf');
         Route::get('work-centers/import-template', [WorkCenterController::class, 'downloadTemplate'])->name('work-centers.import-template');
         Route::post('work-centers/import', [WorkCenterController::class, 'import'])->name('work-centers.import');
         Route::resource('work-centers', WorkCenterController::class);
 
         // BOMs
         Route::get('boms/export', [BomController::class, 'exportExcel'])->name('boms.export');
+        Route::get('boms/export-pdf', [BomController::class, 'exportPdf'])->name('boms.export-pdf');
         Route::get('boms/import-template', [BomController::class, 'downloadTemplate'])->name('boms.import-template');
         Route::post('boms/import', [BomController::class, 'import'])->name('boms.import');
         Route::resource('boms', BomController::class);
 
         // Routings
         Route::get('routings/export', [RoutingController::class, 'exportExcel'])->name('routings.export');
+        Route::get('routings/export-pdf', [RoutingController::class, 'exportPdf'])->name('routings.export-pdf');
         Route::get('routings/import-template', [RoutingController::class, 'downloadTemplate'])->name('routings.import-template');
         Route::post('routings/import', [RoutingController::class, 'import'])->name('routings.import');
         Route::resource('routings', RoutingController::class);
 
         // Production Orders
+        Route::get('production-orders/export-pdf', [ProductionOrderController::class, 'exportPdf'])->name('production-orders.export-pdf');
         Route::get('production-orders/{productionOrder}/print', [ProductionOrderController::class, 'printLabel'])->name('production-orders.print');
         Route::resource('production-orders', ProductionOrderController::class);
         Route::post('production-orders/{productionOrder}/release', [ProductionOrderController::class, 'release'])->name('production-orders.release');
@@ -226,6 +230,7 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
 
         // MRP
         Route::get('mrp', [MrpController::class, 'index'])->name('mrp.index');
+        Route::get('mrp/export-pdf', [MrpController::class, 'exportListPdf'])->name('mrp.export-pdf');
         Route::post('mrp/run', [MrpController::class, 'run'])->name('mrp.run');
         Route::get('mrp/demands/template', [MrpController::class, 'downloadDemandTemplate'])->name('mrp.demands.template');
         Route::post('mrp/demands/import', [MrpController::class, 'importDemands'])->name('mrp.demands.import');

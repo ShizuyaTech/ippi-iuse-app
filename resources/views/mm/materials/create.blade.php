@@ -60,7 +60,7 @@
                             <option value="skm" {{ old('order_method')=='skm'?'selected':'' }}>SKM (Summary Kanban Material)</option>
                         </select>
                     </div>
-                    <div id="vendor_field" class="{{ old('order_method')=='skm' ? '' : 'opacity-40 pointer-events-none' }}">
+                    <div id="vendor_field">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Vendor Planning (MRP/SKM)</label>
                         <select name="vendor_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                             <option value="">-- Pilih Vendor --</option>
@@ -98,12 +98,7 @@
     </div>
     <script>
     function toggleVendor(val) {
-        const el = document.getElementById('vendor_field');
-        if (val === 'skm') {
-            el.classList.remove('opacity-40', 'pointer-events-none');
-        } else {
-            el.classList.add('opacity-40', 'pointer-events-none');
-        }
+        // vendor planning selalu bisa diedit untuk semua metode order
     }
     function toggleProcessVendor(checked) {
         const field = document.getElementById('process_vendor_field');

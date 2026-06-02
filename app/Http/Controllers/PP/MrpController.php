@@ -11,6 +11,7 @@ use App\Models\MrpRun;
 use App\Models\PurchaseOrderItem;
 use App\Models\Stock;
 use App\Services\ExcelService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -456,6 +457,15 @@ class MrpController extends Controller
         foreach ($bom->items as $item) {
             $this->explodeStock($item->material_id, (float) $item->quantity * $multiplier, $availableStock, $chain);
         }
+    }
+
+    public function exportListPdf()
+    {
+        $runs = MrpRun::with('runBy')->withCount('results')->latest()->get();
+
+        $pdf = Pdf::loadView('pp.mrp.pdf-list', compact('runs'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('mrp_runs_' . date('Ymd') . '.pdf');
     }
 }
 

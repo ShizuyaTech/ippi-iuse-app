@@ -95,20 +95,24 @@ class RoutePermissionGuard
 
         // PP – Work Centers
         'pp.work-centers.export'              => 'pp.work_centers.view',
+        'pp.work-centers.export-pdf'          => 'pp.work_centers.view',
         'pp.work-centers.import-template'     => 'pp.work_centers.view',
         'pp.work-centers.import'              => 'pp.work_centers.create',
 
         // PP – BOMs
         'pp.boms.export'                      => 'pp.boms.view',
+        'pp.boms.export-pdf'                  => 'pp.boms.view',
         'pp.boms.import-template'             => 'pp.boms.view',
         'pp.boms.import'                      => 'pp.boms.create',
 
         // PP – Routings
         'pp.routings.export'                  => 'pp.routings.view',
+        'pp.routings.export-pdf'              => 'pp.routings.view',
         'pp.routings.import-template'         => 'pp.routings.view',
         'pp.routings.import'                  => 'pp.routings.create',
 
         // PP – Production Orders (special actions)
+        'pp.production-orders.export-pdf'     => 'pp.production_orders.view',
         'pp.production-orders.print'          => 'pp.production_orders.view',
         'pp.production-orders.release'        => 'pp.production_orders.release',
         'pp.production-orders.bulk-release'   => 'pp.production_orders.release',
@@ -117,6 +121,7 @@ class RoutePermissionGuard
 
         // PP – MRP (special actions)
         'pp.mrp.run'                          => 'pp.mrp.run',
+        'pp.mrp.export-pdf'                   => 'pp.mrp.view',
         'pp.mrp.excel'                        => 'pp.mrp.view',
         'pp.mrp.pdf'                          => 'pp.mrp.view',
         'pp.mrp.demands.template'             => 'pp.mrp.view',

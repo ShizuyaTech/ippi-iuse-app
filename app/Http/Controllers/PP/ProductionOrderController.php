@@ -12,6 +12,7 @@ use App\Models\Routing;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\StorageLocation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -416,5 +417,26 @@ class ProductionOrderController extends Controller
         }
         $productionOrder->delete();
         return redirect()->route('pp.production-orders.index')->with('success', 'Production Order berhasil dihapus.');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = ProductionOrder::with('material');
+        if ($request->status)    $query->where('status', $request->status);
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('order_number', 'like', "%{$request->search}%")
+                  ->orWhereHas('material', fn($m) => $m->where('name', 'like', "%{$request->search}%"));
+            });
+        }
+        if ($request->date_from) $query->whereDate('planned_start_date', '>=', $request->date_from);
+        if ($request->date_to)   $query->whereDate('planned_start_date', '<=', $request->date_to);
+        $orders = $query->latest()->get();
+
+        $filters = $request->only(['search', 'status', 'date_from', 'date_to']);
+
+        $pdf = Pdf::loadView('pp.production-orders.pdf-list', compact('orders', 'filters'))
+            ->setPaper('a4', 'landscape');
+        return $pdf->stream('production_orders_' . date('Ymd') . '.pdf');
     }
 }
