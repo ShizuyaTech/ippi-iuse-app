@@ -363,6 +363,7 @@ class BomController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
         $query = Bom::with('material')->withCount('items');
         if ($request->search) {
             $query->where(function ($q) use ($request) {

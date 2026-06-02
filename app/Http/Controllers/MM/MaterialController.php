@@ -310,6 +310,7 @@ class MaterialController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
         $query = Material::withSum('stocks', 'quantity');
         if ($request->search) $query->where(fn($q) => $q->where('code','like',"%{$request->search}%")->orWhere('name','like',"%{$request->search}%"));
         if ($request->type)   $query->where('type', $request->type);

@@ -329,6 +329,7 @@ class RoutingController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
         $query = Routing::with('material')->withCount('operations');
         if ($request->search) {
             $query->where(function ($q) use ($request) {

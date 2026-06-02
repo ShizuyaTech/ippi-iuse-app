@@ -135,6 +135,7 @@ class StockController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
         $query = Stock::with('material', 'storageLocation');
         $this->applyStockFilters($query, $request);
         $stocks      = $query->orderBy('storage_location_id')->get();

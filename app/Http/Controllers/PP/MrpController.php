@@ -363,6 +363,7 @@ class MrpController extends Controller
 
     public function exportPdf(MrpRun $mrpRun)
     {
+        ini_set('memory_limit', '256M');
         $mrpRun->load('results.material', 'runBy');
         $results = $mrpRun->results->sortBy(fn($r) => $r->recommendation_type === 'purchase' ? 0 : 1)->values();
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pp.mrp.pdf', compact('mrpRun', 'results'))
@@ -461,6 +462,7 @@ class MrpController extends Controller
 
     public function exportListPdf()
     {
+        ini_set('memory_limit', '256M');
         $runs = MrpRun::with('runBy')->withCount('results')->latest()->get();
 
         $pdf = Pdf::loadView('pp.mrp.pdf-list', compact('runs'))

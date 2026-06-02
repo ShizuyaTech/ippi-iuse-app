@@ -182,6 +182,7 @@ class WorkCenterController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
         $query = WorkCenter::query();
         if ($request->search)    $query->where(fn($q) => $q->where('code', 'like', "%{$request->search}%")->orWhere('name', 'like', "%{$request->search}%"));
         if ($request->date_from) $query->whereDate('created_at', '>=', $request->date_from);

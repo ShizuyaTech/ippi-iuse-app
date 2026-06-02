@@ -421,6 +421,7 @@ class ProductionOrderController extends Controller
 
     public function exportPdf(Request $request)
     {
+        ini_set('memory_limit', '256M');
         $query = ProductionOrder::with('material');
         if ($request->status)    $query->where('status', $request->status);
         if ($request->search) {
