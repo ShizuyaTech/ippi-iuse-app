@@ -16,7 +16,7 @@ class BomController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Bom::with('material');
+        $query = Bom::with('material', 'items.material');
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('bom_number', 'like', "%{$request->search}%")

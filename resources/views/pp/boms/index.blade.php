@@ -60,8 +60,8 @@
                 <tr>
                     <th class="px-4 py-2 text-left">No. BOM</th>
                     <th class="px-4 py-2 text-left">Material (Hasil)</th>
-                    <th class="px-4 py-2 text-right">Qty Base</th>
-                    <th class="px-4 py-2 text-right">Jml Komponen</th>
+                    <th class="px-4 py-2 text-right">BQ</th>
+                    <th class="px-4 py-2 text-left">Material Asal (Komponen)</th>
                     <th class="px-4 py-2 text-center">Status</th>
                     <th class="px-4 py-2 text-center">Aksi</th>
                 </tr>
@@ -74,8 +74,16 @@
                         <div class="font-mono text-xs text-gray-500">{{ $bom->material->code }}</div>
                         <div>{{ $bom->material->name }}</div>
                     </td>
-                    <td class="px-4 py-2 text-right" data-label="Qty Base">{{ fmt_qty($bom->base_quantity) }}</td>
-                    <td class="px-4 py-2 text-right" data-label="Jml Komponen">{{ $bom->items->count() }}</td>
+                    <td class="px-4 py-2 text-right" data-label="BQ">{{ fmt_qty($bom->base_quantity) }}</td>
+                    <td class="px-4 py-2" data-label="Material Asal (Komponen)">
+                        @foreach($bom->items as $bi)
+                        <div class="{{ !$loop->first ? 'mt-1 pt-1 border-t border-gray-100' : '' }}">
+                            <span class="font-mono text-xs text-gray-500">{{ $bi->material?->code }}</span>
+                            <span class="ml-1 text-sm text-gray-800">{{ $bi->material?->name }}</span>
+                            <span class="text-xs text-gray-400 ml-1">({{ fmt_qty($bi->quantity) }} {{ $bi->unit }})</span>
+                        </div>
+                        @endforeach
+                    </td>
                     <td class="px-4 py-2 text-center" data-label="Status">
                         <span class="px-2 py-0.5 rounded text-xs {{ $bom->status==='active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                             {{ $bom->status === 'active' ? 'Aktif' : 'Nonaktif' }}
