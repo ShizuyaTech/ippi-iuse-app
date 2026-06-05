@@ -112,7 +112,7 @@
                         <td class="px-4 py-2 text-right text-gray-500">{{ fmt_qty($item->quantity) }}</td>
                         <td class="px-4 py-2 text-right font-medium text-teal-700">{{ fmt_qty($item->quantity_confirmed ?? $item->quantity) }} {{ $item->material?->unit_of_measure }}</td>
                         <td class="px-4 py-2 text-right {{ $selisih > 0 ? 'text-orange-600 font-medium' : 'text-gray-400' }}">
-                            {{ $selisih > 0 ? '-'.fmt_qty($selisih) : '&ndash;' }}
+                            {{ $selisih > 0 ? '-'.fmt_qty($selisih) : '' }}{!! $selisih == 0 ? '&ndash;' : '' !!}
                         </td>
                     </tr>
                     @endforeach

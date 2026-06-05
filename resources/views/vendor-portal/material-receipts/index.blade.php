@@ -40,7 +40,7 @@
                 <tr>
                     <th class="px-4 py-2 text-left">No. VMD</th>
                     <th class="px-4 py-2 text-left">Tanggal Kirim</th>
-                    <th class="px-4 py-2 text-center">Item</th>
+                    <th class="px-4 py-2 text-left">Material</th>
                     <th class="px-4 py-2 text-center">Status</th>
                     <th class="px-4 py-2 text-center">Aksi</th>
                 </tr>
@@ -50,7 +50,19 @@
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-4 py-2 font-mono text-teal-700">{{ $r->vmd_number }}</td>
                     <td class="px-4 py-2">{{ $r->delivery_date?->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2 text-center text-gray-500">{{ $r->items->count() }} item</td>
+                    <td class="px-4 py-2">
+                        @forelse($r->items as $mi)
+                        <div class="{{ !$loop->first ? 'mt-1 pt-1 border-t border-gray-100' : '' }}">
+                            <span class="font-mono text-xs text-teal-700">{{ $mi->material?->code }}</span>
+                            <span class="ml-1 text-sm text-gray-800">{{ $mi->material?->name }}</span>
+                            @if($mi->material?->description)
+                            <div class="text-xs text-gray-400">{{ $mi->material->description }}</div>
+                            @endif
+                        </div>
+                        @empty
+                        <span class="text-gray-400 text-xs">—</span>
+                        @endforelse
+                    </td>
                     <td class="px-4 py-2 text-center">
                         <span class="px-2 py-0.5 rounded text-xs {{ $r->statusColor() }}">{{ $r->statusLabel() }}</span>
                     </td>

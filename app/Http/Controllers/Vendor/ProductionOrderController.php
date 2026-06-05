@@ -336,7 +336,19 @@ class ProductionOrderController extends Controller
             $totalProcessed = $qtyOk + $qtyNg;
             if ($bom && $totalProcessed > 0) {
                 foreach ($bom->items as $bomItem) {
-                    $rmQty = ($bomItem->quantity / max((float) $bom->base_quantity, 0.001)) * $totalProcessed;
+                    $ratio = ($bomItem->quantity / max((float) $bom->base_quantity, 0.001));
+
+                    // Cap total RM consumption for this order to (ratio × quantity_planned)
+                    // This prevents over-consumption due to excessive NG or wrong BOM base_quantity
+                    $maxTotalAllowed = $ratio * (float) $productionOrder->quantity_planned;
+                    $alreadyConsumed = (float) VendorStockMovement::where('vendor_id', $vendorId)
+                        ->where('material_id', $bomItem->material_id)
+                        ->where('movement_type', 'PROD_CONSUME')
+                        ->where('reference_document', $refDoc)
+                        ->sum('quantity');
+                    $remainingAllowed = max(0, $maxTotalAllowed - $alreadyConsumed);
+
+                    $rmQty = min($ratio * $totalProcessed, $remainingAllowed);
                     if ($rmQty <= 0) continue;
 
                     $rmStock = VendorStock::firstOrCreate(
