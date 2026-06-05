@@ -141,6 +141,7 @@ class PurchaseOrderController extends Controller
             return back()->with('error', 'Hanya PO Draft atau PO dari SKM yang berstatus Approved yang dapat diedit.');
         }
         $request->validate([
+            'po_number'              => 'required|string|max:50|unique:purchase_orders,po_number,' . $purchaseOrder->id,
             'vendor_id'              => 'required|exists:vendors,id',
             'storage_location_id'    => 'required|exists:storage_locations,id',
             'order_date'             => 'required|date',
@@ -187,6 +188,7 @@ class PurchaseOrderController extends Controller
                 ]);
             }
             $purchaseOrder->update([
+                'po_number'              => $request->po_number,
                 'vendor_id'              => $request->vendor_id,
                 'storage_location_id'    => $request->storage_location_id,
                 'order_date'             => $request->order_date,

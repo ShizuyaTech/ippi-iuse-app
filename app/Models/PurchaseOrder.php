@@ -20,7 +20,7 @@ class PurchaseOrder extends Model
 
     public static function generateNumber(): string
     {
-        $prefix = 'PO-' . date('Y') . '-';
+        $prefix = 'EDN' . date('Y') . '-';
         $last = static::where('po_number', 'like', $prefix . '%')->orderBy('id', 'desc')->first();
         $next = $last ? (int) substr($last->po_number, -5) + 1 : 1;
         return $prefix . str_pad($next, 5, '0', STR_PAD_LEFT);

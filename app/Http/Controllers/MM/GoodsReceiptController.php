@@ -377,9 +377,9 @@ class GoodsReceiptController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Goods Receipts');
 
-        $headers = ['No. GR','No. PO','Vendor','Tgl Terima','Lokasi','Status','Material','Qty Diterima','Packing Note'];
+        $headers = ['No. GR','No. PO','Vendor','Tgl Terima','Lokasi','Status','Material','Qty Diterima','Packing Note','Deskripsi','Catatan GR'];
         foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'1', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A1:I1');
+        ExcelService::applyHeaderStyle($spreadsheet, 'A1:K1');
         $sheet->getRowDimension(1)->setRowHeight(20);
 
         $r = 2;
@@ -394,18 +394,21 @@ class GoodsReceiptController extends Controller
                 $sheet->setCellValue("G{$r}", ($item->material->code ?? '').' - '.($item->material->name ?? ''));
                 $sheet->setCellValue("H{$r}", (float)$item->quantity_received);
                 $sheet->setCellValue("I{$r}", $item->packing_note);
-                ExcelService::applyDataStyle($spreadsheet, "A{$r}:I{$r}", $r % 2 === 0);
+                $sheet->setCellValue("J{$r}", $item->material->description ?? '');
+                $sheet->setCellValue("K{$r}", $gr->notes ?? '');
+                ExcelService::applyDataStyle($spreadsheet, "A{$r}:K{$r}", $r % 2 === 0);
                 $r++;
             }
             if ($gr->items->isEmpty()) {
                 $sheet->setCellValue("A{$r}", $gr->gr_number);
                 $sheet->setCellValue("D{$r}", $gr->receipt_date->format('d/m/Y'));
                 $sheet->setCellValue("F{$r}", $gr->status);
-                ExcelService::applyDataStyle($spreadsheet, "A{$r}:I{$r}", $r % 2 === 0);
+                $sheet->setCellValue("K{$r}", $gr->notes ?? '');
+                ExcelService::applyDataStyle($spreadsheet, "A{$r}:K{$r}", $r % 2 === 0);
                 $r++;
             }
         }
-        foreach (range('A','I') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (range('A','K') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
         return ExcelService::download($spreadsheet, 'goods_receipts_'.date('Ymd').'.xlsx');
     }
 

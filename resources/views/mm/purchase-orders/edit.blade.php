@@ -12,6 +12,16 @@
         <form method="POST" action="{{ route('mm.purchase-orders.update', $purchaseOrder) }}" id="po-form" class="space-y-6">
             @csrf @method('PATCH')
 
+            {{-- Nomor EDN --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nomor EDN *</label>
+                    <input type="text" name="po_number" value="{{ old('po_number', $purchaseOrder->po_number) }}"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono @error('po_number') border-red-400 @enderror" required>
+                    @error('po_number')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
             {{-- Lokasi Gudang --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="col-span-2">

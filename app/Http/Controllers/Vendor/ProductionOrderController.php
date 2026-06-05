@@ -120,8 +120,7 @@ class ProductionOrderController extends Controller
                     ->whereIn('status', ['approved', 'partially_received']);
             })
             ->whereHas('material', fn($q) => $q
-                ->whereIn('type', ['WIP', 'FP'])
-                ->where('process_vendor_id', $user->vendor_id))
+                ->whereIn('type', ['WIP', 'FP']))
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($item) use ($user) {
@@ -175,12 +174,6 @@ class ProductionOrderController extends Controller
 
                 abort_if($poItem->purchaseOrder->vendor_id !== $user->vendor_id, 403, 'PO item bukan milik vendor Anda.');
                 abort_if(!in_array($poItem->purchaseOrder->status, ['approved', 'partially_received']), 422, 'PO harus Approved/Partially Received.');
-
-                if ((int) ($poItem->material?->process_vendor_id ?? 0) !== (int) $user->vendor_id) {
-                    throw ValidationException::withMessages([
-                        'purchase_order_item_id' => 'Material pada PO item ini tidak ditetapkan ke vendor proses Anda.',
-                    ]);
-                }
 
                 $poRemaining = max(0, (float) $poItem->quantity - (float) $poItem->quantity_received);
                 $allocated = (float) VendorProductionOrder::where('purchase_order_item_id', $poItem->id)

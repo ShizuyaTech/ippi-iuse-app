@@ -209,6 +209,9 @@
                         @if(!$fromDn && ($qtyPerCase ?? 0) > 0)
                         <span class="text-xs text-gray-400 ml-2">{{ number_format($qtyPerCase, 0) }} {{ $item->material->unit_of_measure }}/case &bull; {{ $caseCount }} case</span>
                         @endif
+                        @if($item->material->description)
+                        <div class="text-xs text-gray-500 mt-0.5">{{ $item->material->description }}</div>
+                        @endif
                     </div>
                     <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
                         <span>Order: <b class="text-gray-700">{{ fmt_qty($item->quantity) }}</b> {{ $item->material->unit_of_measure }}</span>
