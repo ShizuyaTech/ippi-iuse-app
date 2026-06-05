@@ -28,7 +28,7 @@
         {{-- Bulk Action Bar --}}
         <form method="POST" action="{{ route('pp.production-orders.bulk-release') }}" id="bulkForm" onsubmit="return confirm('Release semua Production Order yang dipilih?')">
             @csrf
-            <div class="flex items-center gap-3 mb-3 bg-blue-50 border border-blue-200 rounded px-3 py-2" id="bulkBar" style="display:none!important">
+            <div class="flex items-center gap-3 mb-3 bg-blue-50 border border-blue-200 rounded px-3 py-2" id="bulkBar" style="display:none">
                 <span class="text-sm text-blue-700 font-medium" id="bulkCount">0 dipilih</span>
                 <button type="submit" class="bg-blue-700 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-800">Release Semua yang Dipilih</button>
                 <button type="button" onclick="clearSelection()" class="text-sm text-gray-500 hover:text-gray-700">Batal Pilih</button>

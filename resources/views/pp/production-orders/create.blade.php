@@ -31,9 +31,8 @@
                 <table class="w-full text-sm border-collapse" id="items-table">
                     <thead class="bg-blue-900 text-white">
                         <tr>
+                            <th class="px-3 py-2 text-left" style="min-width:150px">No. Order *</th>
                             <th class="px-3 py-2 text-left" style="min-width:200px">Material *</th>
-                            <th class="px-3 py-2 text-left" style="min-width:160px">BOM *</th>
-                            <th class="px-3 py-2 text-left" style="min-width:160px">Routing</th>
                             <th class="px-3 py-2 text-right" style="min-width:100px">Qty Planned *</th>
                             <th class="px-3 py-2 text-left" style="min-width:150px">Catatan Item</th>
                             <th class="px-3 py-2 w-10"></th>
@@ -133,22 +132,16 @@
             tr.className = 'border-b hover:bg-gray-50';
             tr.id = `row-${r}`;
             tr.innerHTML = `
+                <td class="px-2 py-1">
+                    <input type="text" name="orders[${r}][order_number]" placeholder="Nomor PO..."
+                        style="width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 6px;font-size:12px;font-family:monospace;" required>
+                </td>
                 <td class="px-2 py-1" style="position:relative;overflow:visible;">
                     <input type="text" id="mat-text-${r}" placeholder="Ketik kode / nama..." autocomplete="off"
                         style="width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 6px;font-size:12px;"
                         oninput="matSearch(${r}, this)" onkeydown="matKeydown(${r}, this, event)" onblur="hideMat(${r})">
                     <input type="hidden" name="orders[${r}][material_id]" id="mat-id-${r}" required>
                     <ul id="mat-list-${r}" style="display:none;position:absolute;top:100%;left:0;min-width:220px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;max-height:160px;overflow-y:auto;z-index:999;list-style:none;margin:0;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,.12);"></ul>
-                </td>
-                <td class="px-2 py-1">
-                    <select name="orders[${r}][bom_id]" id="bom-${r}" class="w-full border rounded px-2 py-1 text-sm" required>
-                        <option value="">-- pilih material --</option>
-                    </select>
-                </td>
-                <td class="px-2 py-1">
-                    <select name="orders[${r}][routing_id]" id="rtg-${r}" class="w-full border rounded px-2 py-1 text-sm">
-                        <option value="">-</option>
-                    </select>
                 </td>
                 <td class="px-2 py-1">
                     <input type="number" name="orders[${r}][quantity_planned]" value="1" min="0.001" step="0.001" class="w-full border rounded px-2 py-1 text-sm text-right" required>
@@ -161,23 +154,6 @@
                 </td>
             `;
             document.getElementById('items-body').appendChild(tr);
-        }
-
-        function onMaterialChange(r, materialId) {
-            // Rebuild BOM options
-            const bomSel = document.getElementById(`bom-${r}`);
-            const filtered = BOMS.filter(b => b.material_id == materialId);
-            bomSel.innerHTML = filtered.length
-                ? filtered.map(b => `<option value="${b.id}">${b.number}</option>`).join('')
-                : '<option value="">-- Tidak ada BOM --</option>';
-            if (filtered.length === 1) bomSel.value = filtered[0].id;
-
-            // Rebuild Routing options
-            const rtgSel = document.getElementById(`rtg-${r}`);
-            const filteredR = ROUTINGS.filter(x => x.material_id == materialId);
-            rtgSel.innerHTML = '<option value="">-</option>' +
-                filteredR.map(x => `<option value="${x.id}">${x.number}</option>`).join('');
-            if (filteredR.length === 1) rtgSel.value = filteredR[0].id;
         }
 
         // Start with one empty row

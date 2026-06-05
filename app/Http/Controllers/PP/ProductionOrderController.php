@@ -50,20 +50,38 @@ class ProductionOrderController extends Controller
             'planned_start_date'              => 'required|date',
             'planned_end_date'                => 'required|date|after_or_equal:planned_start_date',
             'orders'                          => 'required|array|min:1',
+            'orders.*.order_number'           => 'required|string|max:50|distinct',
             'orders.*.material_id'            => 'required|exists:materials,id',
-            'orders.*.bom_id'                 => 'nullable|exists:boms,id',
-            'orders.*.routing_id'             => 'nullable|exists:routings,id',
             'orders.*.quantity_planned'       => 'required|numeric|min:0.001',
             'orders.*.notes'                  => 'nullable|string',
         ]);
 
+        // Validate uniqueness of each order_number against the database
+        foreach ($request->orders as $idx => $row) {
+            if (ProductionOrder::where('order_number', $row['order_number'])->exists()) {
+                return back()->withErrors(["orders.{$idx}.order_number" => "Nomor order '{$row['order_number']}' sudah digunakan."])->withInput();
+            }
+        }
+
         DB::transaction(function () use ($request) {
             foreach ($request->orders as $row) {
+                // Auto-find active BOM for the material
+                $bom = Bom::with('items')
+                    ->where('material_id', $row['material_id'])
+                    ->where('status', 'active')
+                    ->orderByDesc('valid_from')
+                    ->first();
+
+                // Auto-find active Routing for the material
+                $routing = Routing::where('material_id', $row['material_id'])
+                    ->where('status', 'active')
+                    ->first();
+
                 $order = ProductionOrder::create([
-                    'order_number'       => ProductionOrder::generateNumber(),
+                    'order_number'       => $row['order_number'],
                     'material_id'        => $row['material_id'],
-                    'bom_id'             => $row['bom_id'] ?: null,
-                    'routing_id'         => $row['routing_id'] ?: null,
+                    'bom_id'             => $bom?->id,
+                    'routing_id'         => $routing?->id,
                     'quantity_planned'   => $row['quantity_planned'],
                     'quantity_produced'  => 0,
                     'planned_start_date' => $request->planned_start_date,
@@ -73,8 +91,7 @@ class ProductionOrderController extends Controller
                     'created_by'         => auth()->id(),
                 ]);
 
-                if (!empty($row['bom_id'])) {
-                    $bom = Bom::with('items')->find($row['bom_id']);
+                if ($bom) {
                     $multiplier = $row['quantity_planned'] / $bom->base_quantity;
                     foreach ($bom->items as $item) {
                         $order->components()->create([
