@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MM\GoodsIssueController;
+use App\Http\Controllers\MM\LabelCheckController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
 use App\Http\Controllers\Vendor\PurchaseOrderController as VendorPoController;
 use App\Http\Controllers\Vendor\DeliveryNoteController as VendorDnController;
@@ -170,6 +171,11 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
         Route::get('goods-issues/{goodsIssue}/excel', [GoodsIssueController::class, 'exportExcelDetail'])->name('goods-issues.excel');
         Route::resource('goods-issues', GoodsIssueController::class);
 
+        // Label Check (Traceability)
+        Route::get('label-checks', [LabelCheckController::class, 'index'])->name('label-checks.index');
+        Route::post('label-checks', [LabelCheckController::class, 'store'])->name('label-checks.store');
+        Route::delete('label-checks/{labelCheck}', [LabelCheckController::class, 'destroy'])->name('label-checks.destroy');
+
         // Stock Overview
         Route::get('stocks/export', [StockController::class, 'exportExcel'])->name('stocks.export');
         Route::get('stocks/export-pdf', [StockController::class, 'exportPdf'])->name('stocks.export-pdf');
@@ -221,6 +227,8 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
 
         // Production Orders
         Route::get('production-orders/export-pdf', [ProductionOrderController::class, 'exportPdf'])->name('production-orders.export-pdf');
+        Route::get('production-orders/import-template', [ProductionOrderController::class, 'importTemplate'])->name('production-orders.import-template');
+        Route::post('production-orders/import-excel', [ProductionOrderController::class, 'importExcel'])->name('production-orders.import-excel');
         Route::get('production-orders/{productionOrder}/print', [ProductionOrderController::class, 'printLabel'])->name('production-orders.print');
         Route::resource('production-orders', ProductionOrderController::class);
         Route::post('production-orders/{productionOrder}/release', [ProductionOrderController::class, 'release'])->name('production-orders.release');

@@ -25,7 +25,70 @@
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="font-semibold text-gray-700">Daftar Production Order</h3>
-                    <button type="button" onclick="addRow()" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">+ Tambah Baris</button>
+                    <div class="flex gap-2 items-center">
+                        <button type="button" onclick="document.getElementById('import-panel').classList.toggle('hidden')"
+                                class="inline-flex items-center gap-1.5 bg-teal-600 text-white px-3 py-1 rounded text-sm hover:bg-teal-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Import Excel
+                        </button>
+                        <button type="button" onclick="addRow()" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">+ Tambah Baris</button>
+                    </div>
+                </div>
+
+                {{-- Import Panel --}}
+                <div id="import-panel" class="hidden mb-4 border border-teal-200 rounded-lg bg-teal-50 p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-sm font-semibold text-teal-700">Import Item dari Excel</span>
+                        </div>
+                        <a href="{{ route('pp.production-orders.import-template') }}"
+                           class="inline-flex items-center gap-1.5 text-xs bg-white border border-teal-300 text-teal-700 px-3 py-1.5 rounded hover:bg-teal-50">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Download Template
+                        </a>
+                    </div>
+                    <p class="text-xs text-teal-600">Download template, isi No. Order + Kode Material + Qty + Catatan, lalu upload. Item akan masuk ke tabel secara otomatis.</p>
+
+                    <div class="flex gap-3 items-start">
+                        <div class="flex-1">
+                            <input type="file" id="import-file" accept=".xlsx,.xls"
+                                   class="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:bg-white file:text-teal-700 file:border file:border-teal-300 hover:file:bg-teal-50 cursor-pointer">
+                        </div>
+                        <button type="button" onclick="readImportFile()"
+                                class="bg-teal-700 text-white px-4 py-1.5 rounded text-sm hover:bg-teal-800 whitespace-nowrap">
+                            Proses File
+                        </button>
+                    </div>
+
+                    {{-- Errors --}}
+                    <div id="import-errors" class="hidden bg-red-50 border border-red-200 text-red-700 rounded p-3 text-xs space-y-0.5"></div>
+
+                    {{-- Preview table --}}
+                    <div id="import-preview" class="hidden">
+                        <p class="text-xs font-semibold text-teal-700 mb-1">Preview — <span id="preview-count"></span> item ditemukan:</p>
+                        <div class="overflow-x-auto rounded border border-teal-200">
+                            <table class="w-full text-xs border-collapse">
+                                <thead class="bg-teal-700 text-white">
+                                    <tr>
+                                        <th class="px-3 py-1.5 text-left">No. Order</th>
+                                        <th class="px-3 py-1.5 text-left">Kode Material</th>
+                                        <th class="px-3 py-1.5 text-left">Nama Material</th>
+                                        <th class="px-3 py-1.5 text-right">Qty Planned</th>
+                                        <th class="px-3 py-1.5 text-left">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preview-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button type="button" onclick="applyImport()"
+                                    class="bg-teal-700 text-white px-4 py-1.5 rounded text-sm hover:bg-teal-800">
+                                ✓ Masukkan ke Form
+                            </button>
+                            <button type="button" onclick="clearImport()" class="text-sm text-gray-400 hover:text-gray-600 underline">Batal</button>
+                        </div>
+                    </div>
                 </div>
                 <div style="overflow:visible;">
                 <table class="w-full text-sm border-collapse" id="items-table">
@@ -158,5 +221,94 @@
 
         // Start with one empty row
         addRow();
+
+        // ── Import Excel ───────────────────────────────────────────────
+        const IMPORT_URL = "{{ route('pp.production-orders.import-excel') }}";
+        const IMPORT_CSRF = "{{ csrf_token() }}";
+        let importedItems = [];
+
+        async function readImportFile() {
+            const fileInput = document.getElementById('import-file');
+            const errBox    = document.getElementById('import-errors');
+            const preview   = document.getElementById('import-preview');
+            errBox.classList.add('hidden');
+            preview.classList.add('hidden');
+            importedItems = [];
+
+            if (!fileInput.files.length) {
+                errBox.innerHTML = '<div>Pilih file Excel terlebih dahulu.</div>';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('_token', IMPORT_CSRF);
+
+            try {
+                const res  = await fetch(IMPORT_URL, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.errors && data.errors.length) {
+                    errBox.innerHTML = data.errors.map(e => `<div>• ${e}</div>`).join('');
+                    errBox.classList.remove('hidden');
+                }
+
+                if (data.items && data.items.length) {
+                    importedItems = data.items;
+                    const tbody = document.getElementById('preview-body');
+                    tbody.innerHTML = data.items.map(it =>
+                        `<tr class="border-b">
+                            <td class="px-3 py-1.5 font-mono text-blue-700 font-medium">${it.order_number}</td>
+                            <td class="px-3 py-1.5 font-mono text-gray-600">${it.material_code}</td>
+                            <td class="px-3 py-1.5">${it.material_name}</td>
+                            <td class="px-3 py-1.5 text-right">${Number(it.qty).toLocaleString('id-ID', {minimumFractionDigits:0, maximumFractionDigits:3})}</td>
+                            <td class="px-3 py-1.5 text-gray-500">${it.notes || '—'}</td>
+                        </tr>`
+                    ).join('');
+                    document.getElementById('preview-count').textContent = data.items.length;
+                    preview.classList.remove('hidden');
+                } else if (!data.errors || !data.errors.length) {
+                    errBox.innerHTML = '<div>Tidak ada data yang valid ditemukan dalam file.</div>';
+                    errBox.classList.remove('hidden');
+                }
+            } catch (e) {
+                errBox.innerHTML = '<div>Terjadi kesalahan saat memproses file.</div>';
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        function applyImport() {
+            // Clear existing rows
+            document.getElementById('items-body').innerHTML = '';
+            rowIdx = 0;
+
+            importedItems.forEach(it => {
+                addRow();
+                const idx = rowIdx - 1;
+                // Fill order number
+                const orderInput = document.querySelector(`[name="orders[${idx}][order_number]"]`);
+                if (orderInput) orderInput.value = it.order_number;
+                // Fill material
+                document.getElementById(`mat-text-${idx}`).value = `${it.material_code} - ${it.material_name}`;
+                document.getElementById(`mat-id-${idx}`).value   = it.material_id;
+                // Fill qty
+                const qtyInput = document.querySelector(`[name="orders[${idx}][quantity_planned]"]`);
+                if (qtyInput) qtyInput.value = it.qty;
+                // Fill notes
+                const notesInput = document.querySelector(`[name="orders[${idx}][notes]"]`);
+                if (notesInput) notesInput.value = it.notes || '';
+            });
+
+            clearImport();
+            document.getElementById('import-panel').classList.add('hidden');
+        }
+
+        function clearImport() {
+            document.getElementById('import-file').value = '';
+            document.getElementById('import-errors').classList.add('hidden');
+            document.getElementById('import-preview').classList.add('hidden');
+            importedItems = [];
+        }
     </script>
 </x-app-layout>

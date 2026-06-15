@@ -12,9 +12,15 @@ use App\Models\Routing;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\StorageLocation;
+use App\Services\ExcelService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class ProductionOrderController extends Controller
 {
@@ -106,6 +112,160 @@ class ProductionOrderController extends Controller
 
         $count = count($request->orders);
         return redirect()->route('pp.production-orders.index')->with('success', "{$count} Production Order berhasil dibuat.");
+    }
+
+    public function importTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+
+        // ── Sheet 1: Template ─────────────────────────────────────────
+        $sheet = $spreadsheet->getActiveSheet()->setTitle('Template PO Produksi');
+
+        $instruction = 'TEMPLATE IMPORT PRODUCTION ORDER — A: No. Order * | B: Kode Material * | C: Qty Planned * | D: Catatan (opsional). Lihat sheet "Daftar Material" untuk kode material yang valid.';
+        $sheet->setCellValue('A1', $instruction);
+        $sheet->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['italic' => true, 'size' => 9, 'color' => ['argb' => 'FF92400E']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFFF8DC']],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(18);
+
+        $headers = ['No. Order *', 'Kode Material *', 'Qty Planned *', 'Catatan'];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue(chr(65 + $i) . '2', $h);
+        }
+        $sheet->getStyle('A2:D2')->applyFromArray([
+            'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        // Sample rows
+        $samples = [
+            ['PO-2026-00001', 'FP-001', 100, ''],
+            ['PO-2026-00002', 'FP-002', 50, 'Prioritas'],
+        ];
+        foreach ($samples as $i => $row) {
+            $r = $i + 3;
+            foreach ($row as $j => $val) {
+                $sheet->setCellValue(chr(65 + $j) . $r, $val);
+            }
+            $sheet->getStyle("A{$r}:D{$r}")->applyFromArray([
+                'fill'    => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F6FA']],
+                'font'    => ['color' => ['argb' => 'FF9CA3AF'], 'italic' => true],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFE5E7EB']]],
+            ]);
+        }
+
+        $sheet->getStyle('C3:C1000')->getNumberFormat()->setFormatCode('#,##0.000');
+        $sheet->getColumnDimension('A')->setWidth(20);
+        $sheet->getColumnDimension('B')->setWidth(18);
+        $sheet->getColumnDimension('C')->setWidth(14);
+        $sheet->getColumnDimension('D')->setWidth(30);
+
+        // ── Sheet 2: Daftar Material ──────────────────────────────────
+        $ref = $spreadsheet->createSheet()->setTitle('Daftar Material');
+        $ref->setCellValue('A1', 'Kode Material');
+        $ref->setCellValue('B1', 'Nama Material');
+        $ref->setCellValue('C1', 'Tipe');
+        $ref->setCellValue('D1', 'UoM');
+        $ref->getStyle('A1:D1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        $materials = Material::where('is_active', true)->whereIn('type', ['FP', 'WIP'])->orderBy('type')->orderBy('code')->get();
+        foreach ($materials as $i => $m) {
+            $r  = $i + 2;
+            $bg = $i % 2 === 0 ? 'FFFFFFFF' : 'FFF3F6FA';
+            $ref->setCellValue("A{$r}", $m->code);
+            $ref->setCellValue("B{$r}", $m->name);
+            $ref->setCellValue("C{$r}", $m->type);
+            $ref->setCellValue("D{$r}", $m->unit_of_measure);
+            $ref->getStyle("A{$r}:D{$r}")->applyFromArray([
+                'fill'    => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => $bg]],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFE5E7EB']]],
+            ]);
+        }
+        foreach (['A' => 16, 'B' => 36, 'C' => 8, 'D' => 8] as $col => $w) {
+            $ref->getColumnDimension($col)->setWidth($w);
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        return ExcelService::download($spreadsheet, 'Template_Import_ProductionOrder.xlsx');
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate(['file' => 'required|file|mimes:xlsx,xls|max:5120']);
+
+        $path        = $request->file('file')->getRealPath();
+        $spreadsheet = IOFactory::load($path);
+        $rows        = $spreadsheet->getSheet(0)->toArray(null, true, false, true);
+
+        $materialMap = Material::where('is_active', true)
+            ->whereIn('type', ['FP', 'WIP'])
+            ->get(['id', 'code', 'name', 'unit_of_measure'])
+            ->keyBy('code');
+
+        $items  = [];
+        $errors = [];
+
+        foreach ($rows as $rowNum => $row) {
+            if ($rowNum <= 2) continue; // skip instruction + header
+
+            $orderNo  = trim((string) ($row['A'] ?? ''));
+            $matCode  = trim((string) ($row['B'] ?? ''));
+            $qty      = (float) ($row['C'] ?? 0);
+            $note     = trim((string) ($row['D'] ?? ''));
+
+            // blank row
+            if ($orderNo === '' && $matCode === '' && $qty == 0) continue;
+
+            if ($orderNo === '') {
+                $errors[] = "Baris {$rowNum}: No. Order kosong.";
+                continue;
+            }
+            if ($matCode === '') {
+                $errors[] = "Baris {$rowNum}: Kode Material kosong.";
+                continue;
+            }
+            if ($qty <= 0) {
+                $errors[] = "Baris {$rowNum}: Qty harus lebih dari 0 (order {$orderNo}).";
+                continue;
+            }
+
+            $material = $materialMap->get($matCode);
+            if (!$material) {
+                $errors[] = "Baris {$rowNum}: Kode material '{$matCode}' tidak ditemukan atau bukan FP/WIP.";
+                continue;
+            }
+
+            if (ProductionOrder::where('order_number', $orderNo)->exists()) {
+                $errors[] = "Baris {$rowNum}: No. Order '{$orderNo}' sudah digunakan.";
+                continue;
+            }
+
+            // check duplicate within this import batch
+            $duplicate = collect($items)->first(fn($i) => $i['order_number'] === $orderNo);
+            if ($duplicate) {
+                $errors[] = "Baris {$rowNum}: No. Order '{$orderNo}' muncul lebih dari sekali dalam file.";
+                continue;
+            }
+
+            $items[] = [
+                'order_number'  => $orderNo,
+                'material_id'   => $material->id,
+                'material_code' => $material->code,
+                'material_name' => $material->name,
+                'material_uom'  => $material->unit_of_measure,
+                'qty'           => $qty,
+                'notes'         => $note,
+            ];
+        }
+
+        return response()->json(['items' => $items, 'errors' => $errors]);
     }
 
     public function show(ProductionOrder $productionOrder)

@@ -105,7 +105,10 @@
             </div>
 
             <div class="flex gap-3">
-                <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded text-sm hover:bg-orange-700">Post Goods Issue</button>
+                <button type="submit" id="btn-post-gi"
+                        class="bg-orange-600 text-white px-6 py-2 rounded text-sm hover:bg-orange-700">
+                    Post Goods Issue
+                </button>
                 <a href="{{ route('mm.goods-issues.index') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded text-sm hover:bg-gray-300">Batal</a>
             </div>
         </form>
@@ -293,6 +296,7 @@
             toggleDestination();
             addRow();
         });
+
     </script>
 </x-app-layout>
 
