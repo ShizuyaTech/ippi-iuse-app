@@ -155,9 +155,9 @@
                             @if($isPending)
                             <input type="number"
                                    name="quantities[{{ $comp->id }}]"
-                                   value="{{ old('quantities.' . $comp->id, $remaining) }}"
+                                   value="{{ old('quantities.' . $comp->id, 0) }}"
                                    min="0"
-                                   max="{{ $remaining }}"
+                                   max="{{ $stockInfo['available'] }}"
                                    step="0.001"
                                    class="w-32 border rounded px-2 py-1 text-sm text-right focus:border-orange-400 focus:ring-1 focus:ring-orange-300 gi-qty-input"
                                    data-required="{{ $comp->quantity_required }}"

@@ -82,10 +82,7 @@
                             <span class="text-gray-300 text-xs">|</span>
                             <a href="{{ route('pp.production-orders.edit', $prd) }}" class="text-yellow-600 hover:underline text-xs whitespace-nowrap">Edit</a>
                             <span class="text-gray-300 text-xs">|</span>
-                            <form method="POST" action="{{ route('pp.production-orders.destroy', $prd) }}" class="inline" onsubmit="return confirm('Hapus Production Order {{ $prd->order_number }}?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline text-xs whitespace-nowrap">Hapus</button>
-                            </form>
+                            <button type="button" onclick="deleteOrder('{{ route('pp.production-orders.destroy', $prd) }}', '{{ addslashes($prd->order_number) }}')" class="text-red-600 hover:underline text-xs whitespace-nowrap">Hapus</button>
                             @endif
                             <span class="text-gray-300 text-xs">|</span>
                             <a href="{{ route('pp.production-orders.print', $prd) }}" target="_blank" class="text-emerald-600 hover:underline text-xs whitespace-nowrap">Print</a>
@@ -98,6 +95,12 @@
             </tbody>
         </table>
         </div>
+        </form>
+
+        {{-- Hidden delete form (outside bulk form to avoid nested-form HTML bug) --}}
+        <form method="POST" id="deleteOrderForm" action="">
+            @csrf
+            @method('DELETE')
         </form>
 
         <div class="mt-4">{{ $orders->links() }}</div>
@@ -133,5 +136,12 @@
         }
 
         document.querySelectorAll('.row-check').forEach(c => c.addEventListener('change', updateBar));
+
+        function deleteOrder(url, orderNumber) {
+            if (!confirm('Hapus Production Order ' + orderNumber + '?')) return;
+            const form = document.getElementById('deleteOrderForm');
+            form.action = url;
+            form.submit();
+        }
     </script>
 </x-app-layout>

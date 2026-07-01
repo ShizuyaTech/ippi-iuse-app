@@ -2,16 +2,26 @@
     <x-slot name="title">Edit BOM</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">Edit BOM: {{ $bom->bom_number }}</h2>
-        <form method="POST" action="{{ route('pp.boms.update', $bom) }}" class="space-y-6">
+        <form method="POST" action="{{ route('pp.boms.update', $bom) }}" id="bom-form" class="space-y-6">
             @csrf @method('PATCH')
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Material Hasil *</label>
-                    <select name="material_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
-                        @foreach($materials as $m)
-                        <option value="{{ $m->id }}" {{ old('material_id', $bom->material_id)==$m->id?'selected':'' }}>{{ $m->code }} - {{ $m->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        @php
+                            $fpMat = $materials->firstWhere('id', old('material_id', $bom->material_id));
+                        @endphp
+                        <input type="text" id="fp-search"
+                               value="{{ $fpMat ? $fpMat->code.' - '.$fpMat->name : '' }}"
+                               placeholder="Ketik kode atau nama material..."
+                               autocomplete="off"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                               oninput="fpSearch(this)"
+                               onkeydown="fpKeydown(event)">
+                        <input type="hidden" name="material_id" id="fp-id" value="{{ old('material_id', $bom->material_id) }}">
+                        <div id="fp-suggestions"
+                             class="absolute z-50 w-full bg-white border border-gray-200 rounded-b shadow-lg max-h-52 overflow-y-auto hidden"></div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Qty Base *</label>
@@ -60,20 +70,201 @@
         const materials = @json($materialJson);
         const existing = @json($existingJson);
         let r = 0;
-        function addRow(mid=null, qty=1, uom=''){
-            const opts = materials.map(m=>`<option value="${m.id}" data-uom="${m.uom}" ${mid==m.id?'selected':''}>${m.code} - ${m.name}</option>`).join('');
-            const tr = document.createElement('tr');
-            tr.className='border-b';
-            tr.innerHTML=`
-                <td class="px-2 py-1"><select name="items[${r}][material_id]" class="w-full border rounded px-2 py-1 text-sm" required onchange="fillUom(this)"><option value="">-- Pilih --</option>${opts}</select></td>
-                <td class="px-2 py-1"><input type="number" name="items[${r}][quantity]" value="${qty}" class="w-full border rounded px-2 py-1 text-sm text-right" min="0.001" step="0.001" required></td>
-                <td class="px-2 py-1"><input type="text" name="items[${r}][unit]" value="${uom}" class="w-full border rounded px-2 py-1 text-sm uom-field"></td>
-                <td class="px-2 py-1 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500">&#10005;</button></td>
-            `;
-            document.getElementById('items-body').appendChild(tr); r++;
+
+        // ── Material Hasil autocomplete ────────────────────────────
+        function fpSearch(input) {
+            input._activeIdx = -1;
+            const q = input.value.trim().toLowerCase();
+            const box = document.getElementById('fp-suggestions');
+            document.getElementById('fp-id').value = '';
+            if (!q) { box.classList.add('hidden'); return; }
+            const matches = materials.filter(m =>
+                m.code.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
+            ).slice(0, 20);
+            if (!matches.length) { box.classList.add('hidden'); return; }
+            box.innerHTML = matches.map(m =>
+                `<div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 border-b border-gray-100"
+                      data-id="${m.id}" data-label="${m.code} - ${m.name}" data-uom="${m.uom ?? ''}">
+                    <span class="font-mono text-blue-600 font-semibold text-xs">${m.code}</span>
+                    <span class="ml-2 text-gray-700">${m.name}</span>
+                </div>`
+            ).join('');
+            box.classList.remove('hidden');
         }
-        function fillUom(sel){const opt=sel.options[sel.selectedIndex];sel.closest('tr').querySelector('.uom-field').value=opt.dataset.uom||'';}
-        existing.forEach(i=>addRow(i.material_id, i.quantity, i.uom));
-        if(!existing.length) addRow();
+
+        document.getElementById('fp-suggestions').addEventListener('click', function(e) {
+            const item = e.target.closest('[data-id]');
+            if (!item) return;
+            document.getElementById('fp-search').value = item.dataset.label;
+            document.getElementById('fp-id').value = item.dataset.id;
+            this.classList.add('hidden');
+        });
+
+        function fpKeydown(e) {
+            const box = document.getElementById('fp-suggestions');
+            if (box.classList.contains('hidden')) return;
+            const inp = document.getElementById('fp-search');
+            const items = box.querySelectorAll('[data-id]');
+            if (!items.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                inp._activeIdx = Math.min((inp._activeIdx ?? -1) + 1, items.length - 1);
+                items.forEach((el, i) => el.style.background = i === inp._activeIdx ? '#EFF6FF' : '');
+                items[inp._activeIdx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                inp._activeIdx = Math.max((inp._activeIdx ?? 0) - 1, 0);
+                items.forEach((el, i) => el.style.background = i === inp._activeIdx ? '#EFF6FF' : '');
+                items[inp._activeIdx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (inp._activeIdx >= 0 && inp._activeIdx < items.length) {
+                    const el = items[inp._activeIdx];
+                    inp.value = el.dataset.label;
+                    document.getElementById('fp-id').value = el.dataset.id;
+                    box.classList.add('hidden');
+                }
+            } else if (e.key === 'Escape') {
+                box.classList.add('hidden');
+            }
+        }
+
+        // ── Component row autocomplete ─────────────────────────────
+        function addRow(mid=null, qty=1, uom='', label='') {
+            const tr = document.createElement('tr');
+            tr.className = 'border-b';
+            tr.innerHTML = `
+                <td class="px-2 py-1">
+                    <div class="relative">
+                        <input type="text" id="comp-search-${r}"
+                               value="${label}"
+                               placeholder="Ketik kode atau nama material..."
+                               autocomplete="off"
+                               class="w-full border rounded px-2 py-1 text-sm"
+                               oninput="compSearch(${r}, this)"
+                               onkeydown="compKeydown(${r}, event)">
+                        <input type="hidden" name="items[${r}][material_id]" id="comp-id-${r}" value="${mid ?? ''}">
+                        <div id="comp-sug-${r}"
+                             class="absolute z-50 bg-white border border-gray-200 rounded-b shadow-lg max-h-48 overflow-y-auto hidden"
+                             style="min-width:320px; top:100%; left:0;"></div>
+                    </div>
+                </td>
+                <td class="px-2 py-1">
+                    <input type="number" name="items[${r}][quantity]" value="${qty}"
+                           class="w-full border rounded px-2 py-1 text-sm text-right" min="0.001" step="0.001" required>
+                </td>
+                <td class="px-2 py-1">
+                    <input type="text" name="items[${r}][unit]" id="comp-uom-${r}" value="${uom}"
+                           class="w-full border rounded px-2 py-1 text-sm" placeholder="PCS">
+                </td>
+                <td class="px-2 py-1 text-center">
+                    <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 text-lg leading-none">&times;</button>
+                </td>
+            `;
+            document.getElementById('items-body').appendChild(tr);
+
+            document.getElementById(`comp-sug-${r}`).addEventListener('click', function(e) {
+                const item = e.target.closest('[data-id]');
+                if (!item) return;
+                const row = item.dataset.row;
+                document.getElementById(`comp-search-${row}`).value = item.dataset.label;
+                document.getElementById(`comp-id-${row}`).value = item.dataset.id;
+                document.getElementById(`comp-uom-${row}`).value = item.dataset.uom || '';
+                this.classList.add('hidden');
+            });
+            r++;
+        }
+
+        function compSearch(idx, input) {
+            input._activeIdx = -1;
+            const q = input.value.trim().toLowerCase();
+            const box = document.getElementById(`comp-sug-${idx}`);
+            document.getElementById(`comp-id-${idx}`).value = '';
+            if (!q) { box.classList.add('hidden'); return; }
+            const matches = materials.filter(m =>
+                m.code.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
+            ).slice(0, 20);
+            if (!matches.length) { box.classList.add('hidden'); return; }
+            box.innerHTML = matches.map(m =>
+                `<div class="px-3 py-2 text-xs cursor-pointer hover:bg-blue-50 border-b border-gray-100"
+                      data-id="${m.id}" data-row="${idx}" data-label="${m.code} - ${m.name}" data-uom="${m.uom ?? ''}">
+                    <span class="font-mono text-blue-600 font-semibold">${m.code}</span>
+                    <span class="ml-2 text-gray-700">${m.name}</span>
+                    <span class="ml-1 text-gray-400">(${m.uom ?? '-'})</span>
+                </div>`
+            ).join('');
+            box.classList.remove('hidden');
+        }
+
+        function compKeydown(idx, e) {
+            const box = document.getElementById(`comp-sug-${idx}`);
+            if (!box || box.classList.contains('hidden')) return;
+            const inp = document.getElementById(`comp-search-${idx}`);
+            const items = box.querySelectorAll('[data-id]');
+            if (!items.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                inp._activeIdx = Math.min((inp._activeIdx ?? -1) + 1, items.length - 1);
+                items.forEach((el, i) => el.style.background = i === inp._activeIdx ? '#EFF6FF' : '');
+                items[inp._activeIdx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                inp._activeIdx = Math.max((inp._activeIdx ?? 0) - 1, 0);
+                items.forEach((el, i) => el.style.background = i === inp._activeIdx ? '#EFF6FF' : '');
+                items[inp._activeIdx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (inp._activeIdx >= 0 && inp._activeIdx < items.length) {
+                    const el = items[inp._activeIdx];
+                    inp.value = el.dataset.label;
+                    document.getElementById(`comp-id-${idx}`).value = el.dataset.id;
+                    document.getElementById(`comp-uom-${idx}`).value = el.dataset.uom || '';
+                    box.classList.add('hidden');
+                }
+            } else if (e.key === 'Escape') {
+                box.classList.add('hidden');
+            }
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#fp-search') && !e.target.closest('#fp-suggestions')) {
+                document.getElementById('fp-suggestions').classList.add('hidden');
+            }
+            if (!e.target.closest('[id^="comp-search-"]') && !e.target.closest('[id^="comp-sug-"]')) {
+                document.querySelectorAll('[id^="comp-sug-"]').forEach(b => b.classList.add('hidden'));
+            }
+        });
+
+        // Validate on submit
+        document.getElementById('bom-form').addEventListener('submit', function(e) {
+            if (!document.getElementById('fp-id').value) {
+                e.preventDefault();
+                document.getElementById('fp-search').focus();
+                document.getElementById('fp-search').classList.add('border-red-500');
+                alert('Pilih material hasil dari daftar saran terlebih dahulu.');
+                return;
+            }
+            let ok = true;
+            document.querySelectorAll('[id^="comp-id-"]').forEach(function(hidden) {
+                if (!hidden.value) {
+                    const idx = hidden.id.replace('comp-id-', '');
+                    const inp = document.getElementById('comp-search-' + idx);
+                    if (inp) { inp.classList.add('border-red-500'); ok = false; }
+                }
+            });
+            if (!ok) {
+                e.preventDefault();
+                alert('Pilih material komponen dari daftar saran untuk semua baris.');
+            }
+        });
+
+        // Load existing rows
+        existing.forEach(i => {
+            const mat = materials.find(m => m.id == i.material_id);
+            const label = mat ? `${mat.code} - ${mat.name}` : '';
+            addRow(i.material_id, i.quantity, i.uom, label);
+        });
+        if (!existing.length) addRow();
     </script>
 </x-app-layout>

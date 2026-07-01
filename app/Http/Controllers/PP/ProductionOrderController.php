@@ -383,12 +383,6 @@ class ProductionOrderController extends Controller
             $inputQty = (float) ($request->quantities[$component->id] ?? 0);
             if ($inputQty <= 0) continue;
 
-            $remaining = round((float) $component->quantity_required - (float) $component->quantity_issued, 3);
-            if ($inputQty > $remaining + 0.001) {
-                $validationErrors[] = "{$component->material->code}: qty input ({$inputQty}) melebihi sisa yang dibutuhkan (" . number_format($remaining, 3) . ")";
-                continue;
-            }
-
             $location = $warehouseByType->get($component->material->type);
             if (!$location) continue;
 
@@ -530,40 +524,39 @@ class ProductionOrderController extends Controller
                 ]);
             }
 
-            // 2. Kembalikan sisa material ke stok jika aktual < planned
-            // qtyReturn = qty_issued - qty_yang_benar_dipakai
-            // qty_yang_benar_dipakai = quantity_required * ratio (berdasarkan BOM, bukan issued)
-            // Ini benar menangani kasus GI parsial: jika issued < required*ratio, return = 0
+            // 2. Kembalikan sisa material ke gudang jika issued > yang benar-benar dipakai
+            // qtyActuallyUsed = quantity_required * actualRatio (berdasarkan BOM)
+            // qtyReturn = qty_issued - qtyActuallyUsed
+            // Mencakup dua kasus: (a) issued > required (kirim lebih dari rencana),
+            //                     (b) produksi < planned (hasilkan kurang dari rencana)
             $actualRatio = $productionOrder->quantity_planned > 0
                 ? $totalConfirmed / $productionOrder->quantity_planned
                 : 1;
 
-            if ($actualRatio < 0.9999) {
-                foreach ($productionOrder->components as $component) {
-                    if ($component->quantity_issued <= 0 || !$component->storage_location_id) continue;
+            foreach ($productionOrder->components as $component) {
+                if ($component->quantity_issued <= 0 || !$component->storage_location_id) continue;
 
-                    $qtyActuallyUsed = round($component->quantity_required * $actualRatio, 3);
-                    $qtyReturn = round((float) $component->quantity_issued - $qtyActuallyUsed, 3);
-                    if ($qtyReturn < 0.001) continue;
+                $qtyActuallyUsed = round($component->quantity_required * $actualRatio, 3);
+                $qtyReturn = round((float) $component->quantity_issued - $qtyActuallyUsed, 3);
+                if ($qtyReturn < 0.001) continue;
 
-                    $compStock = Stock::firstOrCreate(
-                        ['material_id' => $component->material_id, 'storage_location_id' => $component->storage_location_id],
-                        ['quantity' => 0]
-                    );
-                    $newCompQty = $compStock->quantity + $qtyReturn;
-                    $compStock->update(['quantity' => $newCompQty]);
+                $compStock = Stock::firstOrCreate(
+                    ['material_id' => $component->material_id, 'storage_location_id' => $component->storage_location_id],
+                    ['quantity' => 0]
+                );
+                $newCompQty = $compStock->quantity + $qtyReturn;
+                $compStock->update(['quantity' => $newCompQty]);
 
-                    StockMovement::create([
-                        'material_id'         => $component->material_id,
-                        'storage_location_id' => $component->storage_location_id,
-                        'movement_type'       => 'GR',
-                        'quantity'            => $qtyReturn,
-                        'quantity_after'      => $newCompQty,
-                        'reference_document'  => $productionOrder->order_number . '/RET',
-                        'movement_date'       => now()->toDateString(),
-                        'created_by'          => auth()->id(),
-                    ]);
-                }
+                StockMovement::create([
+                    'material_id'         => $component->material_id,
+                    'storage_location_id' => $component->storage_location_id,
+                    'movement_type'       => 'GR',
+                    'quantity'            => $qtyReturn,
+                    'quantity_after'      => $newCompQty,
+                    'reference_document'  => $productionOrder->order_number . '/RET',
+                    'movement_date'       => now()->toDateString(),
+                    'created_by'          => auth()->id(),
+                ]);
             }
 
             // 3. Update production order
