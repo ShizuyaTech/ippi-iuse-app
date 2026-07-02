@@ -164,6 +164,9 @@
             }, 150);
         }
 
+        // BOM & Routing are auto-resolved server-side on save.
+        function onMaterialChange(r, materialId) { /* intentionally empty */ }
+
         function matKeydown(r, inp, e) {
             const list = document.getElementById(`mat-list-${r}`);
             if (!list || list.style.display === 'none') return;
@@ -182,7 +185,11 @@
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 if (inp._activeIdx >= 0 && inp._activeIdx < items.length) {
-                    pickMat(r, items[inp._activeIdx]);
+                    const li = items[inp._activeIdx];
+                    document.getElementById(`mat-text-${r}`).value = li.dataset.label;
+                    document.getElementById(`mat-id-${r}`).value   = li.dataset.id;
+                    list.style.display = 'none';
+                    onMaterialChange(r, li.dataset.id);
                 }
             } else if (e.key === 'Escape') {
                 list.style.display = 'none';

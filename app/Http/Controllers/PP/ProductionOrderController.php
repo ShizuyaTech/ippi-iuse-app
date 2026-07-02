@@ -326,9 +326,12 @@ class ProductionOrderController extends Controller
         }
         $request->validate([
             'material_id'        => 'required|exists:materials,id',
+            'bom_id'             => 'nullable|exists:boms,id',
+            'routing_id'         => 'nullable|exists:routings,id',
             'quantity_planned'   => 'required|numeric|min:0.001',
             'planned_start_date' => 'required|date',
             'planned_end_date'   => 'required|date|after_or_equal:planned_start_date',
+            'notes'              => 'nullable|string|max:1000',
         ]);
         $productionOrder->update($request->only('material_id', 'bom_id', 'routing_id', 'quantity_planned', 'planned_start_date', 'planned_end_date', 'notes'));
         return redirect()->route('pp.production-orders.show', $productionOrder)->with('success', 'Production Order diperbarui.');
