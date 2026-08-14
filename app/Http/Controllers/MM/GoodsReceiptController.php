@@ -22,7 +22,7 @@ class GoodsReceiptController extends Controller
 {
     public function index(Request $request)
     {
-        $query = GoodsReceipt::with('purchaseOrder.vendor', 'storageLocation');
+        $query = GoodsReceipt::with('purchaseOrder.vendor', 'vendor', 'storageLocation');
         if ($request->search)      $query->where(fn($q) => $q->where('gr_number', 'like', "%{$request->search}%")->orWhereHas('purchaseOrder', fn($p) => $p->where('po_number', 'like', "%{$request->search}%")));
         if ($request->date_from)   $query->whereDate('receipt_date', '>=', $request->date_from);
         if ($request->date_to)     $query->whereDate('receipt_date', '<=', $request->date_to);
@@ -64,15 +64,76 @@ class GoodsReceiptController extends Controller
 
         $pos = PurchaseOrder::with('vendor')
             ->whereIn('status', ['approved', 'partially_received'])
-            ->get();
-        $recentPos = PurchaseOrder::with('vendor')
-            ->whereIn('status', ['approved', 'partially_received'])
-            ->orderByDesc('updated_at')
-            ->limit(10)
+            ->orderBy('order_date')
             ->get();
         $locations  = StorageLocation::all();
         $selectedPo = $request->po_id ? PurchaseOrder::with('items.material', 'storageLocation')->find($request->po_id) : null;
-        return view('mm.goods-receipts.create', compact('pos', 'recentPos', 'locations', 'selectedPo', 'deliveryNote', 'dnQtyMap'));
+        return view('mm.goods-receipts.create', compact('pos', 'locations', 'selectedPo', 'deliveryNote', 'dnQtyMap'));
+    }
+
+    public function createNonPo()
+    {
+        $materials = \App\Models\Material::where('is_active', true)->orderBy('type')->orderBy('code')->get();
+        $locations = StorageLocation::orderBy('code')->get();
+        $vendors   = \App\Models\Vendor::where('is_active', true)->orderBy('name')->get();
+        return view('mm.goods-receipts.create-non-po', compact('materials', 'locations', 'vendors'));
+    }
+
+    public function storeNonPo(Request $request)
+    {
+        $request->validate([
+            'vendor_id'             => 'required|exists:vendors,id',
+            'receipt_date'          => 'required|date',
+            'storage_location_id'   => 'required|exists:storage_locations,id',
+            'items'                 => 'required|array|min:1',
+            'items.*.material_id'   => 'required|exists:materials,id',
+            'items.*.quantity'      => 'required|numeric|min:0.001',
+            'items.*.packing_note'  => 'nullable|string|max:100',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            $gr = GoodsReceipt::create([
+                'gr_number'           => GoodsReceipt::generateNumber(),
+                'purchase_order_id'   => null,
+                'vendor_id'           => $request->vendor_id,
+                'receipt_date'        => $request->receipt_date,
+                'storage_location_id' => $request->storage_location_id,
+                'status'              => 'posted',
+                'notes'               => $request->notes,
+                'created_by'          => Auth::id(),
+            ]);
+
+            foreach ($request->items as $row) {
+                if (($row['quantity'] ?? 0) <= 0) continue;
+
+                $gr->items()->create([
+                    'purchase_order_item_id' => null,
+                    'material_id'            => $row['material_id'],
+                    'quantity_received'      => $row['quantity'],
+                    'packing_note'           => $row['packing_note'] ?? null,
+                ]);
+
+                $stock = Stock::firstOrCreate(
+                    ['material_id' => $row['material_id'], 'storage_location_id' => $request->storage_location_id],
+                    ['quantity' => 0]
+                );
+                $stock->increment('quantity', $row['quantity']);
+                $stock->refresh();
+
+                StockMovement::create([
+                    'material_id'         => $row['material_id'],
+                    'storage_location_id' => $request->storage_location_id,
+                    'movement_type'       => 'GR',
+                    'quantity'            => $row['quantity'],
+                    'quantity_after'      => $stock->quantity,
+                    'reference_document'  => $gr->gr_number,
+                    'movement_date'       => $request->receipt_date,
+                    'created_by'          => Auth::id(),
+                ]);
+            }
+        });
+
+        return redirect()->route('mm.goods-receipts.create-non-po')->with('success', 'GR Non-PO berhasil diposting.');
     }
 
     public function store(Request $request)
@@ -93,7 +154,8 @@ class GoodsReceiptController extends Controller
             return back()->withErrors(['items' => 'Minimal satu item harus memiliki quantity yang diterima (> 0).'])->withInput();
         }
 
-        DB::transaction(function () use ($request) {
+        $grId = null;
+        DB::transaction(function () use ($request, &$grId) {
             $deliveryNote = null;
             $dnQtyMap = [];
 
@@ -140,6 +202,7 @@ class GoodsReceiptController extends Controller
                 'notes'               => $request->notes,
                 'created_by'          => Auth::id(),
             ]);
+            $grId = $gr->id;
 
             $po = PurchaseOrder::with('items')->find($request->purchase_order_id);
 
@@ -266,12 +329,12 @@ class GoodsReceiptController extends Controller
             }
         });
 
-        return redirect()->route('mm.goods-receipts.index')->with('success', 'Goods Receipt berhasil diposting.');
+        return redirect()->route('mm.goods-receipts.create')->with('success', 'Goods Receipt ' . GoodsReceipt::find($grId)?->gr_number . ' berhasil diposting.');
     }
 
     public function show(GoodsReceipt $goodsReceipt)
     {
-        $goodsReceipt->load('purchaseOrder.vendor', 'deliveryNote', 'items.material', 'storageLocation', 'createdBy');
+        $goodsReceipt->load('purchaseOrder.vendor', 'vendor', 'deliveryNote', 'items.material', 'storageLocation', 'createdBy');
         return view('mm.goods-receipts.show', compact('goodsReceipt'));
     }
 
@@ -335,7 +398,7 @@ class GoodsReceiptController extends Controller
 
     public function edit(GoodsReceipt $goodsReceipt)
     {
-        $goodsReceipt->load('items.purchaseOrderItem.material', 'storageLocation', 'purchaseOrder.vendor');
+        $goodsReceipt->load('items.purchaseOrderItem.material', 'items.material', 'storageLocation', 'purchaseOrder.vendor');
         return view('mm.goods-receipts.edit', compact('goodsReceipt'));
     }
 
@@ -377,38 +440,44 @@ class GoodsReceiptController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Goods Receipts');
 
-        $headers = ['No. GR','No. PO','Vendor','Tgl Terima','Lokasi','Status','Material','Qty Diterima','Packing Note','Deskripsi','Catatan GR'];
+        $headers = ['No. GR','No. PO','Vendor','Tgl Terima','Lokasi','Status','Kode Material','Nama Material','Total Qty Diterima','UoM','Deskripsi','Catatan GR'];
         foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'1', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A1:K1');
+        ExcelService::applyHeaderStyle($spreadsheet, 'A1:L1');
         $sheet->getRowDimension(1)->setRowHeight(20);
 
         $r = 2;
         foreach ($receipts as $gr) {
-            foreach ($gr->items as $item) {
+            // Aggregate total qty per material (collapse per-case rows)
+            $grouped = $gr->items->groupBy('material_id');
+            if ($grouped->isEmpty()) {
+                $sheet->setCellValue("A{$r}", $gr->gr_number);
+                $sheet->setCellValue("D{$r}", $gr->receipt_date->format('d/m/Y'));
+                $sheet->setCellValue("F{$r}", $gr->status);
+                $sheet->setCellValue("L{$r}", $gr->notes ?? '');
+                ExcelService::applyDataStyle($spreadsheet, "A{$r}:L{$r}", $r % 2 === 0);
+                $r++;
+                continue;
+            }
+            foreach ($grouped as $matId => $rows) {
+                $material = $rows->first()->material;
+                $totalQty = $rows->sum(fn($i) => (float) $i->quantity_received);
                 $sheet->setCellValue("A{$r}", $gr->gr_number);
                 $sheet->setCellValue("B{$r}", $gr->purchaseOrder->po_number ?? '-');
-                $sheet->setCellValue("C{$r}", $gr->purchaseOrder->vendor->name ?? '-');
+                $sheet->setCellValue("C{$r}", $gr->purchaseOrder->vendor->name ?? $gr->vendor->name ?? '-');
                 $sheet->setCellValue("D{$r}", $gr->receipt_date->format('d/m/Y'));
                 $sheet->setCellValue("E{$r}", $gr->storageLocation->code ?? '-');
                 $sheet->setCellValue("F{$r}", $gr->status);
-                $sheet->setCellValue("G{$r}", ($item->material->code ?? '').' - '.($item->material->name ?? ''));
-                $sheet->setCellValue("H{$r}", (float)$item->quantity_received);
-                $sheet->setCellValue("I{$r}", $item->packing_note);
-                $sheet->setCellValue("J{$r}", $item->material->description ?? '');
-                $sheet->setCellValue("K{$r}", $gr->notes ?? '');
-                ExcelService::applyDataStyle($spreadsheet, "A{$r}:K{$r}", $r % 2 === 0);
-                $r++;
-            }
-            if ($gr->items->isEmpty()) {
-                $sheet->setCellValue("A{$r}", $gr->gr_number);
-                $sheet->setCellValue("D{$r}", $gr->receipt_date->format('d/m/Y'));
-                $sheet->setCellValue("F{$r}", $gr->status);
-                $sheet->setCellValue("K{$r}", $gr->notes ?? '');
-                ExcelService::applyDataStyle($spreadsheet, "A{$r}:K{$r}", $r % 2 === 0);
+                $sheet->setCellValue("G{$r}", $material->code ?? '');
+                $sheet->setCellValue("H{$r}", $material->name ?? '');
+                $sheet->setCellValue("I{$r}", $totalQty);
+                $sheet->setCellValue("J{$r}", $material->unit_of_measure ?? '');
+                $sheet->setCellValue("K{$r}", $material->description ?? '');
+                $sheet->setCellValue("L{$r}", $gr->notes ?? '');
+                ExcelService::applyDataStyle($spreadsheet, "A{$r}:L{$r}", $r % 2 === 0);
                 $r++;
             }
         }
-        foreach (range('A','K') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        foreach (range('A','L') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
         return ExcelService::download($spreadsheet, 'goods_receipts_'.date('Ymd').'.xlsx');
     }
 

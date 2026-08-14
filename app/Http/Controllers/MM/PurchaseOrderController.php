@@ -239,13 +239,13 @@ class PurchaseOrderController extends Controller
         return back()->with('success', 'Purchase Order berhasil di-approve.');
     }
 
-    public function cancel(PurchaseOrder $purchaseOrder)
+    public function close(PurchaseOrder $purchaseOrder)
     {
-        if (in_array($purchaseOrder->status, ['received', 'cancelled'])) {
-            return back()->with('error', 'PO tidak dapat dibatalkan.');
+        if (in_array($purchaseOrder->status, ['received', 'closed'])) {
+            return back()->with('error', 'PO tidak dapat ditutup.');
         }
-        $purchaseOrder->update(['status' => 'cancelled']);
-        return back()->with('success', 'Purchase Order berhasil dibatalkan.');
+        $purchaseOrder->update(['status' => 'closed']);
+        return back()->with('success', 'Purchase Order berhasil ditutup.');
     }
 
     public function destroy(PurchaseOrder $purchaseOrder)

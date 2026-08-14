@@ -15,6 +15,7 @@
                         {{ $purchaseOrder->status==='approved'?'bg-blue-100 text-blue-700':'' }}
                         {{ $purchaseOrder->status==='received'?'bg-green-100 text-green-700':'' }}
                         {{ $purchaseOrder->status==='cancelled'?'bg-red-100 text-red-700':'' }}
+                        {{ $purchaseOrder->status==='closed'?'bg-orange-100 text-orange-700':'' }}
                         {{ $purchaseOrder->status==='partially_received'?'bg-yellow-100 text-yellow-700':'' }}
                     ">{{ ucfirst(str_replace('_',' ',$purchaseOrder->status)) }}</span>
                     <div class="mt-2 flex gap-2 justify-end flex-wrap">
@@ -68,17 +69,17 @@
                         @if($purchaseOrder->status === 'approved')
                         <a href="{{ route('mm.goods-receipts.create', ['po_id'=>$purchaseOrder->id]) }}" class="bg-green-600 text-white px-4 py-2 rounded text-sm">Buat GR</a>
                         @endif
-                        @if(!in_array($purchaseOrder->status, ['received','cancelled']))
-                        <form method="POST" action="{{ route('mm.purchase-orders.cancel', $purchaseOrder) }}" onsubmit="return confirm('Batalkan PO ini?')">
+                        @if(!in_array($purchaseOrder->status, ['received','closed']))
+                        <form method="POST" action="{{ route('mm.purchase-orders.close', $purchaseOrder) }}" onsubmit="return confirm('Tutup PO ini? Sisa outstanding tidak akan diterima lagi, namun stok yang sudah di-GR tetap aman.')">
                             @csrf
-                            <button class="bg-red-600 text-white px-4 py-2 rounded text-sm">Cancel</button>
+                            <button class="bg-orange-600 text-white px-4 py-2 rounded text-sm">Close PO</button>
                         </form>
                         @endif
                         <a href="{{ route('mm.purchase-orders.pdf', $purchaseOrder) }}" target="_blank" class="bg-red-700 text-white px-4 py-2 rounded text-sm flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                             Print PDF
                         </a>
-                        <a href="{{ route('mm.purchase-orders.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                        <a href="{{ route('mm.purchase-orders.index') }}" data-back-key="back_mm_purchase_orders" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
                     </div>
                     {{-- Approval info (once approved) --}}
                     @if($purchaseOrder->approved_at)

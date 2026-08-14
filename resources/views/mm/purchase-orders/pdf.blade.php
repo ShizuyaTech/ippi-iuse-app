@@ -27,6 +27,7 @@
         .status-approved { background: #dbeafe; color: #1d4ed8; }
         .status-received { background: #dcfce7; color: #15803d; }
         .status-cancelled { background: #fee2e2; color: #dc2626; }
+        .status-closed { background: #ffedd5; color: #c2410c; }
         .status-partially_received { background: #fef9c3; color: #a16207; }
 
         /* Info Grid */

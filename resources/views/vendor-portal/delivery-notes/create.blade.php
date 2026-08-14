@@ -2,7 +2,7 @@
     <x-slot name="title">Buat Surat Jalan</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center gap-3 mb-4">
-            <a href="{{ route('vendor.delivery-notes.index') }}" class="text-teal-600 hover:underline text-sm">← Kembali</a>
+            <a href="{{ route('vendor.delivery-notes.index') }}" data-back-key="back_vendor_delivery_notes" class="text-teal-600 hover:underline text-sm">← Kembali</a>
             <h2 class="text-lg font-semibold text-gray-700">Buat Surat Jalan</h2>
         </div>
 

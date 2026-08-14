@@ -36,7 +36,7 @@
                     @csrf @method('DELETE')
                     <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Hapus</button>
                 </form>
-                <a href="{{ route('mm.materials.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                <a href="{{ route('mm.materials.index') }}" data-back-key="back_mm_materials" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
             </div>
         </div>
 

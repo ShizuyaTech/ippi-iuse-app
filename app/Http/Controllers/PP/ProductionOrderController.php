@@ -15,6 +15,7 @@ use App\Models\StorageLocation;
 use App\Services\ExcelService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -56,7 +57,7 @@ class ProductionOrderController extends Controller
             'planned_start_date'              => 'required|date',
             'planned_end_date'                => 'required|date|after_or_equal:planned_start_date',
             'orders'                          => 'required|array|min:1',
-            'orders.*.order_number'           => 'required|string|max:50|distinct',
+            'orders.*.order_number'           => 'nullable|string|max:50|distinct',
             'orders.*.material_id'            => 'required|exists:materials,id',
             'orders.*.quantity_planned'       => 'required|numeric|min:0.001',
             'orders.*.notes'                  => 'nullable|string',
@@ -94,7 +95,7 @@ class ProductionOrderController extends Controller
                     'planned_end_date'   => $request->planned_end_date,
                     'status'             => 'created',
                     'notes'              => $row['notes'] ?? null,
-                    'created_by'         => auth()->id(),
+                    'created_by'         => Auth::id(),
                 ]);
 
                 if ($bom) {
@@ -416,7 +417,7 @@ class ProductionOrderController extends Controller
                 'storage_location_id' => $rmLocation?->id,
                 'status'              => 'posted',
                 'notes'               => 'GI for Production Order ' . $productionOrder->order_number,
-                'created_by'          => auth()->id(),
+                'created_by'          => Auth::id(),
             ]);
 
             foreach ($productionOrder->components as $component) {
@@ -444,7 +445,7 @@ class ProductionOrderController extends Controller
                     'quantity_after'      => $newQty,
                     'reference_document'  => $gi->gi_number,
                     'movement_date'       => now()->toDateString(),
-                    'created_by'          => auth()->id(),
+                    'created_by'          => Auth::id(),
                 ]);
             }
 
@@ -523,7 +524,7 @@ class ProductionOrderController extends Controller
                     'quantity_after'      => $newQty,
                     'reference_document'  => $productionOrder->order_number,
                     'movement_date'       => now()->toDateString(),
-                    'created_by'          => auth()->id(),
+                    'created_by'          => Auth::id(),
                 ]);
             }
 
@@ -558,7 +559,7 @@ class ProductionOrderController extends Controller
                     'quantity_after'      => $newCompQty,
                     'reference_document'  => $productionOrder->order_number . '/RET',
                     'movement_date'       => now()->toDateString(),
-                    'created_by'          => auth()->id(),
+                    'created_by'          => Auth::id(),
                 ]);
             }
 

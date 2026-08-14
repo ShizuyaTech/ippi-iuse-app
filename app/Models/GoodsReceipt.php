@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class GoodsReceipt extends Model
 {
-    protected $fillable = ['gr_number', 'purchase_order_id', 'delivery_note_id', 'receipt_date', 'storage_location_id', 'status', 'notes', 'created_by'];
+    protected $fillable = ['gr_number', 'purchase_order_id', 'vendor_id', 'delivery_note_id', 'receipt_date', 'storage_location_id', 'status', 'notes', 'created_by'];
 
     protected $casts = ['receipt_date' => 'date'];
 
     public function purchaseOrder() { return $this->belongsTo(PurchaseOrder::class); }
+    public function vendor()        { return $this->belongsTo(\App\Models\Vendor::class); }
     public function deliveryNote() { return $this->belongsTo(DeliveryNote::class); }
     public function storageLocation() { return $this->belongsTo(StorageLocation::class); }
     public function items() { return $this->hasMany(GoodsReceiptItem::class); }

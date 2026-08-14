@@ -4,7 +4,7 @@
         <div class="bg-white rounded-lg shadow p-5">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <a href="{{ route('vendor.material-receipts.index') }}" class="text-teal-600 hover:underline text-sm">← Kembali</a>
+                    <a href="{{ route('vendor.material-receipts.index') }}" data-back-key="back_vendor_material_receipts" class="text-teal-600 hover:underline text-sm">← Kembali</a>
                     <h2 class="text-lg font-semibold text-gray-700 mt-1">
                         Kiriman: <span class="font-mono text-teal-700">{{ $materialReceipt->vmd_number }}</span>
                     </h2>

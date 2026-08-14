@@ -338,7 +338,7 @@
                     <input type="hidden" name="items[${rowIndex}][material_id]" id="mat-id-${rowIndex}" required>
                     <ul id="mat-list-${rowIndex}" style="display:none;position:absolute;top:100%;left:0;min-width:240px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;max-height:160px;overflow-y:auto;z-index:1000;margin:0;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,.12);"></ul>
                 </td>
-                <td class="px-2 py-1"><input type="number" name="items[${rowIndex}][quantity]" class="w-full border rounded px-2 py-1 text-sm qty" min="0.001" step="0.001" value="1" onchange="calcRow(this)" required></td>
+                <td class="px-2 py-1"><input type="number" name="items[${rowIndex}][quantity]" class="w-full border rounded px-2 py-1 text-sm qty" min="0.001" step="0.001" onchange="calcRow(this)" required></td>
                 <td class="px-2 py-1"><input type="number" name="items[${rowIndex}][unit_price]" class="w-full border rounded px-2 py-1 text-sm price" min="0" step="0.01" value="0" onchange="calcRow(this)" required></td>
                 <td class="px-2 py-1 text-right font-medium row-total">0</td>
                 <td class="px-2 py-1 text-center"><button type="button" onclick="this.closest('tr').remove();calcGrand()" class="text-red-500 hover:text-red-700">&#10005;</button></td>

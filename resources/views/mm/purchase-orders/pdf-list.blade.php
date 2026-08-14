@@ -40,6 +40,7 @@
         .badge-approved { background: #dbeafe; color: #1d4ed8; }
         .badge-received { background: #dcfce7; color: #15803d; }
         .badge-cancelled { background: #fee2e2; color: #dc2626; }
+        .badge-closed { background: #ffedd5; color: #c2410c; }
         .badge-partially_received { background: #fef9c3; color: #a16207; }
 
         /* Summary */

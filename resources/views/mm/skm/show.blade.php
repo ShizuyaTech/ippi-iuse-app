@@ -93,7 +93,7 @@
                     </form>
                     @endif
 
-                    <a href="{{ route('mm.skm.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                    <a href="{{ route('mm.skm.index') }}" data-back-key="back_mm_skm" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
                 </div>
             </div>
 

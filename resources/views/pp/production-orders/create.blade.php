@@ -94,7 +94,7 @@
                 <table class="w-full text-sm border-collapse" id="items-table">
                     <thead class="bg-blue-900 text-white">
                         <tr>
-                            <th class="px-3 py-2 text-left" style="min-width:150px">No. Order *</th>
+                            <th class="px-3 py-2 text-left" style="min-width:150px">No. Order</th>
                             <th class="px-3 py-2 text-left" style="min-width:200px">Material *</th>
                             <th class="px-3 py-2 text-right" style="min-width:100px">Qty Planned *</th>
                             <th class="px-3 py-2 text-left" style="min-width:150px">Catatan Item</th>
@@ -203,8 +203,8 @@
             tr.id = `row-${r}`;
             tr.innerHTML = `
                 <td class="px-2 py-1">
-                    <input type="text" name="orders[${r}][order_number]" placeholder="Nomor PO..."
-                        style="width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 6px;font-size:12px;font-family:monospace;" required>
+                    <input type="text" name="orders[${r}][order_number]" placeholder="Nomor PO (opsional)"
+                        style="width:100%;border:1px solid #cbd5e1;border-radius:4px;padding:3px 6px;font-size:12px;font-family:monospace;">
                 </td>
                 <td class="px-2 py-1" style="position:relative;overflow:visible;">
                     <input type="text" id="mat-text-${r}" placeholder="Ketik kode / nama..." autocomplete="off"
@@ -214,7 +214,7 @@
                     <ul id="mat-list-${r}" style="display:none;position:absolute;top:100%;left:0;min-width:220px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;max-height:160px;overflow-y:auto;z-index:999;list-style:none;margin:0;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,.12);"></ul>
                 </td>
                 <td class="px-2 py-1">
-                    <input type="number" name="orders[${r}][quantity_planned]" value="1" min="0.001" step="0.001" class="w-full border rounded px-2 py-1 text-sm text-right" required>
+                    <input type="number" name="orders[${r}][quantity_planned]" min="0.001" step="0.001" class="w-full border rounded px-2 py-1 text-sm text-right" required>
                 </td>
                 <td class="px-2 py-1">
                     <input type="text" name="orders[${r}][notes]" class="w-full border rounded px-2 py-1 text-sm" placeholder="opsional">

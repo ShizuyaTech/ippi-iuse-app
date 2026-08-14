@@ -17,7 +17,7 @@
         </div>
         <div class="mt-4 flex gap-2">
             <a href="{{ route('mm.customers.edit', $customer) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm">Edit</a>
-            <a href="{{ route('mm.customers.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+            <a href="{{ route('mm.customers.index') }}" data-back-key="back_mm_customers" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
         </div>
     </div>
 </x-app-layout>

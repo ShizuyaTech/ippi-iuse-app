@@ -2,7 +2,7 @@
     <x-slot name="title">Permission User: {{ $user->name }}</x-slot>
     <div class="bg-white rounded-lg shadow p-6 max-w-4xl">
         <div class="flex items-center gap-3 mb-6">
-            <a href="{{ route('admin.users.index') }}" class="text-blue-600 hover:underline text-sm">← Kembali</a>
+            <a href="{{ route('admin.users.index') }}" data-back-key="back_admin_users" class="text-blue-600 hover:underline text-sm">← Kembali</a>
             <h2 class="text-lg font-semibold text-gray-700">
                 Permission Individual: <span class="text-blue-700">{{ $user->name }}</span>
             </h2>

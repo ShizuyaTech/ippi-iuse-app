@@ -4,7 +4,7 @@
         <div class="bg-white rounded-lg shadow p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('mm.vendor-deliveries.index') }}" class="text-blue-600 hover:underline text-sm">← Kembali</a>
+                    <a href="{{ route('mm.vendor-deliveries.index') }}" data-back-key="back_mm_vendor_deliveries" class="text-blue-600 hover:underline text-sm">← Kembali</a>
                     <h2 class="text-lg font-semibold text-gray-700">
                         Kiriman: <span class="font-mono text-blue-700">{{ $vendorDelivery->vmd_number }}</span>
                     </h2>

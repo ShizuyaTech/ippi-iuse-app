@@ -13,6 +13,7 @@
                     Print PDF
                 </a>
                 <a href="{{ route('mm.goods-receipts.create') }}" class="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800">+ Buat GR</a>
+                <a href="{{ route('mm.goods-receipts.create-non-po') }}" class="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700">+ GR Non-PO</a>
             </div>
         </div>
 
@@ -40,10 +41,10 @@
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
-                    <th class="px-3 py-2 text-left">No. GR</th>
-                    <th class="px-3 py-2 text-left hidden sm:table-cell">No. PO</th>
-                    <th class="px-3 py-2 text-left hidden md:table-cell">Vendor</th>
                     <th class="px-3 py-2 text-left hidden sm:table-cell">Tgl Terima</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Vendor</th>
+                    <th class="px-3 py-2 text-left hidden sm:table-cell">No. PO</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Catatan</th>
                     <th class="px-3 py-2 text-left hidden md:table-cell">Lokasi</th>
                     <th class="px-3 py-2 text-center hidden md:table-cell">Status</th>
                     <th class="px-3 py-2 text-center print:hidden">Aksi</th>
@@ -52,10 +53,10 @@
             <tbody>
                 @forelse($receipts as $gr)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-3 py-2 font-mono text-blue-700 font-medium text-xs whitespace-nowrap">{{ $gr->gr_number }}</td>
-                    <td class="px-3 py-2 font-mono text-xs hidden sm:table-cell">{{ $gr->purchaseOrder->po_number ?? '-' }}</td>
-                    <td class="px-3 py-2 hidden md:table-cell">{{ $gr->purchaseOrder->vendor->name ?? '-' }}</td>
                     <td class="px-3 py-2 hidden sm:table-cell">{{ $gr->receipt_date->format('d/m/Y') }}</td>
+                    <td class="px-3 py-2 hidden md:table-cell">{{ $gr->purchaseOrder->vendor->name ?? $gr->vendor->name ?? '-' }}</td>
+                    <td class="px-3 py-2 font-mono text-xs hidden sm:table-cell">{{ $gr->purchaseOrder->po_number ?? '—' }} @if(!$gr->purchase_order_id)<span class="text-purple-600 text-xs font-sans font-normal">(Non-PO)</span>@endif</td>
+                    <td class="px-3 py-2 text-gray-500 text-xs hidden md:table-cell">{{ Str::limit($gr->notes, 30) }}</td>
                     <td class="px-3 py-2 hidden md:table-cell">{{ $gr->storageLocation->name ?? '-' }}</td>
                     <td class="px-3 py-2 text-center hidden md:table-cell"><span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">{{ $gr->status }}</span></td>
                     <td class="px-3 py-2 text-center print:hidden">

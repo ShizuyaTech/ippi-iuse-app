@@ -2,7 +2,7 @@
     <x-slot name="title">Edit Role: {{ $role->display_name }}</x-slot>
     <div class="bg-white rounded-lg shadow p-6 max-w-4xl">
         <div class="flex items-center gap-3 mb-6">
-            <a href="{{ route('admin.roles.index') }}" class="text-blue-600 hover:underline text-sm">← Kembali</a>
+            <a href="{{ route('admin.roles.index') }}" data-back-key="back_admin_roles" class="text-blue-600 hover:underline text-sm">← Kembali</a>
             <h2 class="text-lg font-semibold text-gray-700">
                 Edit Role: <span class="text-blue-700">{{ $role->display_name }}</span>
                 @if($role->is_system)

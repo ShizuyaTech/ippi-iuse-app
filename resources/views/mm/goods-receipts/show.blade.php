@@ -13,12 +13,18 @@
                         @csrf @method('DELETE')
                         <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Hapus</button>
                     </form>
-                    <a href="{{ route('mm.goods-receipts.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                    <a href="{{ route('mm.goods-receipts.index') }}" data-back-key="back_mm_goods_receipts" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
                 </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
-                <div><span class="text-gray-500">No. PO:</span><br><a href="{{ route('mm.purchase-orders.show', $goodsReceipt->purchaseOrder) }}" class="font-mono text-blue-700 hover:underline">{{ $goodsReceipt->purchaseOrder->po_number }}</a></div>
-                <div><span class="text-gray-500">Vendor:</span><br><span class="font-medium">{{ $goodsReceipt->purchaseOrder->vendor->name ?? '-' }}</span></div>
+                <div><span class="text-gray-500">No. PO:</span><br>
+                    @if($goodsReceipt->purchaseOrder)
+                        <a href="{{ route('mm.purchase-orders.show', $goodsReceipt->purchaseOrder) }}" class="font-mono text-blue-700 hover:underline">{{ $goodsReceipt->purchaseOrder->po_number }}</a>
+                    @else
+                        <span class="text-purple-600 font-medium">Non-PO</span>
+                    @endif
+                </div>
+                <div><span class="text-gray-500">Vendor:</span><br><span class="font-medium">{{ $goodsReceipt->purchaseOrder->vendor->name ?? $goodsReceipt->vendor->name ?? '-' }}</span></div>
                 <div><span class="text-gray-500">Tgl Terima:</span><br><span class="font-medium">{{ $goodsReceipt->receipt_date->format('d M Y') }}</span></div>
                 <div><span class="text-gray-500">Lokasi:</span><br><span class="font-medium">{{ $goodsReceipt->storageLocation->name ?? '-' }}</span></div>
                 <div><span class="text-gray-500">Dibuat Pada:</span><br><span class="font-medium">{{ $goodsReceipt->created_at->format('d/m/Y H:i') }}</span></div>

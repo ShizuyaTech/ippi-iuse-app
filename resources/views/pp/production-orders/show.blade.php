@@ -62,7 +62,7 @@
                         </form>
                         @endif
 
-                        <a href="{{ route('pp.production-orders.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm self-end">Kembali</a>
+                        <a href="{{ route('pp.production-orders.index') }}" data-back-key="back_pp_production_orders" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm self-end">Kembali</a>
                     </div>
                 </div>
             </div>
@@ -152,20 +152,17 @@
                             <div class="text-xs text-gray-400">{{ $stockInfo['location_code'] }}</div>
                         </td>
                         <td class="px-4 py-2 text-right">
-                            @if($isPending)
                             <input type="number"
                                    name="quantities[{{ $comp->id }}]"
                                    value="{{ old('quantities.' . $comp->id, 0) }}"
                                    min="0"
-                                   max="{{ $stockInfo['available'] }}"
                                    step="0.001"
-                                   class="w-32 border rounded px-2 py-1 text-sm text-right focus:border-orange-400 focus:ring-1 focus:ring-orange-300 gi-qty-input"
+                                   class="w-32 border rounded px-2 py-1 text-sm text-right focus:border-orange-400 focus:ring-1 focus:ring-orange-300 gi-qty-input {{ !$isPending ? 'border-green-300 bg-green-50' : '' }}"
                                    data-required="{{ $comp->quantity_required }}"
                                    data-issued="{{ $comp->quantity_issued ?? 0 }}"
                                    data-planned="{{ $productionOrder->quantity_planned }}">
-                            @else
-                            <span class="text-xs text-green-600">Selesai</span>
-                            <input type="hidden" name="quantities[{{ $comp->id }}]" value="0">
+                            @if(!$isPending)
+                            <div class="text-xs text-green-600 mt-0.5">Sudah issued</div>
                             @endif
                         </td>
                         @endif

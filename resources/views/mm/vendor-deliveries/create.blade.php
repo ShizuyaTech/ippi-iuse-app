@@ -2,7 +2,7 @@
     <x-slot name="title">Buat Kiriman Bahan ke Vendor</x-slot>
     <div class="max-w-4xl bg-white rounded-lg shadow p-6">
         <div class="flex items-center gap-3 mb-4">
-            <a href="{{ route('mm.vendor-deliveries.index') }}" class="text-blue-600 hover:underline text-sm">← Kembali</a>
+            <a href="{{ route('mm.vendor-deliveries.index') }}" data-back-key="back_mm_vendor_deliveries" class="text-blue-600 hover:underline text-sm">← Kembali</a>
             <h2 class="text-lg font-semibold text-gray-700">Buat Kiriman Bahan ke Vendor</h2>
         </div>
 
@@ -120,7 +120,7 @@
                 <td class="px-2 py-1">
                     <input type="number" name="items[${r}][quantity]"
                         class="w-full border rounded px-2 py-1 text-sm text-right"
-                        min="0.001" step="0.001" value="1" required>
+                        min="0.001" step="0.001" required>
                 </td>
                 <td class="px-2 py-1">
                     <input type="text" name="items[${r}][notes]"

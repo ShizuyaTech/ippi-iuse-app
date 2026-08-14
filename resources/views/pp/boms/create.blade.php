@@ -128,7 +128,7 @@
         }
 
         // ── Component row autocomplete ─────────────────────────────
-        function addRow(mid=null, qty=1, uom='', label='') {
+        function addRow(mid=null, qty='', uom='', label='') {
             const tr = document.createElement('tr');
             tr.className = 'border-b';
             tr.innerHTML = `

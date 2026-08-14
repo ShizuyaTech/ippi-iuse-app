@@ -3,7 +3,7 @@
     <div class="bg-white rounded-lg shadow p-6 max-w-4xl">
         <div class="flex justify-between items-start mb-6">
             <div>
-                <a href="{{ route('vendor.purchase-orders.index') }}" class="text-teal-600 hover:underline text-sm">← Kembali</a>
+                <a href="{{ route('vendor.purchase-orders.index') }}" data-back-key="back_vendor_purchase_orders" class="text-teal-600 hover:underline text-sm">← Kembali</a>
                 <h2 class="text-lg font-semibold text-gray-700 mt-1">
                     PO: <span class="font-mono text-teal-700">{{ $purchaseOrder->po_number }}</span>
                 </h2>

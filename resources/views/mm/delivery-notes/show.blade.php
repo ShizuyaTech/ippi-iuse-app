@@ -6,7 +6,7 @@
         <div class="bg-white rounded-lg shadow p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('mm.delivery-notes.index') }}" class="text-blue-600 hover:underline text-sm">← Kembali</a>
+                    <a href="{{ route('mm.delivery-notes.index') }}" data-back-key="back_mm_delivery_notes" class="text-blue-600 hover:underline text-sm">← Kembali</a>
                     <h2 class="text-lg font-semibold text-gray-700">
                         Surat Jalan: <span class="font-mono text-blue-700">{{ $deliveryNote->dn_number }}</span>
                     </h2>

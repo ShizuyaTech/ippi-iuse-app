@@ -20,7 +20,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dari Storage Location *</label>
-                    <select name="storage_location_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
+                    <select id="src-location" name="storage_location_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required onchange="updateAllStocks()">
                         <option value="">-- Pilih Lokasi --</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('storage_location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->code }} - {{ $loc->name }}</option>
@@ -94,8 +94,9 @@
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="px-3 py-2 text-left">Material</th>
-                                <th class="px-3 py-2 text-right w-32">Qty</th>
-                                <th class="px-3 py-2 text-left w-56">Note / ID Packing</th>
+                                <th class="px-3 py-2 text-right w-28">Stok</th>
+                                <th class="px-3 py-2 text-right w-28">Qty</th>
+                                <th class="px-3 py-2 text-left w-48">Note / ID Packing</th>
                                 <th class="px-3 py-2 w-10"></th>
                             </tr>
                         </thead>
@@ -116,9 +117,10 @@
 
     <script>
         @php
-            $materialJson = $materials->map(fn($m) => ['id'=>$m->id,'code'=>$m->code,'name'=>$m->name]);
+            $materialJson = $materials->map(fn($m) => ['id'=>$m->id,'code'=>$m->code,'name'=>$m->name,'type'=>$m->type]);
         @endphp
         const materials = @json($materialJson);
+        const stockMap  = @json($stocks);
         let r = 0;
 
         function addRow() {
@@ -139,8 +141,9 @@
                              style="min-width:320px; top:100%; left:0;"></div>
                     </div>
                 </td>
+                <td class="px-2 py-1 text-right text-xs text-gray-500 whitespace-nowrap" id="stk-${r}" data-stock-row="${r}">-</td>
                 <td class="px-2 py-1">
-                    <input type="number" name="items[${r}][quantity]" class="w-full border rounded px-2 py-1 text-sm text-right" min="0.001" step="0.001" value="1" required>
+                    <input type="number" name="items[${r}][quantity]" class="w-full border rounded px-2 py-1 text-sm text-right" min="0.001" step="0.001" required>
                 </td>
                 <td class="px-2 py-1">
                     <input type="text" name="items[${r}][note]" class="w-full border rounded px-2 py-1 text-sm" placeholder="Contoh: PKG-0042">
@@ -157,8 +160,24 @@
                 document.getElementById(`mat-search-${item.dataset.row}`).value = item.dataset.label;
                 document.getElementById(`mat-id-${item.dataset.row}`).value = item.dataset.id;
                 this.classList.add('hidden');
+                updateStock(item.dataset.row, item.dataset.id);
             });
             r++;
+        }
+
+        function updateStock(row, matId) {
+            const locId = document.getElementById('src-location')?.value || '';
+            const qty   = locId ? stockMap[matId + '_' + locId] : undefined;
+            const cell  = document.getElementById(`stk-${row}`);
+            if (cell) cell.textContent = (qty !== undefined && qty !== null) ? Number(qty).toLocaleString('id-ID') : '-';
+        }
+        function updateAllStocks() {
+            document.querySelectorAll('[data-stock-row]').forEach(cell => {
+                const row   = cell.dataset.stockRow;
+                const matId = document.getElementById(`mat-id-${row}`)?.value;
+                if (matId) updateStock(row, matId);
+                else cell.textContent = '-';
+            });
         }
 
         function matSearch(idx, input) {
@@ -214,6 +233,7 @@
                     document.getElementById(`mat-search-${idx}`).value = el.dataset.label;
                     document.getElementById(`mat-id-${idx}`).value = el.dataset.id;
                     box.classList.add('hidden');
+                    updateStock(idx, el.dataset.id);
                 }
             } else if (e.key === 'Escape') {
                 box.classList.add('hidden');
@@ -291,10 +311,34 @@
             }
         }
 
-        // Init on load
+        // Init on load — restore old items if validation failed, else start with one empty row
         document.addEventListener('DOMContentLoaded', function () {
             toggleDestination();
-            addRow();
+            @php $oldItems = old('items', []); @endphp
+            @if(count($oldItems) > 0)
+                @foreach($oldItems as $i => $oldItem)
+                addRow();
+                @if(!empty($oldItem['material_id']))
+                (function() {
+                    const matId = '{{ $oldItem["material_id"] }}';
+                    const mat   = materials.find(m => m.id == matId);
+                    if (mat) {
+                        document.getElementById(`mat-search-{{ $i }}`).value = mat.code + ' - ' + mat.name;
+                        document.getElementById(`mat-id-{{ $i }}`).value = matId;
+                        updateStock({{ $i }}, matId);
+                    }
+                })();
+                @endif
+                @if(!empty($oldItem['quantity']))
+                document.querySelector('[name="items[{{ $i }}][quantity]"]').value = '{{ $oldItem["quantity"] }}';
+                @endif
+                @if(!empty($oldItem['note']))
+                document.querySelector('[name="items[{{ $i }}][note]"]').value = '{{ addslashes($oldItem["note"]) }}';
+                @endif
+                @endforeach
+            @else
+                addRow();
+            @endif
         });
 
     </script>

@@ -31,6 +31,7 @@
                 <option value="approved" {{ request('status')=='approved'?'selected':'' }}>Approved</option>
                 <option value="partially_received" {{ request('status')=='partially_received'?'selected':'' }}>Partial Received</option>
                 <option value="received" {{ request('status')=='received'?'selected':'' }}>Received</option>
+                <option value="closed" {{ request('status')=='closed'?'selected':'' }}>Closed</option>
                 <option value="cancelled" {{ request('status')=='cancelled'?'selected':'' }}>Cancelled</option>
             </select>
             <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded text-sm">Cari</button>
@@ -63,6 +64,7 @@
                             {{ $po->status==='approved'?'bg-blue-100 text-blue-700':'' }}
                             {{ $po->status==='received'?'bg-green-100 text-green-700':'' }}
                             {{ $po->status==='cancelled'?'bg-red-100 text-red-700':'' }}
+                            {{ $po->status==='closed'?'bg-orange-100 text-orange-700':'' }}
                             {{ $po->status==='partially_received'?'bg-yellow-100 text-yellow-700':'' }}
                         ">{{ ucfirst(str_replace('_',' ',$po->status)) }}</span>
                     </td>

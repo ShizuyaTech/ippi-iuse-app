@@ -1,7 +1,19 @@
 <x-app-layout>
     <x-slot name="title">Buat Goods Receipt</x-slot>
     <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-700 mb-4">Buat Goods Receipt</h2>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('mm.goods-receipts.index') }}" data-back-key="back_mm_goods_receipts" class="text-blue-600 hover:underline text-sm">← Index GR</a>
+                <h2 class="text-lg font-semibold text-gray-700">Buat Goods Receipt</h2>
+            </div>
+        </div>
+
+        @if(session('success'))
+        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded text-sm flex items-center gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
+        </div>
+        @endif
 
         @isset($deliveryNote)
         <div class="mb-4 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded text-sm">
@@ -11,124 +23,112 @@
         </div>
         @endisset
 
-        {{-- PO Selection --}}
+        {{-- PO Selection table --}}
+        @if(!$selectedPo)
         @php
-            $posJson = $pos->map(fn($p) => ['id' => $p->id, 'label' => $p->po_number.' - '.$p->vendor->name]);
-            $selectedPoLabel = request('po_id') ? ($pos->firstWhere('id', request('po_id'))?->po_number.' - '.$pos->firstWhere('id', request('po_id'))?->vendor?->name) : '';
+            $vendors = $pos->pluck('vendor.name', 'vendor_id')->filter()->unique()->sort();
         @endphp
-        <form method="GET" id="po-select-form" class="mb-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            @isset($deliveryNote)
-            <input type="hidden" name="dn_id" value="{{ $deliveryNote->id }}">
-            @endisset
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Purchase Order</label>
-                <div class="relative">
-                    <input type="text" id="po-search"
-                           value="{{ $selectedPoLabel }}"
-                           placeholder="Ketik nomor PO atau nama vendor..."
-                           autocomplete="off"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                           oninput="poSearch(this)"
-                           onkeydown="poKeydown(event)">
-                    <input type="hidden" name="po_id" id="po-id-hidden" value="{{ request('po_id') }}">
-                    <div id="po-suggestions"
-                         class="absolute z-50 w-full bg-white border border-gray-200 rounded-b shadow-lg max-h-60 overflow-y-auto hidden"></div>
-                </div>
-            </div>
-        </form>
-
-        {{-- 10 PO Terbaru (Open / Partial) --}}
-        @if($recentPos->isNotEmpty() && !$selectedPo)
         <div class="mb-6">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">10 PO Terbaru yang Belum Selesai</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                @foreach($recentPos as $rpo)
-                @php
-                    $statusColor = $rpo->status === 'partially_received'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-blue-100 text-blue-700';
-                    $statusLabel = $rpo->status === 'partially_received' ? 'Partial' : 'Approved';
-                @endphp
-                <a href="{{ request()->fullUrlWithQuery(['po_id' => $rpo->id]) }}"
-                   class="flex items-center justify-between gap-2 px-3 py-2 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group">
-                    <div class="min-w-0">
-                        <div class="font-mono text-blue-700 text-xs font-bold truncate">{{ $rpo->po_number }}</div>
-                        <div class="text-gray-600 text-xs truncate">{{ $rpo->vendor->name ?? '-' }}</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap {{ $statusColor }}">{{ $statusLabel }}</span>
-                </a>
-                @endforeach
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+                <p class="text-sm font-semibold text-gray-600 mr-auto">Pilih Purchase Order</p>
+                <input type="text" id="po-filter-text" placeholder="No. PO..."
+                       oninput="applyPoFilters()"
+                       class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <select id="po-filter-vendor" onchange="applyPoFilters()"
+                        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                    <option value="">Semua Vendor</option>
+                    @foreach($vendors as $vname)
+                    <option value="{{ strtolower($vname) }}">{{ $vname }}</option>
+                    @endforeach
+                </select>
+                <input type="date" id="po-filter-from" onchange="applyPoFilters()" title="Tgl Order dari"
+                       class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                <input type="date" id="po-filter-to" onchange="applyPoFilters()" title="Tgl Order sampai"
+                       class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                <button type="button" onclick="resetPoFilters()"
+                        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600">Reset</button>
+            </div>
+            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+            <table class="w-full text-sm border-collapse" id="po-table">
+                <thead class="bg-blue-900 text-white">
+                    <tr>
+                        <th class="px-3 py-2 text-left">No. PO</th>
+                        <th class="px-3 py-2 text-left">Vendor</th>
+                        <th class="px-3 py-2 text-left hidden sm:table-cell">Tgl Order</th>
+                        <th class="px-3 py-2 text-left hidden sm:table-cell">Est. Kirim</th>
+                        <th class="px-3 py-2 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($pos as $po)
+                    @php
+                        $sc = $po->status === 'partially_received' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700';
+                        $sl = $po->status === 'partially_received' ? 'Partial' : 'Approved';
+                        $href = isset($deliveryNote)
+                            ? request()->fullUrlWithQuery(['po_id' => $po->id, 'dn_id' => $deliveryNote->id])
+                            : request()->fullUrlWithQuery(['po_id' => $po->id]);
+                    @endphp
+                    <tr class="border-b hover:bg-blue-50 cursor-pointer po-row"
+                        data-text="{{ strtolower($po->po_number . ' ' . ($po->vendor->name ?? '')) }}"
+                        data-vendor="{{ strtolower($po->vendor->name ?? '') }}"
+                        data-order-date="{{ $po->order_date->format('Y-m-d') }}"
+                        onclick="window.location='{{ $href }}'">
+                        <td class="px-3 py-2 font-mono text-blue-700 text-xs font-bold">{{ $po->po_number }}</td>
+                        <td class="px-3 py-2">{{ $po->vendor->name ?? '-' }}</td>
+                        <td class="px-3 py-2 hidden sm:table-cell">{{ $po->order_date->format('d/m/Y') }}</td>
+                        <td class="px-3 py-2 hidden sm:table-cell">{{ $po->expected_delivery_date?->format('d/m/Y') ?? '-' }}</td>
+                        <td class="px-3 py-2 text-center"><span class="px-2 py-0.5 rounded text-xs {{ $sc }}">{{ $sl }}</span></td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Tidak ada PO yang tersedia untuk GR.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
             </div>
         </div>
-        @endif
-
         <script>
-            const allPos = @json($posJson);
-
-            function poSearch(input) {
-                input._activeIdx = -1;
-                const q = input.value.trim().toLowerCase();
-                const box = document.getElementById('po-suggestions');
-                document.getElementById('po-id-hidden').value = '';
-                if (!q) { box.classList.add('hidden'); return; }
-                const matches = allPos.filter(p => p.label.toLowerCase().includes(q)).slice(0, 30);
-                if (!matches.length) { box.classList.add('hidden'); return; }
-                box.innerHTML = matches.map(p =>
-                    `<div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 border-b border-gray-100"
-                          data-id="${p.id}" data-label="${p.label}">
-                        <span class="font-mono text-blue-600 font-semibold">${p.label.split(' - ')[0]}</span>
-                        <span class="ml-2 text-gray-700">${p.label.split(' - ').slice(1).join(' - ')}</span>
-                    </div>`
-                ).join('');
-                box.classList.remove('hidden');
-            }
-
-            document.getElementById('po-suggestions').addEventListener('click', function(e) {
-                const item = e.target.closest('[data-id]');
-                if (!item) return;
-                document.getElementById('po-search').value = item.dataset.label;
-                document.getElementById('po-id-hidden').value = item.dataset.id;
-                this.classList.add('hidden');
-                document.getElementById('po-select-form').submit();
+        const GR_FILTER_KEY = 'gr_po_create_filters';
+        function applyPoFilters() {
+            const text   = (document.getElementById('po-filter-text')?.value || '').toLowerCase();
+            const vendor = (document.getElementById('po-filter-vendor')?.value || '');
+            const from   = document.getElementById('po-filter-from')?.value || '';
+            const to     = document.getElementById('po-filter-to')?.value || '';
+            sessionStorage.setItem(GR_FILTER_KEY, JSON.stringify({text, vendor, from, to}));
+            document.querySelectorAll('#po-table .po-row').forEach(function(row) {
+                const matchText   = !text   || row.dataset.text.includes(text);
+                const matchVendor = !vendor || row.dataset.vendor === vendor.toLowerCase();
+                const d = row.dataset.orderDate || '';
+                const matchFrom   = !from   || d >= from;
+                const matchTo     = !to     || d <= to;
+                row.style.display = (matchText && matchVendor && matchFrom && matchTo) ? '' : 'none';
             });
-
-            function poKeydown(e) {
-                const box = document.getElementById('po-suggestions');
-                if (box.classList.contains('hidden')) return;
-                const inp = document.getElementById('po-search');
-                const items = box.querySelectorAll('[data-id]');
-                if (!items.length) return;
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    inp._activeIdx = Math.min((inp._activeIdx ?? -1) + 1, items.length - 1);
-                    items.forEach((el, i) => el.style.background = i === inp._activeIdx ? '#EFF6FF' : '');
-                    items[inp._activeIdx]?.scrollIntoView({ block: 'nearest' });
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    inp._activeIdx = Math.max((inp._activeIdx ?? 0) - 1, 0);
-                    items.forEach((el, i) => el.style.background = i === inp._activeIdx ? '#EFF6FF' : '');
-                    items[inp._activeIdx]?.scrollIntoView({ block: 'nearest' });
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (inp._activeIdx >= 0 && inp._activeIdx < items.length) {
-                        const el = items[inp._activeIdx];
-                        inp.value = el.dataset.label;
-                        document.getElementById('po-id-hidden').value = el.dataset.id;
-                        box.classList.add('hidden');
-                        document.getElementById('po-select-form').submit();
-                    }
-                } else if (e.key === 'Escape') {
-                    box.classList.add('hidden');
-                }
-            }
-
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('#po-search') && !e.target.closest('#po-suggestions')) {
-                    const box = document.getElementById('po-suggestions');
-                    if (box) box.classList.add('hidden');
-                }
-            });
+        }
+        function resetPoFilters() {
+            document.getElementById('po-filter-text').value   = '';
+            document.getElementById('po-filter-vendor').value = '';
+            document.getElementById('po-filter-from').value   = '';
+            document.getElementById('po-filter-to').value     = '';
+            sessionStorage.removeItem(GR_FILTER_KEY);
+            applyPoFilters();
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = sessionStorage.getItem(GR_FILTER_KEY);
+            if (!saved) return;
+            try {
+                const f = JSON.parse(saved);
+                if (f.text)   document.getElementById('po-filter-text').value   = f.text;
+                if (f.vendor) { const s = document.getElementById('po-filter-vendor'); if (s) s.value = f.vendor; }
+                if (f.from)   document.getElementById('po-filter-from').value   = f.from;
+                if (f.to)     document.getElementById('po-filter-to').value     = f.to;
+                applyPoFilters();
+            } catch(e) {}
+        });
         </script>
+        @else
+        <div class="mb-4">
+            <a href="{{ route('mm.goods-receipts.create') }}{{ isset($deliveryNote) ? '?dn_id='.$deliveryNote->id : '' }}" class="text-blue-600 text-sm hover:underline">← Pilih PO lain</a>
+        </div>
+        @endif
 
         @if($selectedPo)
         @php

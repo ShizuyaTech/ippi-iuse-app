@@ -78,10 +78,12 @@ class SkmController extends Controller
         ]);
 
         $scrapIds            = StorageLocation::where('is_scrap', true)->pluck('id');
+        // Only count stock in RM-designated warehouses
+        $rmLocIds            = StorageLocation::where('material_type', 'RM')->where('is_scrap', false)->pluck('id');
         $expectedDelivery    = $request->expected_delivery_date;
         $storageLocationId   = $request->storage_location_id;
 
-        DB::transaction(function () use ($request, $scrapIds, $expectedDelivery, $storageLocationId) {
+        DB::transaction(function () use ($request, $scrapIds, $rmLocIds, $expectedDelivery, $storageLocationId) {
             $skm = SkmOrder::create([
                 'skm_number' => SkmOrder::generateNumber(),
                 'order_date' => $request->order_date,
@@ -96,7 +98,7 @@ class SkmController extends Controller
                 $numCards     = (int) $item['num_cards'];
                 $orderQty     = $kanbanQty * $numCards;
                 $currentStock = (float) Stock::where('material_id', $material->id)
-                    ->whereNotIn('storage_location_id', $scrapIds)
+                    ->when($rmLocIds->isNotEmpty(), fn($q) => $q->whereIn('storage_location_id', $rmLocIds))
                     ->sum('quantity');
 
                 SkmOrderItem::create([
@@ -145,6 +147,16 @@ class SkmController extends Controller
         }
 
         $skm->update(['status' => $request->status]);
+
+        // Cancel any generated POs when SKM is cancelled
+        if ($request->status === 'cancelled') {
+            PurchaseOrder::where('skm_order_id', $skm->id)
+                ->whereNotIn('status', ['received', 'cancelled'])
+                ->each(function ($po) {
+                    $po->update(['status' => $po->status === 'partially_received' ? 'closed' : 'cancelled']);
+                });
+        }
+
         return back()->with('success', 'Status SKM diperbarui menjadi "' . $skm->fresh()->status_label . '".');
     }
 
@@ -396,6 +408,8 @@ class SkmController extends Controller
     private function getPendingItems(): array
     {
         $scrapIds = StorageLocation::where('is_scrap', true)->pluck('id');
+        // Only count stock in RM-designated warehouses
+        $rmLocIds = StorageLocation::where('material_type', 'RM')->where('is_scrap', false)->pluck('id');
 
         // Material IDs already in open (draft/sent) SKM — skip them
         $openIds = SkmOrderItem::whereHas('skmOrder', fn($q) =>
@@ -448,7 +462,7 @@ class SkmController extends Controller
             $qpc = (float) $mat->qty_per_case;
 
             $currentStock = (float) Stock::where('material_id', $mat->id)
-                ->when($scrapIds->isNotEmpty(), fn($q) => $q->whereNotIn('storage_location_id', $scrapIds))
+                ->when($rmLocIds->isNotEmpty(), fn($q) => $q->whereIn('storage_location_id', $rmLocIds))
                 ->sum('quantity');
 
             // ── Kanban calculation ─────────────────────────────────────

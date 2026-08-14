@@ -23,7 +23,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         Print PDF
                     </a>
-                    <a href="{{ route('mm.goods-issues.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-300">Kembali</a>
+                    <a href="{{ route('mm.goods-issues.index') }}" data-back-key="back_mm_goods_issues" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-300">Kembali</a>
                 </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
@@ -78,7 +78,8 @@
             <table class="w-full text-sm border-collapse">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="px-4 py-2 text-left">Material</th>
+                        <th class="px-4 py-2 text-left">Material (RM)</th>
+                        <th class="px-4 py-2 text-left hidden sm:table-cell">Kode WIP/FP</th>
                         <th class="px-4 py-2 text-right">Qty Keluar</th>
                         <th class="px-4 py-2 text-left hidden sm:table-cell">UoM</th>
                         <th class="px-4 py-2 text-left hidden sm:table-cell">Note / ID Packing</th>
@@ -86,10 +87,22 @@
                 </thead>
                 <tbody>
                     @foreach($goodsIssue->items as $item)
+                    @php
+                        $wipCodes = $item->material->bomItems
+                            ->map(fn($bi) => $bi->bom?->material?->code)
+                            ->filter()->unique()->join(', ');
+                    @endphp
                     <tr class="border-b">
                         <td class="px-4 py-2 min-w-[140px]">
                             <div class="font-mono text-blue-700 text-xs">{{ $item->material->code }}</div>
                             <div class="font-medium">{{ $item->material->name }}</div>
+                        </td>
+                        <td class="px-4 py-2 hidden sm:table-cell">
+                            @if($wipCodes)
+                            <span class="font-mono text-xs bg-purple-50 border border-purple-200 text-purple-700 px-2 py-0.5 rounded">{{ $wipCodes }}</span>
+                            @else
+                            <span class="text-gray-300">-</span>
+                            @endif
                         </td>
                         <td class="px-4 py-2 text-right font-medium text-orange-600 whitespace-nowrap">{{ fmt_qty($item->quantity_issued) }}</td>
                         <td class="px-4 py-2 text-gray-500 hidden sm:table-cell">{{ $item->material->unit_of_measure ?? '-' }}</td>

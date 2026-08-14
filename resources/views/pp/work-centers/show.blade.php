@@ -9,7 +9,7 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('pp.work-centers.edit', $workCenter) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm">Edit</a>
-                <a href="{{ route('pp.work-centers.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                <a href="{{ route('pp.work-centers.index') }}" data-back-key="back_pp_work_centers" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
             </div>
         </div>
         <div class="grid grid-cols-2 gap-4 text-sm">

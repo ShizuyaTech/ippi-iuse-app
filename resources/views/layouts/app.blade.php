@@ -579,5 +579,21 @@
 })();
 </script>
 
+<script>
+// Save index URL to sessionStorage; handle data-back-key Kembali buttons; reload on BFCache restore
+(function() {
+    var r = '{{ request()->route()?->getName() ?? "" }}';
+    var m = r.match(/^(.+)\.index$/);
+    if (m) sessionStorage.setItem('back_' + m[1].replace(/[\.\-]/g, '_'), window.location.href);
+    document.addEventListener('click', function(e) {
+        var a = e.target.closest('[data-back-key]');
+        if (!a) return;
+        var url = sessionStorage.getItem(a.dataset.backKey);
+        if (url) { e.preventDefault(); window.location.href = url; }
+    });
+    window.addEventListener('pageshow', function(e) { if (e.persisted) window.location.reload(); });
+})();
+</script>
+
 </body>
 </html>

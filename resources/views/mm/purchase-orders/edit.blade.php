@@ -134,7 +134,7 @@
             }
         }
 
-        function addItem(mid=null, qty=1, price=0, mcode='', mname='') {
+        function addItem(mid=null, qty='', price=0, mcode='', mname='') {
             const materials = filteredMaterials.length ? filteredMaterials : allMaterials;
             const tbody = document.getElementById('items-body');
             const r = rowIndex;

@@ -12,7 +12,7 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('mm.storage-locations.edit', $storageLocation) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm">Edit</a>
-                <a href="{{ route('mm.storage-locations.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                <a href="{{ route('mm.storage-locations.index') }}" data-back-key="back_mm_storage_locations" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
             </div>
         </div>
         <h3 class="font-semibold text-gray-700 mb-3">Stok di Lokasi Ini</h3>

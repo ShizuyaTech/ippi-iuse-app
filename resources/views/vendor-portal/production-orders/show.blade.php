@@ -5,7 +5,7 @@
         <div class="bg-white rounded-lg shadow p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('vendor.production-orders.index') }}" class="text-teal-700 hover:underline text-sm">← Kembali</a>
+                    <a href="{{ route('vendor.production-orders.index') }}" data-back-key="back_vendor_production_orders" class="text-teal-700 hover:underline text-sm">← Kembali</a>
                     <h2 class="text-lg font-semibold text-gray-700">{{ $productionOrder->order_number }}</h2>
                     <span class="px-2 py-0.5 rounded text-xs {{ $productionOrder->statusColor() }}">{{ $productionOrder->statusLabel() }}</span>
                 </div>

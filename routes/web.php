@@ -139,12 +139,14 @@ Route::middleware(['auth', 'verified', 'no.vendor'])->group(function () {
         Route::post('purchase-orders/import-create', [PurchaseOrderController::class, 'importCreate'])->name('purchase-orders.import-create');
         Route::resource('purchase-orders', PurchaseOrderController::class);
         Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
-        Route::post('purchase-orders/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])->name('purchase-orders.cancel');
+        Route::post('purchase-orders/{purchaseOrder}/close', [PurchaseOrderController::class, 'close'])->name('purchase-orders.close');
         Route::get('purchase-orders/{purchaseOrder}/pdf', [PurchaseOrderController::class, 'printPdf'])->name('purchase-orders.pdf');
 
         // Goods Receipts
         Route::get('goods-receipts/export', [GoodsReceiptController::class, 'exportExcel'])->name('goods-receipts.export');
         Route::get('goods-receipts/export-pdf', [GoodsReceiptController::class, 'exportPdf'])->name('goods-receipts.export-pdf');
+        Route::get('goods-receipts/create-non-po', [GoodsReceiptController::class, 'createNonPo'])->name('goods-receipts.create-non-po');
+        Route::post('goods-receipts/store-non-po', [GoodsReceiptController::class, 'storeNonPo'])->name('goods-receipts.store-non-po');
         Route::resource('goods-receipts', GoodsReceiptController::class);
 
         // Delivery Notes (Surat Jalan dari Vendor)

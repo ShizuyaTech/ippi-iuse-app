@@ -3,9 +3,16 @@
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-700 mb-1">Edit Goods Receipt</h2>
         <p class="text-sm text-gray-500 mb-4">
-            {{ $goodsReceipt->gr_number }} &bull;
-            PO: {{ $goodsReceipt->purchaseOrder->po_number }} &bull;
-            Vendor: {{ $goodsReceipt->purchaseOrder->vendor->name }}
+            {{ $goodsReceipt->gr_number }}
+            @if($goodsReceipt->purchaseOrder)
+            &bull; PO: {{ $goodsReceipt->purchaseOrder->po_number }}
+            &bull; Vendor: {{ $goodsReceipt->purchaseOrder->vendor->name }}
+            @elseif($goodsReceipt->vendor)
+            &bull; Vendor: {{ $goodsReceipt->vendor->name }}
+            &bull; <span class="text-purple-600">Non-PO</span>
+            @else
+            &bull; <span class="text-purple-600">Non-PO</span>
+            @endif
         </p>
 
         @if($errors->any())
@@ -54,12 +61,13 @@
                         @foreach($goodsReceipt->items as $item)
                         <tr class="border-b hover:bg-gray-50">
                             <td class="px-3 py-2">
-                                <div class="font-mono text-blue-700 text-xs">{{ $item->purchaseOrderItem->material->code }}</div>
-                                <div class="text-gray-700">{{ $item->purchaseOrderItem->material->name }}</div>
+                                @php $mat = $item->purchaseOrderItem?->material ?? $item->material; @endphp
+                                <div class="font-mono text-blue-700 text-xs">{{ $mat?->code ?? '-' }}</div>
+                                <div class="text-gray-700">{{ $mat?->name ?? '-' }}</div>
                             </td>
                             <td class="px-3 py-2 text-right font-medium">
                                 {{ fmt_qty($item->quantity_received) }}
-                                <span class="text-gray-400 text-xs">{{ $item->purchaseOrderItem->material->unit_of_measure }}</span>
+                                <span class="text-gray-400 text-xs">{{ $mat?->unit_of_measure }}</span>
                             </td>
                             <td class="px-3 py-2">
                                 <input type="text"

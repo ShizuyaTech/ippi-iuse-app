@@ -13,7 +13,7 @@
                         {{ $bom->status === 'active' ? 'Aktif' : 'Nonaktif' }}
                     </span>
                     <a href="{{ route('pp.boms.edit', $bom) }}" class="bg-yellow-500 text-white px-4 py-2 rounded text-sm">Edit</a>
-                    <a href="{{ route('pp.boms.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
+                    <a href="{{ route('pp.boms.index') }}" data-back-key="back_pp_boms" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">Kembali</a>
                 </div>
             </div>
             <div class="mt-3 text-sm"><span class="text-gray-500">Qty Base:</span> <span class="font-medium">{{ fmt_qty($bom->base_quantity) }} {{ $bom->material->unit_of_measure }}</span></div>

@@ -32,20 +32,22 @@
         <table id="data-table" class="w-full text-sm border-collapse">
             <thead class="bg-blue-900 text-white">
                 <tr>
-                    <th class="px-3 py-2 text-left">No. GI</th>
                     <th class="px-3 py-2 text-left hidden sm:table-cell">Tanggal</th>
+                    <th class="px-3 py-2 text-left">No. GI</th>
                     <th class="px-3 py-2 text-left hidden md:table-cell">Dari Lokasi</th>
-                    <th class="px-3 py-2 text-left hidden md:table-cell">Keterangan</th>
+                    <th class="px-3 py-2 text-left hidden md:table-cell">Tujuan</th>
                     <th class="px-3 py-2 text-center print:hidden">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($issues as $gi)
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="px-3 py-2 font-mono text-blue-700 font-medium text-xs whitespace-nowrap">{{ $gi->gi_number }}</td>
                     <td class="px-3 py-2 hidden sm:table-cell">{{ $gi->issue_date->format('d/m/Y') }}</td>
+                    <td class="px-3 py-2 font-mono text-blue-700 font-medium text-xs whitespace-nowrap">{{ $gi->gi_number }}</td>
                     <td class="px-3 py-2 hidden md:table-cell">{{ $gi->storageLocation->name ?? '-' }}</td>
-                    <td class="px-3 py-2 text-gray-500 text-xs hidden md:table-cell">{{ Str::limit($gi->notes, 40) }}</td>
+                    <td class="px-3 py-2 text-gray-600 text-xs hidden md:table-cell">
+                        {{ $gi->destination_name ?? $gi->vendor?->name ?? $gi->destinationStorageLocation?->name ?? '-' }}
+                    </td>
                     <td class="px-3 py-2 text-center print:hidden">
                         <div class="flex justify-center gap-2">
                             <a href="{{ route('mm.goods-issues.show', $gi) }}" class="text-blue-600 hover:underline">Detail</a>

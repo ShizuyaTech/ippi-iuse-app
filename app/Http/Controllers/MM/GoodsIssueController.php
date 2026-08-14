@@ -20,7 +20,7 @@ class GoodsIssueController extends Controller
 {
     public function index(Request $request)
     {
-        $query = GoodsIssue::with('storageLocation', 'createdBy');
+        $query = GoodsIssue::with('storageLocation', 'destinationStorageLocation', 'vendor', 'createdBy');
         if ($request->search)      $query->where('gi_number', 'like', "%{$request->search}%");
         if ($request->date_from)   $query->whereDate('issue_date', '>=', $request->date_from);
         if ($request->date_to)     $query->whereDate('issue_date', '<=', $request->date_to);
@@ -38,7 +38,8 @@ class GoodsIssueController extends Controller
         $locations = StorageLocation::all();
         $vendors   = Vendor::where('is_active', true)->orderBy('name')->get();
         $customers = \App\Models\Customer::where('is_active', true)->orderBy('name')->get();
-        return view('mm.goods-issues.create', compact('materials', 'locations', 'vendors', 'customers'));
+        $stocks    = \App\Models\Stock::all()->mapWithKeys(fn($s) => [$s->material_id.'_'.$s->storage_location_id => (float)$s->quantity])->toArray();
+        return view('mm.goods-issues.create', compact('materials', 'locations', 'vendors', 'customers', 'stocks'));
     }
 
     public function store(Request $request)
@@ -182,7 +183,7 @@ class GoodsIssueController extends Controller
 
     public function show(GoodsIssue $goodsIssue)
     {
-        $goodsIssue->load('items.material', 'storageLocation', 'destinationStorageLocation', 'createdBy');
+        $goodsIssue->load('items.material.bomItems.bom.material', 'storageLocation', 'destinationStorageLocation', 'createdBy');
         return view('mm.goods-issues.show', compact('goodsIssue'));
     }
 
@@ -390,7 +391,7 @@ class GoodsIssueController extends Controller
 
     public function exportExcelDetail(GoodsIssue $goodsIssue)
     {
-        $goodsIssue->load('items.material', 'storageLocation', 'destinationStorageLocation', 'createdBy');
+        $goodsIssue->load('items.material.bomItems.bom.material', 'storageLocation', 'destinationStorageLocation', 'createdBy');
 
         $typeLabel = ['internal' => 'Pemakaian Internal', 'to_vendor' => 'Kirim ke Vendor (Proses)', 'to_customer' => 'Kirim ke Customer'];
         $t         = $goodsIssue->issue_type ?? 'internal';
@@ -411,8 +412,8 @@ class GoodsIssueController extends Controller
         $darkText    = 'FF1A1A1A';
         $white       = 'FFFFFFFF';
 
-        $colCount = 6; // A–F
-        $lastCol  = 'F';
+        $colCount = 7; // A–H
+        $lastCol  = 'G';
 
         // ── helper: merge + style a full-width banner row ─────────────
         $setRow = function (int $row, string $text, array $style = []) use ($sheet, $lastCol) {
@@ -426,16 +427,16 @@ class GoodsIssueController extends Controller
         // ═══════════════════════════════════════════════════════════════
         $sheet->getRowDimension(1)->setRowHeight(26);
         $sheet->setCellValue('A1', 'IPPI — Integrated Production & Inventory System');
-        $sheet->mergeCells('A1:D1');
+        $sheet->mergeCells('A1:E1');
         $sheet->getStyle('A1')->applyFromArray([
             'font'      => ['bold' => true, 'size' => 13, 'color' => ['argb' => $orange]],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
                             'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
 
-        $sheet->setCellValue('E1', 'GOODS ISSUE');
-        $sheet->mergeCells('E1:F1');
-        $sheet->getStyle('E1')->applyFromArray([
+        $sheet->setCellValue('F1', 'GOODS ISSUE');
+        $sheet->mergeCells('F1:G1');
+        $sheet->getStyle('F1')->applyFromArray([
             'font'      => ['bold' => true, 'size' => 13, 'color' => ['argb' => $orange]],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
                             'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
@@ -443,9 +444,9 @@ class GoodsIssueController extends Controller
 
         // ROW 2  — GI number (right) + status badge
         $sheet->getRowDimension(2)->setRowHeight(18);
-        $sheet->setCellValue('E2', $goodsIssue->gi_number . '  [' . strtoupper($goodsIssue->status ?? 'posted') . ']');
-        $sheet->mergeCells('E2:F2');
-        $sheet->getStyle('E2')->applyFromArray([
+        $sheet->setCellValue('F2', $goodsIssue->gi_number . '  [' . strtoupper($goodsIssue->status ?? 'posted') . ']');
+        $sheet->mergeCells('F2:G2');
+        $sheet->getStyle('F2')->applyFromArray([
             'font'      => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FF374151']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
                             'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
@@ -479,12 +480,13 @@ class GoodsIssueController extends Controller
             $sheet->mergeCells("B{$ir}:C{$ir}");
 
             // Right label / value
-            $sheet->setCellValue("D{$ir}", $cols[2]);
-            $sheet->setCellValue("E{$ir}", $cols[3]);
-            $sheet->mergeCells("E{$ir}:F{$ir}");
+            $sheet->setCellValue("E{$ir}", $cols[2]);
+            $sheet->mergeCells("E{$ir}:E{$ir}");
+            $sheet->setCellValue("F{$ir}", $cols[3]);
+            $sheet->mergeCells("F{$ir}:G{$ir}");
 
             // Label style
-            foreach (["A{$ir}", "D{$ir}"] as $lc) {
+            foreach (["A{$ir}", "E{$ir}"] as $lc) {
                 $sheet->getStyle($lc)->applyFromArray([
                     'font'      => ['size' => 8, 'color' => ['argb' => 'FF6B7280']],
                     'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $gray]],
@@ -494,7 +496,7 @@ class GoodsIssueController extends Controller
                 ]);
             }
             // Value style
-            foreach (["B{$ir}:C{$ir}", "E{$ir}:F{$ir}"] as $vc) {
+            foreach (["B{$ir}:C{$ir}", "F{$ir}:G{$ir}"] as $vc) {
                 $sheet->getStyle($vc)->applyFromArray([
                     'font'      => ['bold' => true, 'size' => 10, 'color' => ['argb' => $darkText]],
                     'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $white]],
@@ -560,10 +562,10 @@ class GoodsIssueController extends Controller
         // ═══════════════════════════════════════════════════════════════
         $tableStart = $r;
         $sheet->getRowDimension($r)->setRowHeight(22);
-        $headers = ['#', 'Kode Material', 'Nama Material', 'UoM', 'Qty Keluar', 'Note / ID Packing'];
-        foreach ($headers as $i => $h) {
+        $headers = ['#', 'Kode Material', 'Kode WIP/FP', 'Nama Material', 'UoM', 'Qty Keluar', 'Note / ID Packing'];
+        foreach ($headers as $i => $g) {
             $col = chr(65 + $i);
-            $sheet->setCellValue("{$col}{$r}", $h);
+            $sheet->setCellValue("{$col}{$r}", $g);
         }
         $sheet->getStyle("A{$r}:{$lastCol}{$r}")->applyFromArray([
             'font'      => ['bold' => true, 'size' => 9, 'color' => ['argb' => $white]],
@@ -574,7 +576,7 @@ class GoodsIssueController extends Controller
                                              'color'       => ['argb' => 'FFCC5500']]],
         ]);
         // right-align Qty header
-        $sheet->getStyle("E{$r}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("G{$r}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
         $r++;
 
         // ═══════════════════════════════════════════════════════════════
@@ -588,11 +590,16 @@ class GoodsIssueController extends Controller
 
             $sheet->getRowDimension($r)->setRowHeight(18);
             $sheet->setCellValue("A{$r}", $no++);
+            $wipCodes = $item->material->bomItems
+                ->map(fn($bi) => $bi->bom?->material?->code)
+                ->filter()->unique()->join(', ');
             $sheet->setCellValue("B{$r}", $item->material->code ?? '-');
-            $sheet->setCellValue("C{$r}", $item->material->name ?? '-');
-            $sheet->setCellValue("D{$r}", $item->material->unit_of_measure ?? '-');
-            $sheet->setCellValue("E{$r}", (float) $item->quantity_issued);
-            $sheet->setCellValue("F{$r}", $item->note ?? '');
+            $sheet->setCellValue("C{$r}", $wipCodes ?: '-');
+            // $sheet->setCellValue("D{$r}", $item->material->type ?? '-');
+            $sheet->setCellValue("D{$r}", $item->material->name ?? '-');
+            $sheet->setCellValue("E{$r}", $item->material->unit_of_measure ?? '-');
+            $sheet->setCellValue("F{$r}", (int) round((float) $item->quantity_issued));
+            $sheet->setCellValue("G{$r}", $item->note ?? '');
 
             $sheet->getStyle("A{$r}:{$lastCol}{$r}")->applyFromArray([
                 'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $rowBg]],
@@ -606,16 +613,16 @@ class GoodsIssueController extends Controller
             // Kode — monospaced colour
             $sheet->getStyle("B{$r}")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF1D4ED8'));
             // UoM — center
-            $sheet->getStyle("D{$r}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("E{$r}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             // Qty — right, bold, orange
-            $sheet->getStyle("E{$r}")->applyFromArray([
+            $sheet->getStyle("F{$r}")->applyFromArray([
                 'font'      => ['bold' => true, 'color' => ['argb' => 'FFC2410C']],
                 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
-                'numberFormat' => ['formatCode' => '#,##0.000'],
+                'numberFormat' => ['formatCode' => '#,##0'],
             ]);
             // Note — yellow chip style
             if ($item->note) {
-                $sheet->getStyle("F{$r}")->applyFromArray([
+                $sheet->getStyle("G{$r}")->applyFromArray([
                     'font' => ['size' => 9, 'color' => ['argb' => 'FF92400E']],
                     'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $yellow]],
                 ]);
@@ -629,23 +636,23 @@ class GoodsIssueController extends Controller
         // TOTAL ROW
         // ═══════════════════════════════════════════════════════════════
         $sheet->getRowDimension($r)->setRowHeight(20);
-        $sheet->setCellValue("D{$r}", 'Total Qty Keluar:');
-        $sheet->mergeCells("A{$r}:D{$r}");
-        $sheet->getStyle("A{$r}:D{$r}")->applyFromArray([
+        $sheet->setCellValue("F{$r}", 'Total Qty Keluar:');
+        $sheet->mergeCells("A{$r}:E{$r}");
+        $sheet->getStyle("A{$r}:E{$r}")->applyFromArray([
             'font'      => ['bold' => true, 'size' => 10],
             'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $orangeLight]],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
             'borders'   => ['top' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM, 'color' => ['argb' => $orange]]],
         ]);
-        $sheet->setCellValue("E{$r}", $totalQty);
-        $sheet->getStyle("E{$r}")->applyFromArray([
+        $sheet->setCellValue("F{$r}", (int) round($totalQty));
+        $sheet->getStyle("F{$r}")->applyFromArray([
             'font'         => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FFC2410C']],
             'fill'         => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $orangeLight]],
             'alignment'    => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
-            'numberFormat' => ['formatCode' => '#,##0.000'],
+            'numberFormat' => ['formatCode' => '#,##0'],
             'borders'      => ['top' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM, 'color' => ['argb' => $orange]]],
         ]);
-        $sheet->getStyle("F{$r}")->applyFromArray([
+        $sheet->getStyle("G{$r}")->applyFromArray([
             'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $orangeLight]],
             'borders' => ['top' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM, 'color' => ['argb' => $orange]]],
         ]);
@@ -777,11 +784,13 @@ class GoodsIssueController extends Controller
         // COLUMN WIDTHS  (match PDF proportions)
         // ═══════════════════════════════════════════════════════════════
         $sheet->getColumnDimension('A')->setWidth(5);   // #
-        $sheet->getColumnDimension('B')->setWidth(16);  // Kode
-        $sheet->getColumnDimension('C')->setWidth(34);  // Nama
-        $sheet->getColumnDimension('D')->setWidth(8);   // UoM
-        $sheet->getColumnDimension('E')->setWidth(14);  // Qty
-        $sheet->getColumnDimension('F')->setWidth(26);  // Note
+        $sheet->getColumnDimension('B')->setWidth(14);  // Kode RM
+        $sheet->getColumnDimension('C')->setWidth(14);  // Kode WIP/FP
+        $sheet->getColumnDimension('D')->setWidth(8);   // Jenis
+        $sheet->getColumnDimension('E')->setWidth(28);  // Nama
+        $sheet->getColumnDimension('F')->setWidth(8);   // UoM
+        $sheet->getColumnDimension('G')->setWidth(12);  // Qty
+        $sheet->getColumnDimension('H')->setWidth(22);  // Note
 
         // Print setup
         $sheet->getPageSetup()
@@ -805,9 +814,9 @@ class GoodsIssueController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Goods Issues');
 
-        $headers = ['No. GI','Tgl Issue','Lokasi','Keterangan','Material','Qty Keluar'];
+        $headers = ['No. GI','Tgl Issue','Lokasi','Keterangan','Material','Job Number','Qty Keluar'];
         foreach ($headers as $i => $h) $sheet->setCellValue(chr(65+$i).'1', $h);
-        ExcelService::applyHeaderStyle($spreadsheet, 'A1:F1');
+        ExcelService::applyHeaderStyle($spreadsheet, 'A1:G1');
         $sheet->getRowDimension(1)->setRowHeight(20);
 
         $r = 2;
@@ -817,15 +826,16 @@ class GoodsIssueController extends Controller
                 $sheet->setCellValue("B{$r}", $gi->issue_date->format('d/m/Y'));
                 $sheet->setCellValue("C{$r}", $gi->storageLocation->code ?? '-');
                 $sheet->setCellValue("D{$r}", $gi->notes);
-                $sheet->setCellValue("E{$r}", ($item->material->code ?? '').' - '.($item->material->name ?? ''));
-                $sheet->setCellValue("F{$r}", (float)$item->quantity_issued);
-                ExcelService::applyDataStyle($spreadsheet, "A{$r}:F{$r}", $r % 2 === 0);
+                $sheet->setCellValue("E{$r}", ($item->material->code ?? ''));
+                $sheet->setCellValue("F{$r}", ($item->material->name ?? ''));
+                $sheet->setCellValue("G{$r}", (float)$item->quantity_issued);
+                ExcelService::applyDataStyle($spreadsheet, "A{$r}:G{$r}", $r % 2 === 0);
                 $r++;
             }
             if ($gi->items->isEmpty()) {
                 $sheet->setCellValue("A{$r}", $gi->gi_number);
                 $sheet->setCellValue("B{$r}", $gi->issue_date->format('d/m/Y'));
-                ExcelService::applyDataStyle($spreadsheet, "A{$r}:F{$r}", $r % 2 === 0);
+                ExcelService::applyDataStyle($spreadsheet, "A{$r}:G{$r}", $r % 2 === 0);
                 $r++;
             }
         }
