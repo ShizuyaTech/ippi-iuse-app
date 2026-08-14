@@ -64,9 +64,23 @@ class ProductionOrderController extends Controller
         ]);
 
         // Validate uniqueness of each order_number against the database
+        // foreach ($request->orders as $idx => $row) {
+        //     if (ProductionOrder::where('order_number', $row['order_number'])->exists()) {
+        //         return back()->withErrors(["orders.{$idx}.order_number" => "Nomor order '{$row['order_number']}' sudah digunakan."])->withInput();
+        //     }
+        // }
+
         foreach ($request->orders as $idx => $row) {
-            if (ProductionOrder::where('order_number', $row['order_number'])->exists()) {
-                return back()->withErrors(["orders.{$idx}.order_number" => "Nomor order '{$row['order_number']}' sudah digunakan."])->withInput();
+            if (
+        !empty($row['order_number']) &&
+        ProductionOrder::where('order_number', $row['order_number'])->exists()
+            ) {
+                return back()
+                    ->withErrors([
+                        "orders.{$idx}.order_number" =>
+                            "Nomor order '{$row['order_number']}' sudah digunakan."
+                    ])
+                    ->withInput();
             }
         }
 
@@ -122,7 +136,7 @@ class ProductionOrderController extends Controller
         // ── Sheet 1: Template ─────────────────────────────────────────
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Template PO Produksi');
 
-        $instruction = 'TEMPLATE IMPORT PRODUCTION ORDER — A: No. Order * | B: Kode Material * | C: Qty Planned * | D: Catatan (opsional). Lihat sheet "Daftar Material" untuk kode material yang valid.';
+        $instruction = 'TEMPLATE IMPORT PRODUCTION ORDER — A: No. Order (Opsional) | B: Kode Material * | C: Qty Planned * | D: Catatan (opsional). Lihat sheet "Daftar Material" untuk kode material yang valid.';
         $sheet->setCellValue('A1', $instruction);
         $sheet->mergeCells('A1:D1');
         $sheet->getStyle('A1')->applyFromArray([
@@ -131,7 +145,7 @@ class ProductionOrderController extends Controller
         ]);
         $sheet->getRowDimension(1)->setRowHeight(18);
 
-        $headers = ['No. Order *', 'Kode Material *', 'Qty Planned *', 'Catatan'];
+        $headers = ['No. Order', 'Kode Material *', 'Qty Planned *', 'Catatan'];
         foreach ($headers as $i => $h) {
             $sheet->setCellValue(chr(65 + $i) . '2', $h);
         }
@@ -197,77 +211,229 @@ class ProductionOrderController extends Controller
         return ExcelService::download($spreadsheet, 'Template_Import_ProductionOrder.xlsx');
     }
 
+    // public function importExcel(Request $request)
+    // {
+    //     $request->validate(['file' => 'required|file|mimes:xlsx,xls|max:5120']);
+
+    //     $path        = $request->file('file')->getRealPath();
+    //     $spreadsheet = IOFactory::load($path);
+    //     $rows        = $spreadsheet->getSheet(0)->toArray(null, true, false, true);
+
+    //     $materialMap = Material::where('is_active', true)
+    //         ->whereIn('type', ['FP', 'WIP'])
+    //         ->get(['id', 'code', 'name', 'unit_of_measure'])
+    //         ->keyBy('code');
+
+    //     $items  = [];
+    //     $errors = [];
+
+    //     foreach ($rows as $rowNum => $row) {
+    //         if ($rowNum <= 2) continue; // skip instruction + header
+
+    //         $orderNo  = trim((string) ($row['A'] ?? ''));
+    //         $matCode  = trim((string) ($row['B'] ?? ''));
+    //         $qty      = (float) ($row['C'] ?? 0);
+    //         $note     = trim((string) ($row['D'] ?? ''));
+
+    //         // blank row
+    //         if ($orderNo === '' && $matCode === '' && $qty == 0) continue;
+    //         if ($matCode === '') {
+    //             $errors[] = "Baris {$rowNum}: Kode Material kosong.";
+    //             continue;
+    //         }
+    //         if ($qty <= 0) {
+    //             $errors[] = "Baris {$rowNum}: Qty harus lebih dari 0 (order {$orderNo}).";
+    //             continue;
+    //         }
+
+    //         // if ($orderNo === '') {
+    //         //     $errors[] = "Baris {$rowNum}: No. Order kosong.";
+    //         //     continue;
+    //         // }
+
+    //         $material = $materialMap->get($matCode);
+    //         if (!$material) {
+    //             $errors[] = "Baris {$rowNum}: Kode material '{$matCode}' tidak ditemukan atau bukan FP/WIP.";
+    //             continue;
+    //         }
+
+    //         if (ProductionOrder::where('order_number', $orderNo)->exists()) {
+    //             $errors[] = "Baris {$rowNum}: No. Order '{$orderNo}' sudah digunakan.";
+    //             continue;
+    //         }
+
+    //         // check duplicate within this import batch
+    //         $duplicate = collect($items)->first(fn($i) => $i['order_number'] === $orderNo);
+    //         if ($duplicate) {
+    //             $errors[] = "Baris {$rowNum}: No. Order '{$orderNo}' muncul lebih dari sekali dalam file.";
+    //             continue;
+    //         }
+
+    //         $items[] = [
+    //             'order_number'  => $orderNo,
+    //             'material_id'   => $material->id,
+    //             'material_code' => $material->code,
+    //             'material_name' => $material->name,
+    //             'material_uom'  => $material->unit_of_measure,
+    //             'qty'           => $qty,
+    //             'notes'         => $note,
+    //         ];
+    //     }
+
+    //     return response()->json(['items' => $items, 'errors' => $errors]);
+    // }
+
     public function importExcel(Request $request)
-    {
-        $request->validate(['file' => 'required|file|mimes:xlsx,xls|max:5120']);
+{
+    $request->validate([
+        'file' => 'required|file|mimes:xlsx,xls|max:5120',
+    ]);
 
-        $path        = $request->file('file')->getRealPath();
-        $spreadsheet = IOFactory::load($path);
-        $rows        = $spreadsheet->getSheet(0)->toArray(null, true, false, true);
+    $path = $request->file('file')->getRealPath();
 
-        $materialMap = Material::where('is_active', true)
-            ->whereIn('type', ['FP', 'WIP'])
-            ->get(['id', 'code', 'name', 'unit_of_measure'])
-            ->keyBy('code');
+    $spreadsheet = IOFactory::load($path);
 
-        $items  = [];
-        $errors = [];
+    $rows = $spreadsheet
+        ->getSheet(0)
+        ->toArray(null, true, false, true);
 
-        foreach ($rows as $rowNum => $row) {
-            if ($rowNum <= 2) continue; // skip instruction + header
+    // =====================================================
+    // MATERIAL REFERENCE
+    // =====================================================
+    $materialMap = Material::where('is_active', true)
+        ->whereIn('type', ['FP', 'WIP'])
+        ->get([
+            'id',
+            'code',
+            'name',
+            'unit_of_measure',
+        ])
+        ->keyBy('code');
 
-            $orderNo  = trim((string) ($row['A'] ?? ''));
-            $matCode  = trim((string) ($row['B'] ?? ''));
-            $qty      = (float) ($row['C'] ?? 0);
-            $note     = trim((string) ($row['D'] ?? ''));
+    $items = [];
+    $errors = [];
 
-            // blank row
-            if ($orderNo === '' && $matCode === '' && $qty == 0) continue;
+    // =====================================================
+    // PROCESS EXCEL ROWS
+    // =====================================================
+    foreach ($rows as $rowNum => $row) {
 
-            if ($orderNo === '') {
-                $errors[] = "Baris {$rowNum}: No. Order kosong.";
-                continue;
-            }
-            if ($matCode === '') {
-                $errors[] = "Baris {$rowNum}: Kode Material kosong.";
-                continue;
-            }
-            if ($qty <= 0) {
-                $errors[] = "Baris {$rowNum}: Qty harus lebih dari 0 (order {$orderNo}).";
-                continue;
-            }
-
-            $material = $materialMap->get($matCode);
-            if (!$material) {
-                $errors[] = "Baris {$rowNum}: Kode material '{$matCode}' tidak ditemukan atau bukan FP/WIP.";
-                continue;
-            }
-
-            if (ProductionOrder::where('order_number', $orderNo)->exists()) {
-                $errors[] = "Baris {$rowNum}: No. Order '{$orderNo}' sudah digunakan.";
-                continue;
-            }
-
-            // check duplicate within this import batch
-            $duplicate = collect($items)->first(fn($i) => $i['order_number'] === $orderNo);
-            if ($duplicate) {
-                $errors[] = "Baris {$rowNum}: No. Order '{$orderNo}' muncul lebih dari sekali dalam file.";
-                continue;
-            }
-
-            $items[] = [
-                'order_number'  => $orderNo,
-                'material_id'   => $material->id,
-                'material_code' => $material->code,
-                'material_name' => $material->name,
-                'material_uom'  => $material->unit_of_measure,
-                'qty'           => $qty,
-                'notes'         => $note,
-            ];
+        // Skip instruction + header
+        if ($rowNum <= 2) {
+            continue;
         }
 
-        return response()->json(['items' => $items, 'errors' => $errors]);
+        // =================================================
+        // READ EXCEL DATA
+        // =================================================
+        $orderNo = trim((string) ($row['A'] ?? ''));
+        $matCode = trim((string) ($row['B'] ?? ''));
+        $qty     = (float) ($row['C'] ?? 0);
+        $note    = trim((string) ($row['D'] ?? ''));
+
+        // =================================================
+        // SKIP COMPLETELY EMPTY ROW
+        // =================================================
+        if (
+            $orderNo === '' &&
+            $matCode === '' &&
+            $qty == 0
+        ) {
+            continue;
+        }
+
+        // =================================================
+        // MATERIAL CODE IS REQUIRED
+        // =================================================
+        if ($matCode === '') {
+            $errors[] = "Baris {$rowNum}: Kode Material kosong.";
+            continue;
+        }
+
+        // =================================================
+        // QUANTITY IS REQUIRED
+        // =================================================
+        if ($qty <= 0) {
+            $errors[] = "Baris {$rowNum}: Qty harus lebih dari 0.";
+            continue;
+        }
+
+        // =================================================
+        // FIND MATERIAL
+        // =================================================
+        $material = $materialMap->get($matCode);
+
+        if (!$material) {
+            $errors[] =
+                "Baris {$rowNum}: Kode material '{$matCode}' tidak ditemukan atau bukan FP/WIP.";
+
+            continue;
+        }
+
+        // =================================================
+        // ORDER NUMBER IS OPTIONAL
+        // =================================================
+        //
+        // Jika No. Order diisi:
+        // 1. Cek apakah sudah ada di database
+        // 2. Cek duplicate di dalam file Excel
+        //
+        // Jika kosong:
+        // langsung lanjut.
+        // =================================================
+        if ($orderNo !== '') {
+
+            // ---------------------------------------------
+            // CHECK ORDER NUMBER IN DATABASE
+            // ---------------------------------------------
+            $orderExists = ProductionOrder::where('order_number', $orderNo)->exists();
+
+            if ($orderExists) {
+                $errors[] =
+                    "Baris {$rowNum}: No. Order '{$orderNo}' sudah digunakan.";
+
+                continue;
+            }
+
+            // ---------------------------------------------
+            // CHECK DUPLICATE IN CURRENT EXCEL FILE
+            // ---------------------------------------------
+            $duplicate = collect($items)->first(
+                fn ($item) =>
+                    $item['order_number'] !== '' &&
+                    $item['order_number'] === $orderNo
+            );
+
+            if ($duplicate) {
+                $errors[] =
+                    "Baris {$rowNum}: No. Order '{$orderNo}' muncul lebih dari sekali dalam file.";
+
+                continue;
+            }
+        }
+
+        // =================================================
+        // ADD VALID DATA
+        // =================================================
+        $items[] = [
+            'order_number'  => $orderNo !== '' ? $orderNo : null,
+            'material_id'   => $material->id,
+            'material_code' => $material->code,
+            'material_name' => $material->name,
+            'material_uom'  => $material->unit_of_measure,
+            'qty'           => $qty,
+            'notes'         => $note !== '' ? $note : null,
+        ];
     }
+
+    // =====================================================
+    // RETURN RESULT
+    // =====================================================
+    return response()->json([
+        'items'  => $items,
+        'errors' => $errors,
+    ]);
+}
 
     public function show(ProductionOrder $productionOrder)
     {
